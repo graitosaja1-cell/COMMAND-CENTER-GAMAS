@@ -100,110 +100,6 @@
     ::-webkit-scrollbar-thumb { background: #2a3a5c; border-radius: 12px; }
     ::-webkit-scrollbar-thumb:hover { background: #4a6a9c; }
 
-    /* ── header ── */
-    .app-header {
-      position: sticky;
-      top: 0;
-      z-index: 60;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px 20px;
-      padding: 12px 32px;
-      background: rgba(7, 10, 20, 0.65);
-      backdrop-filter: blur(18px) saturate(1.6);
-      -webkit-backdrop-filter: blur(18px) saturate(1.6);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-      box-shadow: 0 4px 30px rgba(0,0,0,0.4);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    /* ── icon di pojok kiri atas dihapus ── */
-    .brand-icon {
-      display: none;
-    }
-
-    .brand h1 {
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: -0.3px;
-      background: linear-gradient(135deg, #f0f4ff, #b7c9ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-shadow: 0 0 40px rgba(59, 130, 246, 0.1);
-    }
-
-    .brand .sub {
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.25);
-      -webkit-text-fill-color: rgba(255, 255, 255, 0.25);
-      margin-left: 4px;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .user-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 4px 14px 4px 6px;
-      border-radius: 40px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.04);
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(4px);
-    }
-
-    .user-badge .avatar {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: linear-gradient(145deg, #3b82f6, #8b5cf6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 600;
-      color: #fff;
-      box-shadow: 0 2px 12px rgba(59, 130, 246, 0.3);
-    }
-
-    #btnLogoutHeader {
-      background: transparent;
-      color: rgba(255, 255, 255, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 40px;
-      padding: 6px 18px;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      font-family: inherit;
-      letter-spacing: 0.2px;
-    }
-
-    #btnLogoutHeader:hover {
-      background: rgba(255, 255, 255, 0.05);
-      color: #fff;
-      border-color: rgba(255, 255, 255, 0.12);
-      box-shadow: 0 0 30px rgba(59, 130, 246, 0.05);
-    }
-
     /* ── main hub ── */
     .hub-wrap {
       position: relative;
@@ -427,11 +323,13 @@
     }
 
     .kartu .judul-kartu {
-      font-size: 18px;
-      font-weight: 700;
-      color: #f0f4ff;
-      letter-spacing: -0.2px;
+      font-size: 17px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: #4fe8ff;
+      letter-spacing: 0.6px;
       margin-bottom: 6px;
+      text-shadow: 0 0 10px rgba(79, 232, 255, 0.55), 0 0 22px rgba(79, 232, 255, 0.25);
     }
 
     /* ── deskripsi kecil dibuat lebih terang dan terbaca ── */
@@ -482,26 +380,31 @@
       transform: translateX(4px);
     }
 
-    /* status chip minimal */
+    /* status chip - glowing ONLINE badge */
     .kartu .status-chip {
       position: absolute;
-      top: 18px;
-      right: 18px;
-      font-size: 8px;
-      font-weight: 600;
-      letter-spacing: 0.8px;
+      top: 16px;
+      left: 16px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      padding: 4px 12px;
+      padding: 5px 12px;
       border-radius: 40px;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.02);
-      color: rgba(255, 255, 255, 0.15);
+      background: rgba(79, 232, 255, 0.06);
+      border: 1px solid rgba(79, 232, 255, 0.35);
+      color: #4fe8ff;
+      text-shadow: 0 0 8px rgba(79, 232, 255, 0.6);
+      box-shadow: 0 0 14px rgba(79, 232, 255, 0.15), inset 0 0 6px rgba(79, 232, 255, 0.08);
     }
 
-    /* card accent colors (subtle) */
-    .kartu.kerja .status-chip { color: rgba(59, 130, 246, 0.3); border-color: rgba(59, 130, 246, 0.05); }
-    .kartu.laporan .status-chip { color: rgba(139, 92, 246, 0.3); border-color: rgba(139, 92, 246, 0.05); }
-    .kartu.data .status-chip { color: rgba(0, 200, 255, 0.3); border-color: rgba(0, 200, 255, 0.05); }
+    /* card accent colors (semua diseragamkan cyan seperti referensi) */
+    .kartu.kerja .status-chip,
+    .kartu.laporan .status-chip,
+    .kartu.data .status-chip {
+      color: #4fe8ff;
+      border-color: rgba(79, 232, 255, 0.35);
+    }
 
     .kartu.kerja .ikon-wrap { border-color: rgba(59, 130, 246, 0.1); }
     .kartu.laporan .ikon-wrap { border-color: rgba(139, 92, 246, 0.1); }
@@ -652,10 +555,6 @@
 
     /* ── responsive ── */
     @media (max-width: 700px) {
-      .app-header { padding: 10px 16px; }
-      .brand h1 { font-size: 18px; }
-      .brand .sub { font-size: 8px; }
-      .user-badge { display: none; }
       .hub-wrap { padding: 30px 16px 20px; min-height: 50vh; }
       .hub-headline h2 { font-size: 22px; }
       .kartu-grid { grid-template-columns: 1fr; gap: 18px; }
@@ -682,24 +581,6 @@
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
   <div class="orb orb-3"></div>
-
-  <!-- ─── HEADER ─── -->
-  <header class="app-header">
-    <div class="brand">
-      <!-- ikon di pojok kiri atas telah dihapus -->
-      <div>
-        <h1>GAMAS 2026</h1>
-        <span class="sub">Futuristik · Neural Hub</span>
-      </div>
-    </div>
-    <div class="header-actions">
-      <span class="user-badge">
-        <span class="avatar">✦</span>
-        <span>Admin</span>
-      </span>
-      <button id="btnLogoutHeader" type="button">Keluar</button>
-    </div>
-  </header>
 
   <!-- ─── MAIN ─── -->
   <div class="hub-wrap">
@@ -775,13 +656,6 @@
 
   <!-- ─── SCRIPTS ─── -->
   <script>
-    // ── logout ──
-    document.getElementById('btnLogoutHeader').addEventListener('click', async function() {
-      if (!confirm('Yakin mau logout dari GAMAS 2026?')) return;
-      sessionStorage.removeItem(LAPORAN_PIN_SESSION_KEY);
-      location.reload();
-    });
-
     // ── PIN khusus Dashboard Laporan (owner-only) — satu-satunya PIN yang tersisa ──
     // Staf sales tetap bisa akses PIN command center di atas (untuk Dashboard
     // Kerja & Dashboard Data), tapi begitu klik kartu "Dashboard Laporan"

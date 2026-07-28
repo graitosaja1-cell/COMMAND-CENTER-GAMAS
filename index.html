@@ -234,10 +234,18 @@
       .radar-label h2 { font-size: 16px; }
     }
 
+    /* ── layout utama: kartu Kerja + link samping ── */
+    .hub-main {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 40px;
+    }
+
     /* ── card grid futuristik ── */
     .kartu-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: minmax(0, 340px);
       gap: 28px;
     }
 
@@ -368,6 +376,28 @@
       transform: translateX(4px);
     }
 
+    /* ── akses lain (Laporan & Data): tautan teks kecil, sengaja tidak mencolok ── */
+    .side-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding-top: 18px;
+    }
+
+    .side-nav .side-link {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      color: rgba(255, 255, 255, 0.22);
+      text-decoration: none;
+      transition: color 0.25s ease;
+      white-space: nowrap;
+    }
+
+    .side-nav .side-link:hover {
+      color: rgba(255, 255, 255, 0.55);
+    }
+
     /* status chip - glowing ONLINE badge */
     .kartu .status-chip {
       position: absolute;
@@ -386,10 +416,8 @@
       box-shadow: 0 0 14px rgba(79, 232, 255, 0.15), inset 0 0 6px rgba(79, 232, 255, 0.08);
     }
 
-    /* card accent colors (semua diseragamkan cyan seperti referensi) */
-    .kartu.kerja .status-chip,
-    .kartu.laporan .status-chip,
-    .kartu.data .status-chip {
+    /* card accent color */
+    .kartu.kerja .status-chip {
       color: #4fe8ff;
       border-color: rgba(79, 232, 255, 0.35);
     }
@@ -542,7 +570,9 @@
     @media (max-width: 700px) {
       .hub-wrap { padding: 30px 16px 20px; min-height: 50vh; }
       .hub-headline h2 { font-size: 22px; }
-      .kartu-grid { grid-template-columns: 1fr; gap: 18px; }
+      .hub-main { flex-direction: column; align-items: center; gap: 20px; }
+      .kartu-grid { grid-template-columns: 1fr; gap: 18px; width: 100%; }
+      .side-nav { flex-direction: row; padding-top: 0; }
       .kartu { padding: 24px 16px 22px; }
       #authForm, #laporanPinForm { padding: 28px 20px 24px; }
       .orb-1, .orb-2, .orb-3 { display: none; }
@@ -553,9 +583,6 @@
       }
     }
 
-    @media (min-width: 701px) and (max-width: 1000px) {
-      .kartu-grid { grid-template-columns: repeat(2, 1fr); }
-    }
   </style>
 </head>
 <body>
@@ -581,42 +608,26 @@
       <p>kelola ekosistem kerja dengan presisi tinggi</p>
     </div>
 
-    <div class="kartu-grid">
-      <!-- KERJA -->
-      <a class="kartu kerja" href="dashboard-kerja.html">
-        <span class="corner corner-tl"></span>
-        <span class="corner corner-br"></span>
-        <span class="status-chip">● online</span>
-        <div class="judul-kartu">Dashboard Kerja</div>
-        <div class="desc-kartu">orkestrasi tugas &amp; alur kerja</div>
-        <span class="buka-btn">
-          akses <span class="arrow">→</span>
-        </span>
-      </a>
+    <div class="hub-main">
+      <div class="kartu-grid">
+        <!-- KERJA -->
+        <a class="kartu kerja" href="dashboard-kerja.html">
+          <span class="corner corner-tl"></span>
+          <span class="corner corner-br"></span>
+          <span class="status-chip">● online</span>
+          <div class="judul-kartu">Dashboard Kerja</div>
+          <div class="desc-kartu">orkestrasi tugas &amp; alur kerja</div>
+          <span class="buka-btn">
+            akses <span class="arrow">→</span>
+          </span>
+        </a>
+      </div>
 
-      <!-- LAPORAN (dikunci PIN tambahan, khusus owner) -->
-      <a class="kartu laporan" href="dashboard-laporan.html" onclick="bukaLaporan(event)" style="--mx: 50%; --my: 50%;">
-        <span class="corner corner-tl"></span>
-        <span class="corner corner-br"></span>
-        <span class="status-chip">● online</span>
-        <div class="judul-kartu">Dashboard Laporan</div>
-        <div class="desc-kartu">analitik realtime &amp; insight</div>
-        <span class="buka-btn">
-          akses <span class="arrow">→</span>
-        </span>
-      </a>
-
-      <!-- DATA -->
-      <a class="kartu data" href="dashboard-data.html">
-        <span class="corner corner-tl"></span>
-        <span class="corner corner-br"></span>
-        <span class="status-chip">● online</span>
-        <div class="judul-kartu">Dashboard Data</div>
-        <div class="desc-kartu">kelola dataset &amp; intelijen</div>
-        <span class="buka-btn">
-          akses <span class="arrow">→</span>
-        </span>
-      </a>
+      <!-- LAPORAN & DATA: dibuat tautan teks kecil, tidak mencolok, tapi tetap berfungsi normal -->
+      <div class="side-nav">
+        <a class="side-link" href="dashboard-laporan.html" onclick="bukaLaporan(event)">Laporan</a>
+        <a class="side-link" href="dashboard-data.html">Data</a>
+      </div>
     </div>
   </div>
 

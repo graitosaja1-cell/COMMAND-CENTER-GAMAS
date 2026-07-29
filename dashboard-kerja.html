@@ -7503,9 +7503,10 @@
             const produk = prompt('Produk:', '');
             if (!produk) return;
 
-            // ⚠️ CEK DUPLIKAT: No.Faktur + Produk yang sama persis sudah ada di data
-            const dupKeyBaru = salesDupKey(noFaktur, produk);
-            const sudahAdaDup = salesData.some(r => salesDupKey(r['No.Faktur'], r.Produk) === dupKeyBaru);
+            // ⚠️ CEK DUPLIKAT: No.Faktur + Produk + Tanggal yang sama persis sudah ada di data
+            // (Jumlah belum ditanya di titik ini, jadi tidak diikutkan di cek awal ini)
+            const dupKeyBaru = salesDupKey(noFaktur, produk, tgl, '');
+            const sudahAdaDup = salesData.some(r => salesDupKey(r['No.Faktur'], r.Produk, r.Tanggal, '') === dupKeyBaru);
             if (sudahAdaDup) {
                 if (!confirm(`⚠️ No.Faktur "${noFaktur}" dengan produk "${produk}" SUDAH ADA di data.\nTetap simpan sebagai baris baru (duplikat)?`)) {
                     return;
@@ -7548,14 +7549,20 @@
         // data dari tab Rapikan Data, supaya kalau file/kiriman yang sama
         // tidak sengaja diproses dua kali, datanya tidak dobel.
         // ================================================================
-        function salesDupKey(faktur, produk) {
-            return String(faktur || '').trim().toUpperCase() + '|||' + String(produk || '').trim().toUpperCase();
+        function salesDupKey(faktur, produk, tanggal, jumlah) {
+            // PENTING: kunci duplikat HARUS ikut sertakan Tanggal & Jumlah, bukan cuma
+            // No.Faktur + Produk. Kalau cuma No.Faktur+Produk, baris baru yang kebetulan
+            // punya No.Faktur sama dengan baris lama (beda tanggal/beda jumlah) akan
+            // dianggap "sudah ada" dan di-skip diam-diam saat import (data hilang tanpa
+            // ada pesan error apapun). Lihat catatan perbaikan Juli 2026.
+            return String(faktur || '').trim().toUpperCase() + '|||' + String(produk || '').trim().toUpperCase() +
+                '|||' + String(tanggal || '').trim() + '|||' + String(jumlah || '').toString().trim();
         }
         function buildSalesDupKeySet(list) {
             const s = new Set();
             (list || []).forEach(r => {
-                const key = salesDupKey(r['No.Faktur'], r.Produk);
-                if (key !== '|||') s.add(key);
+                const key = salesDupKey(r['No.Faktur'], r.Produk, r.Tanggal, r.Jumlah);
+                if (key !== '|||||||||') s.add(key);
             });
             return s;
         }
@@ -7597,26 +7604,6 @@
                 const faktur = String(it['No.Faktur'] || '').trim();
                 const produk = String(it.Produk || '').trim();
                 if (!faktur) return;
-                const key = salesDupKey(faktur, produk);
-                if (dupKeys.has(key)) { dup++; return; }
-                dupKeys.add(key);
-
-                let hargaBeli = (it['Harga Beli'] === undefined || it['Harga Beli'] === null || it['Harga Beli'] === '')
-                    ? '' : parseNumber(it['Harga Beli']);
-                if (hargaBeli === '') {
-                    const hMaster = cariHargaProdukMaster(produk);
-                    if (hMaster && hMaster.hargaBeli !== '') hargaBeli = hMaster.hargaBeli;
-                }
-                const jumlah = parseNumber(it.Jumlah);
-                const harga = parseNumber(it['Harga Jual']);
-                const disc = parseNumber(it.Disc);
-                const total = (jumlah * harga) - disc;
-                const profit = hargaBeli === '' ? '' : total - (hargaBeli * jumlah);
-
-                let pembayaran = String(it.Pembayaran || '').trim();
-                if (pembayaran !== 'Cash' && pembayaran !== 'Tempo') pembayaran = 'Tempo';
-                let sales = String(it.Sales || '').trim();
-                if (!sales || /^\d+$/.test(sales)) sales = 'LAINNYA';
 
                 let tanggal = String(it.Tanggal || '').trim();
                 if (tanggal.includes('/')) {
@@ -7627,6 +7614,27 @@
                         tanggal = thn + '-' + parts[1].trim().padStart(2, '0') + '-' + parts[0].trim().padStart(2, '0');
                     }
                 }
+                const jumlah = parseNumber(it.Jumlah);
+
+                const key = salesDupKey(faktur, produk, tanggal, jumlah);
+                if (dupKeys.has(key)) { dup++; return; }
+                dupKeys.add(key);
+
+                let hargaBeli = (it['Harga Beli'] === undefined || it['Harga Beli'] === null || it['Harga Beli'] === '')
+                    ? '' : parseNumber(it['Harga Beli']);
+                if (hargaBeli === '') {
+                    const hMaster = cariHargaProdukMaster(produk);
+                    if (hMaster && hMaster.hargaBeli !== '') hargaBeli = hMaster.hargaBeli;
+                }
+                const harga = parseNumber(it['Harga Jual']);
+                const disc = parseNumber(it.Disc);
+                const total = (jumlah * harga) - disc;
+                const profit = hargaBeli === '' ? '' : total - (hargaBeli * jumlah);
+
+                let pembayaran = String(it.Pembayaran || '').trim();
+                if (pembayaran !== 'Cash' && pembayaran !== 'Tempo') pembayaran = 'Tempo';
+                let sales = String(it.Sales || '').trim();
+                if (!sales || /^\d+$/.test(sales)) sales = 'LAINNYA';
 
                 salesData.push({
                     'Tanggal': tanggal, 'No.Faktur': faktur, 'Produk': produk,
@@ -8024,7 +8032,7 @@
                         // Profit = Total - (Harga Beli x Jumlah)
                         const profit = hargaBeli === '' ? '' : total - (hargaBeli * jumlah);
                         const produkTrim = String(row[2] || '').trim();
-                        const dupKey = salesDupKey(faktur, produkTrim);
+                        const dupKey = salesDupKey(faktur, produkTrim, tanggal, jumlah);
                         if (dupKeys.has(dupKey)) { dupSkipped++; continue; }
                         dupKeys.add(dupKey);
                         salesData.push({ 'Tanggal': tanggal, 'No.Faktur': faktur, 'Produk': produkTrim,

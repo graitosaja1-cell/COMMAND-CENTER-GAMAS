@@ -3999,25 +3999,6 @@
             <svg class="tab-icon" viewBox="0 0 24 24"><polyline points="3 7 10 14 14 10 21 17"></polyline><polyline points="15 17 21 17 21 11"></polyline></svg>
             Pengeluaran <span class="badge-tab" id="badgePengeluaran">0</span>
         </button>
-        <div style="position:relative;display:inline-block;">
-            <button class="tab-btn" id="btnExportExcelTab" type="button">
-                <svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M4 19h16"></path></svg>
-                Export Excel
-            </button>
-            <div class="menu-dropdown" id="exportExcelDropdown" style="min-width:230px;">
-                <div class="menu-item" style="border-bottom:1px solid #e5e7eb;padding-bottom:6px;margin-bottom:4px;">
-                    <label style="font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="exportChkSemua" checked> Pilih Semua</label>
-                </div>
-                <div class="menu-item"><label style="cursor:pointer;display:flex;align-items:center;gap:6px;"><input type="checkbox" class="export-chk" value="cash" checked> Cek Cash</label></div>
-                <div class="menu-item"><label style="cursor:pointer;display:flex;align-items:center;gap:6px;"><input type="checkbox" class="export-chk" value="piutang" checked> Cek Piutang</label></div>
-                <div class="menu-item"><label style="cursor:pointer;display:flex;align-items:center;gap:6px;"><input type="checkbox" class="export-chk" value="tagihan" checked> Cetak Tagihan</label></div>
-                <div class="menu-item"><label style="cursor:pointer;display:flex;align-items:center;gap:6px;"><input type="checkbox" class="export-chk" value="pembayaran" checked> Pembayaran</label></div>
-                <div class="menu-item"><label style="cursor:pointer;display:flex;align-items:center;gap:6px;"><input type="checkbox" class="export-chk" value="pengeluaran" checked> Pengeluaran</label></div>
-                <div class="menu-item" style="border-top:1px solid #e5e7eb;padding-top:8px;margin-top:4px;">
-                    <button type="button" class="btn btn-success" id="btnJalankanExportExcel" style="width:100%;margin:0;">💾 Export ke Excel</button>
-                </div>
-            </div>
-        </div>
         <button class="tab-btn" data-tab="tab8" style="display:none">
             <svg class="tab-icon" viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><rect x="4" y="10" width="16" height="12" rx="1.5"></rect><path d="M8 14l3 3 5-5"></path></svg>
             Trash &amp; Save <span class="badge-tab" id="badgeTrash">0</span>
@@ -7560,10 +7541,6 @@
             salesCurrentDateIndex = Infinity;
             renderSales();
             if (okSave) showToast('✅ Transaksi ditambahkan.', 'success');
-            // Cek: apakah customer ini masih punya piutang LAMA (bulan sebelumnya)
-            // yang belum lunas? Kalau ada, kasih tahu sekarang juga supaya tidak
-            // kelewat/ketinggalan ditagih saat dia order lagi.
-            peringatkanJikaAdaPiutangLama(customer, alamat, noFaktur, tgl);
         });
         // ================================================================
         // CEK DUPLIKAT DATA PENJUALAN (berdasarkan No.Faktur + Produk)
@@ -7616,7 +7593,6 @@
             const dupKeys = buildSalesDupKeySet(salesData);
             let added = 0;
             let dup = 0;
-            const addedRows = [];
             items.forEach(it => {
                 const faktur = String(it['No.Faktur'] || '').trim();
                 const produk = String(it.Produk || '').trim();
@@ -7652,24 +7628,22 @@
                     }
                 }
 
-                const rowBaru = {
+                salesData.push({
                     'Tanggal': tanggal, 'No.Faktur': faktur, 'Produk': produk,
                     'Jumlah': jumlah, 'Satuan': String(it.Satuan || '').trim(),
                     'Harga Jual': harga, 'Disc': disc, 'Total': total, 'Sales': sales,
                     'Customer': String(it.Customer || '').trim(), 'Alamat': String(it.Alamat || '').trim(),
                     'Pembayaran': pembayaran, 'Harga Beli': hargaBeli, 'Profit': profit
-                };
-                salesData.push(rowBaru);
-                addedRows.push(rowBaru);
+                });
                 added++;
             });
-            return { added, dup, addedRows };
+            return { added, dup };
         }
 
         document.getElementById('btnTransferBankDataImport').addEventListener('click', async function() {
             const parsed = window._pendingTransferData;
             if (!parsed) return;
-            const { added, dup, addedRows } = mergeTransferDataIntoSales(parsed.items);
+            const { added, dup } = mergeTransferDataIntoSales(parsed.items);
             const okSave = await saveSalesData();
             rebuildSalesFilterOptions();
             salesCurrentDateIndex = Infinity;
@@ -7682,9 +7656,6 @@
                 const dupMsg = dup > 0 ? ` ⚠️ ${dup} baris duplikat (sudah ada) dilewati.` : '';
                 showToast(`✅ ${added} baris dari Rapikan Data berhasil diimpor.${dupMsg}`, 'success');
             }
-            // Cek per customer unik dari baris yang baru masuk: apakah dia masih
-            // punya piutang lama (bulan sebelumnya) yang belum lunas?
-            peringatkanPiutangLamaBatch(addedRows);
             switchTab('tab1');
         });
 
@@ -8005,7 +7976,6 @@
                     let added = 0;
                     let dupSkipped = 0;
                     const dupKeys = buildSalesDupKeySet(salesData);
-                    const addedRowsExcel = [];
                     for (let i = 1; i < rows.length; i++) {
                         const row = rows[i];
                         if (!row || row.length < 8) continue;
@@ -8057,13 +8027,11 @@
                         const dupKey = salesDupKey(faktur, produkTrim);
                         if (dupKeys.has(dupKey)) { dupSkipped++; continue; }
                         dupKeys.add(dupKey);
-                        const rowBaruExcel = { 'Tanggal': tanggal, 'No.Faktur': faktur, 'Produk': produkTrim,
+                        salesData.push({ 'Tanggal': tanggal, 'No.Faktur': faktur, 'Produk': produkTrim,
                                 'Jumlah': jumlah, 'Satuan': String(row[4] || '').trim(),
                             'Harga Jual': harga, 'Disc': disc, 'Total': total, 'Sales': sales,
                             'Customer': String(row[9] || '').trim(), 'Alamat': String(row[10] || '').trim(),
-                            'Pembayaran': pembayaran, 'Harga Beli': hargaBeli, 'Profit': profit };
-                        salesData.push(rowBaruExcel);
-                        addedRowsExcel.push(rowBaruExcel);
+                            'Pembayaran': pembayaran, 'Harga Beli': hargaBeli, 'Profit': profit });
                         added++;
                     }
                     const okSave = await saveSalesData();
@@ -8075,9 +8043,6 @@
                         const dupMsg = dupSkipped > 0 ? ` ⚠️ ${dupSkipped} baris duplikat (No.Faktur+Produk sudah ada) dilewati.` : '';
                         showToast('✅ ' + added + ' baris tersimpan permanen (aman untuk refresh).' + dupMsg, 'success');
                     }
-                    // Cek per customer unik dari baris yang baru masuk: apakah dia masih
-                    // punya piutang lama (bulan sebelumnya) yang belum lunas?
-                    peringatkanPiutangLamaBatch(addedRowsExcel);
                 } catch (err) {
                     showToast('❌ Gagal baca file: ' + err.message, 'warning');
                 }
@@ -8621,13 +8586,6 @@
                 const rincian = buildCashCardRincian(noFaktur, d);
                 const multiTag = rincian.itemCount > 1 ?
                     ' <span title="Faktur ini punya beberapa item produk">🔗</span>' : '';
-                // Cek: customer ini masih punya piutang LAMA (bulan-bulan sebelum
-                // tanggal transaksi ini) yang belum lunas? Kalau ada, kasih badge
-                // peringatan supaya kelihatan langsung di kartunya.
-                const oldDebt = getOldDebtBadgeInfo(d.Customer, d.Alamat, noFaktur, d.Tanggal);
-                const oldDebtBadge = oldDebt ?
-                    ` <span class="badge" style="background:#fff7ed;color:#c2410c;border:1px solid #fdba74;" title="${escapeHtml(oldDebt.title)}">⚠️ Piutang lama (${oldDebt.count})</span>` :
-                    '';
                 return `<div class="sales-card${cbChecked ? ' selected' : ''}">
                     ${d._status === 'cocok' ? '<div class="sales-card-stempel-lunas">Lunas</div>' : ''}
                     <div class="sales-card-top">
@@ -8642,7 +8600,7 @@
                     ${rincian.html}
                     <div class="sales-card-mid">
                         <span class="sales-card-total">${fmtRp(rincian.totalJual)}</span>
-                        <span class="sales-card-badges"><span class="badge pt-tercatat">${kategori}</span> <span class="badge ${d._status === 'cocok' ? 'cocok' : 'tidak'}">${statusLabel}</span>${oldDebtBadge}</span>
+                        <span class="sales-card-badges"><span class="badge pt-tercatat">${kategori}</span> <span class="badge ${d._status === 'cocok' ? 'cocok' : 'tidak'}">${statusLabel}</span></span>
                     </div>
                     <div class="sales-card-foot">
                         <span><b>${escapeHtml(d.Sales || '-')}</b></span>
@@ -8999,102 +8957,6 @@
             return rows;
         }
 
-        // ================================================================
-        // DETEKSI PIUTANG LAMA DARI CUSTOMER YANG SAMA
-        // Dipakai di 2 tempat:
-        // 1) Saat ada transaksi/order BARU masuk (manual/import) -> tampilkan
-        //    peringatan langsung supaya tidak kelewat ditagih.
-        // 2) Saat kartu Cek Cash / Cek Piutang dirender -> tampil badge kalau
-        //    customer di kartu itu ternyata MASIH punya piutang lama (bulan
-        //    sebelumnya) yang belum lunas.
-        // Kuncinya dicocokkan dari Customer + Alamat (di-normalize), BUKAN dari
-        // No.Faktur, karena satu customer bisa order berkali-kali dengan
-        // No.Faktur berbeda-beda tiap kali order.
-        // ================================================================
-        function normCustomerKey(customer, alamat) {
-            const c = String(customer || '').trim().toLowerCase().replace(/\s+/g, ' ');
-            const a = String(alamat || '').trim().toLowerCase().replace(/\s+/g, ' ');
-            if (!c && !a) return '';
-            return c + '|' + a;
-        }
-
-        // Semua piutang BELUM LUNAS milik 1 customer. opts.sebelumTanggal membatasi
-        // hanya piutang yang tanggalnya SEBELUM tanggal itu (dipakai supaya yang
-        // dihitung cuma piutang yg "LAMA" relatif terhadap transaksi baru — bukan
-        // transaksi baru itu sendiri atau transaksi lain yg lebih baru).
-        // opts.excludeFaktur mengecualikan 1 No.Faktur (biar transaksi yang baru saja
-        // diinput tidak dianggap sbg "piutang lama" dari dirinya sendiri).
-        function cariPiutangLamaCustomer(customer, alamat, opts) {
-            opts = opts || {};
-            const key = normCustomerKey(customer, alamat);
-            if (!key) return [];
-            const excludeKey = opts.excludeFaktur ? normFaktur(opts.excludeFaktur) : null;
-            const batasTanggal = opts.sebelumTanggal || null;
-            const rows = (typeof ptBuildTempoRows === 'function') ? ptBuildTempoRows() : [];
-            const map = new Map();
-            rows.forEach(r => {
-                if (r.statusClass === 'lunas') return;
-                const fk = normFaktur(r.noFaktur);
-                if (excludeKey && fk === excludeKey) return;
-                if (normCustomerKey(r.customer, r.alamat) !== key) return;
-                if (batasTanggal && !(String(r.tanggal || '') < String(batasTanggal))) return;
-                if (!map.has(fk)) {
-                    map.set(fk, { noFaktur: r.noFaktur, tanggal: r.tanggal,
-                        sisa: Math.max(0, (r.totalFaktur || 0) - (r.totalBayar || 0)) });
-                }
-            });
-            return Array.from(map.values()).sort((a, b) => String(a.tanggal || '').localeCompare(String(b
-                .tanggal || '')));
-        }
-
-        // Info ringkas buat badge di kartu (Cek Cash & Cek Piutang): berapa banyak
-        // & berapa total sisa piutang lama customer ini, atau null kalau tidak ada.
-        function getOldDebtBadgeInfo(customer, alamat, excludeFaktur, tanggal) {
-            const lama = cariPiutangLamaCustomer(customer, alamat, { excludeFaktur, sebelumTanggal: tanggal });
-            if (!lama.length) return null;
-            const totalSisa = lama.reduce((s, x) => s + x.sisa, 0);
-            const daftar = lama.map(x => x.noFaktur).join(', ');
-            return { count: lama.length, totalSisa,
-                title: `Masih ada ${lama.length} piutang lama belum lunas: ${daftar} (sisa \u00b1${fmtRp(totalSisa)})`
-            };
-        }
-
-        // Tampilkan 1 toast peringatan untuk 1 transaksi baru (dipakai di "Tambah
-        // Data" manual, Tab 1).
-        function peringatkanJikaAdaPiutangLama(customer, alamat, noFakturBaru, tanggalBaru) {
-            const lama = cariPiutangLamaCustomer(customer, alamat, { excludeFaktur: noFakturBaru,
-                sebelumTanggal: tanggalBaru });
-            if (!lama.length) return;
-            const totalSisa = lama.reduce((s, x) => s + x.sisa, 0);
-            const daftar = lama.map(x => x.noFaktur).join(', ');
-            showToast(`⚠️ ${escapeHtml(customer || 'Customer ini')} masih punya ${lama.length} piutang lama belum lunas (${escapeHtml(daftar)}) — sisa \u00b1${fmtRp(totalSisa)}`,
-                'warning');
-        }
-
-        // Versi batch: dipakai sesudah import banyak baris sekaligus (Rapikan Data /
-        // Import Excel). Dicek per CUSTOMER UNIK dari baris2 yang baru masuk, supaya
-        // tidak muncul toast berkali-kali untuk faktur yang sama / customer yang sama.
-        function peringatkanPiutangLamaBatch(rowsBaru) {
-            if (!rowsBaru || !rowsBaru.length) return;
-            const seenCustomer = new Set();
-            const hasil = [];
-            rowsBaru.forEach(r => {
-                const key = normCustomerKey(r.Customer, r.Alamat);
-                if (!key || seenCustomer.has(key)) return;
-                seenCustomer.add(key);
-                const lama = cariPiutangLamaCustomer(r.Customer, r.Alamat, { excludeFaktur: r['No.Faktur'],
-                    sebelumTanggal: r.Tanggal });
-                if (lama.length) hasil.push({ customer: r.Customer, jumlahFaktur: lama.length,
-                    totalSisa: lama.reduce((s, x) => s + x.sisa, 0) });
-            });
-            if (!hasil.length) return;
-            const ringkas = hasil.slice(0, 5).map(h => `${h.customer || '-'} (${h.jumlahFaktur} faktur, \u00b1${fmtRp(h.totalSisa)})`)
-                .join('; ');
-            const lebih = hasil.length > 5 ? ` dan ${hasil.length - 5} customer lain` : '';
-            showToast(`⚠️ ${hasil.length} customer dalam batch ini masih punya piutang lama: ${ringkas}${lebih}`,
-                'warning');
-        }
-
         function ptRebuildFilterOptions() {
             const salesSet = new Set(),
                 bulanSet = new Set();
@@ -9328,12 +9190,6 @@
                 const statusBadge = r.statusClass === 'lunas' ?
                     '<span class="badge lunas-mini">✅ Lunas</span>' :
                     `<span class="badge pt-${r.statusClass}">${r.statusClass === 'overdue' && r.overdueDays != null ? `${r.overdueDays} hr/Overdue` : ptStatusLabel(r.statusClass)}</span>`;
-                // Cek: customer ini masih punya piutang LAMA LAIN (faktur beda,
-                // tanggal lebih tua) yang belum lunas? Kalau ada, tandai di kartu.
-                const oldDebt = getOldDebtBadgeInfo(r.customer, r.alamat, r.noFaktur, r.tanggal);
-                const oldDebtBadge = oldDebt ?
-                    ` <span class="badge" style="background:#fff7ed;color:#c2410c;border:1px solid #fdba74;" title="${escapeHtml(oldDebt.title)}">⚠️ Piutang lama (${oldDebt.count})</span>` :
-                    '';
                 return `<div class="sales-card${checked ? ' selected' : ''}">
                     ${r.statusClass === 'lunas' ? '<div class="sales-card-stempel-lunas">Lunas</div>' : ''}
                     <div class="sales-card-top">
@@ -9361,7 +9217,7 @@
                         </div>
                     </div>
                     <div class="sales-card-mid">
-                        <span class="sales-card-badges"><span class="badge pt-tercatat">${r.kategori === 'fitri' ? 'Minyak Fitri' : 'Rupa Rupa'}</span> ${statusBadge}${oldDebtBadge}</span>
+                        <span class="sales-card-badges"><span class="badge pt-tercatat">${r.kategori === 'fitri' ? 'Minyak Fitri' : 'Rupa Rupa'}</span> ${statusBadge}</span>
                     </div>
                     <div class="sales-card-foot">
                         <span><b>${escapeHtml(r.sales || '-')}</b></span>
@@ -13322,193 +13178,12 @@
         setupMenuDropdown('ptMenuBtn', 'ptMenuDropdown');
         setupMenuDropdown('harianMenuBtn', 'harianMenuDropdown');
         setupMenuDropdown('pgMenuBtn', 'pgMenuDropdown');
-        setupMenuDropdown('btnExportExcelTab', 'exportExcelDropdown');
 
         document.addEventListener('click', function() {
             document.querySelectorAll('.menu-dropdown.active').forEach(function(d) {
                 d.classList.remove('active');
             });
         });
-
-        // ================================================================
-        // EXPORT EXCEL GABUNGAN (tab baru setelah "Pengeluaran")
-        // Dropdown centang: Cek Cash, Cek Piutang, Cetak Tagihan, Pembayaran,
-        // Pengeluaran. Yang dicentang akan diexport jadi 1 file .xlsx, masing2
-        // sebagai 1 sheet terpisah.
-        // ================================================================
-        (function() {
-            const chkSemua = document.getElementById('exportChkSemua');
-            const chkList = () => Array.from(document.querySelectorAll('.export-chk'));
-
-            if (chkSemua) {
-                chkSemua.addEventListener('change', function() {
-                    chkList().forEach(cb => { cb.checked = chkSemua.checked; });
-                });
-                chkList().forEach(cb => {
-                    cb.addEventListener('change', function() {
-                        chkSemua.checked = chkList().every(x => x.checked);
-                    });
-                });
-            }
-
-            const btnJalankan = document.getElementById('btnJalankanExportExcel');
-            if (!btnJalankan) return;
-            btnJalankan.addEventListener('click', async function() {
-                const dipilih = chkList().filter(cb => cb.checked).map(cb => cb.value);
-                if (!dipilih.length) { showToast('⚠️ Pilih minimal 1 data untuk di-export.', 'warning'); return; }
-
-                btnJalankan.disabled = true;
-                btnJalankan.textContent = '⏳ Menyiapkan...';
-                try {
-                    // Pastikan data yang sifatnya "lazy-load" (baru dimuat saat tab
-                    // terkait dibuka) sudah tersedia, supaya export tidak kosong
-                    // walau user belum pernah membuka tab-tab itu sebelumnya.
-                    if ((dipilih.includes('cash') || dipilih.includes('tagihan')) && !window
-                        ._cekDataLoaded) {
-                        await renderCek();
-                        window._cekDataLoaded = true;
-                    }
-                    if ((dipilih.includes('piutang') || dipilih.includes('tagihan')) && !window
-                        ._ptDataLoaded) {
-                        await loadAllCashDataBeforePtRefresh();
-                        await ptRefresh(false);
-                        window._ptDataLoaded = true;
-                    }
-                    if (dipilih.includes('pengeluaran') && !window._pengeluaranDataLoaded) {
-                        await loadPengeluaranData();
-                        window._pengeluaranDataLoaded = true;
-                    }
-
-                    const wb = XLSX.utils.book_new();
-                    let adaSheet = false;
-                    const kosong = [{ 'Info': 'Tidak ada data' }];
-
-                    if (dipilih.includes('cash')) {
-                        const rows = (cashTableFiltered || []).map(d => ({
-                            'Tanggal': fmtTanggal(d.Tanggal), 'No.Faktur': d['No.Faktur'] || '',
-                            'Customer': d.Customer || '', 'Alamat': d.Alamat || '',
-                            'Sales': d.Sales || '',
-                            'Kategori': (d.Produk || '').toLowerCase().includes('fitri') ?
-                                'Minyak Fitri' : 'Rupa Rupa',
-                            'Total': d.Total || 0,
-                            'Status': d._status === 'cocok' ? 'Lunas' : 'Belum Lunas'
-                        }));
-                        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows.length ? rows :
-                            kosong), 'Cek Cash');
-                        adaSheet = true;
-                    }
-
-                    if (dipilih.includes('piutang')) {
-                        const rows = ptGetFilteredTempo().map(r => ({
-                            'Tanggal': fmtTanggal(r.tanggal), 'No.Faktur': r.noFaktur || '',
-                            'Customer': r.customer || '', 'Alamat': r.alamat || '',
-                            'Sales': r.sales || '', 'Jatuh Tempo': r.jt || '',
-                            'Total Tagihan': r.totalFaktur || 0, 'Total Dibayar': r.totalBayar || 0,
-                            'Sisa Tagihan': Math.max(0, (r.totalFaktur || 0) - (r.totalBayar || 0)),
-                            'Status': r.statusClass === 'lunas' ? 'Lunas' : (r.statusClass ===
-                                'overdue' ? 'Overdue' : (r.statusClass === 'titip' ? 'Titip' :
-                                    'Belum Lunas'))
-                        }));
-                        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows.length ? rows :
-                            kosong), 'Cek Piutang');
-                        adaSheet = true;
-                    }
-
-                    if (dipilih.includes('tagihan')) {
-                        renderTagihanDariPiutang();
-                        const src = window._tagihanSelectedRows || [];
-                        const rows = src.map(r => ({
-                            'No.Faktur': r.noFaktur || '', 'Customer': r.customer || '',
-                            'Alamat': r.alamat || '', 'Sales': r.sales || '',
-                            'Produk': r.produk || r.produkNama || '', 'Tanggal': fmtTanggal(r
-                                .tanggal), 'Jatuh Tempo': r.jt || '-',
-                            'Nominal': ptNominalTagih(r), 'Sumber': r.tipe === 'cash' ? 'Cash' :
-                                'Piutang'
-                        }));
-                        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows.length ? rows :
-                            kosong), 'Cetak Tagihan');
-                        adaSheet = true;
-                    }
-
-                    if (dipilih.includes('pembayaran')) {
-                        const semuaHarian = await db.inputHarian.toArray();
-                        semuaHarian.sort((a, b) => String(a.tanggal || '').localeCompare(String(b
-                            .tanggal || '')));
-                        const rows = [];
-                        semuaHarian.forEach(rec => {
-                            ((rec.data && rec.data.piutang) || []).forEach(p => rows.push({
-                                'Tanggal Input': rec.tanggal, 'Jenis': 'Piutang',
-                                'Sales': p.sales || '', 'No.Faktur': p.no_faktur || '',
-                                'Nama Toko': p.nama_toko || '', 'Alamat': p.alamat || '',
-                                'Tgl Faktur': p.tgl_faktur || '', 'JT': p.jt || '',
-                                'Tagihan/Nominal': p.tagihan || '', 'Minyak Cash': p
-                                    .minyak_cash || '', 'Minyak Transfer': p.minyak_transfer ||
-                                    '', 'Rupa Cash': p.rupa_cash || '', 'Rupa Transfer': p
-                                    .rupa_transfer || '', 'Ket': p.ket || ''
-                            }));
-                            ((rec.data && rec.data.cash) || []).forEach(c => rows.push({
-                                'Tanggal Input': rec.tanggal, 'Jenis': 'Cash',
-                                'Sales': c.dropping_sales || '', 'No.Faktur': c.no_faktur || '',
-                                'Nama Toko': c.nama_toko || '', 'Alamat': c.alamat || '',
-                                'Tgl Faktur': c.tgl_faktur || '', 'JT': c.jt || '',
-                                'Tagihan/Nominal': c.nominal_faktur || '', 'Minyak Cash': c
-                                    .minyak_cash || '', 'Minyak Transfer': c.minyak_transfer ||
-                                    '', 'Rupa Cash': c.rupa_cash || '', 'Rupa Transfer': c
-                                    .rupa_transfer || '', 'Ket': c.ket || ''
-                            }));
-                        });
-                        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows.length ? rows :
-                            kosong), 'Pembayaran');
-                        adaSheet = true;
-                    }
-
-                    if (dipilih.includes('pengeluaran')) {
-                        const rows = [];
-                        Object.keys(pengeluaranDataMap).sort().forEach(bulan => {
-                            (pengeluaranDataMap[bulan] || []).forEach(day => {
-                                const trList = day.transaksi || [];
-                                const ket = trList.map(t => (t.ket || '') + ' (' + fmtRp(t.jumlah ||
-                                    0) + ')').join('; ');
-                                const masuk = trList.filter(t => t.tipe === 'masuk').reduce((s,
-                                    t) => s + (t.jumlah || 0), 0);
-                                const kantor = trList.filter(t => t.tipe !== 'masuk' && (t
-                                    .kategori || 'kantor') === 'kantor').reduce((s, t) => s + (t
-                                    .jumlah || 0), 0);
-                                const burung = trList.filter(t => t.tipe !== 'masuk' && t
-                                    .kategori === 'burung').reduce((s, t) => s + (t.jumlah ||
-                                    0), 0);
-                                rows.push({
-                                    'Bulan': fmtBulanTahun(bulan), 'Tanggal': fmtTanggal(day
-                                        .tanggal), 'Keterangan': ket, 'Masuk': masuk,
-                                    'Kantor': kantor, 'Burung': burung, 'Total Pengeluaran':
-                                        kantor + burung, 'Saldo': day.saldo || 0
-                                });
-                            });
-                        });
-                        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows.length ? rows :
-                            kosong), 'Pengeluaran');
-                        adaSheet = true;
-                    }
-
-                    if (!adaSheet) {
-                        showToast('⚠️ Tidak ada data untuk di-export.', 'warning');
-                        return;
-                    }
-
-                    const tglFile = new Date().toISOString().slice(0, 10);
-                    XLSX.writeFile(wb, `Export_Dashboard_${tglFile}.xlsx`);
-                    showToast('✅ Export Excel berhasil diunduh (' + dipilih.length + ' sheet).',
-                        'success');
-                    const dd = document.getElementById('exportExcelDropdown');
-                    if (dd) dd.classList.remove('active');
-                } catch (e) {
-                    showToast('❌ Gagal export: ' + e.message, 'warning');
-                } finally {
-                    btnJalankan.disabled = false;
-                    btnJalankan.textContent = '💾 Export ke Excel';
-                }
-            });
-        })();
 
         // ================================================================
         // INIT

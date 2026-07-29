@@ -7541,6 +7541,10 @@
             salesCurrentDateIndex = Infinity;
             renderSales();
             if (okSave) showToast('✅ Transaksi ditambahkan.', 'success');
+            // Cek: apakah customer ini masih punya piutang LAMA (bulan sebelumnya)
+            // yang belum lunas? Kalau ada, kasih tahu sekarang juga supaya tidak
+            // kelewat/ketinggalan ditagih saat dia order lagi.
+            peringatkanJikaAdaPiutangLama(customer, alamat, noFaktur, tgl);
         });
         // ================================================================
         // CEK DUPLIKAT DATA PENJUALAN (berdasarkan No.Faktur + Produk)
@@ -7593,6 +7597,7 @@
             const dupKeys = buildSalesDupKeySet(salesData);
             let added = 0;
             let dup = 0;
+            const addedRows = [];
             items.forEach(it => {
                 const faktur = String(it['No.Faktur'] || '').trim();
                 const produk = String(it.Produk || '').trim();
@@ -7628,22 +7633,24 @@
                     }
                 }
 
-                salesData.push({
+                const rowBaru = {
                     'Tanggal': tanggal, 'No.Faktur': faktur, 'Produk': produk,
                     'Jumlah': jumlah, 'Satuan': String(it.Satuan || '').trim(),
                     'Harga Jual': harga, 'Disc': disc, 'Total': total, 'Sales': sales,
                     'Customer': String(it.Customer || '').trim(), 'Alamat': String(it.Alamat || '').trim(),
                     'Pembayaran': pembayaran, 'Harga Beli': hargaBeli, 'Profit': profit
-                });
+                };
+                salesData.push(rowBaru);
+                addedRows.push(rowBaru);
                 added++;
             });
-            return { added, dup };
+            return { added, dup, addedRows };
         }
 
         document.getElementById('btnTransferBankDataImport').addEventListener('click', async function() {
             const parsed = window._pendingTransferData;
             if (!parsed) return;
-            const { added, dup } = mergeTransferDataIntoSales(parsed.items);
+            const { added, dup, addedRows } = mergeTransferDataIntoSales(parsed.items);
             const okSave = await saveSalesData();
             rebuildSalesFilterOptions();
             salesCurrentDateIndex = Infinity;
@@ -7656,6 +7663,9 @@
                 const dupMsg = dup > 0 ? ` ⚠️ ${dup} baris duplikat (sudah ada) dilewati.` : '';
                 showToast(`✅ ${added} baris dari Rapikan Data berhasil diimpor.${dupMsg}`, 'success');
             }
+            // Cek per customer unik dari baris yang baru masuk: apakah dia masih
+            // punya piutang lama (bulan sebelumnya) yang belum lunas?
+            peringatkanPiutangLamaBatch(addedRows);
             switchTab('tab1');
         });
 
@@ -7976,6 +7986,7 @@
                     let added = 0;
                     let dupSkipped = 0;
                     const dupKeys = buildSalesDupKeySet(salesData);
+                    const addedRowsExcel = [];
                     for (let i = 1; i < rows.length; i++) {
                         const row = rows[i];
                         if (!row || row.length < 8) continue;
@@ -8027,11 +8038,13 @@
                         const dupKey = salesDupKey(faktur, produkTrim);
                         if (dupKeys.has(dupKey)) { dupSkipped++; continue; }
                         dupKeys.add(dupKey);
-                        salesData.push({ 'Tanggal': tanggal, 'No.Faktur': faktur, 'Produk': produkTrim,
+                        const rowBaruExcel = { 'Tanggal': tanggal, 'No.Faktur': faktur, 'Produk': produkTrim,
                                 'Jumlah': jumlah, 'Satuan': String(row[4] || '').trim(),
                             'Harga Jual': harga, 'Disc': disc, 'Total': total, 'Sales': sales,
                             'Customer': String(row[9] || '').trim(), 'Alamat': String(row[10] || '').trim(),
-                            'Pembayaran': pembayaran, 'Harga Beli': hargaBeli, 'Profit': profit });
+                            'Pembayaran': pembayaran, 'Harga Beli': hargaBeli, 'Profit': profit };
+                        salesData.push(rowBaruExcel);
+                        addedRowsExcel.push(rowBaruExcel);
                         added++;
                     }
                     const okSave = await saveSalesData();
@@ -8043,6 +8056,9 @@
                         const dupMsg = dupSkipped > 0 ? ` ⚠️ ${dupSkipped} baris duplikat (No.Faktur+Produk sudah ada) dilewati.` : '';
                         showToast('✅ ' + added + ' baris tersimpan permanen (aman untuk refresh).' + dupMsg, 'success');
                     }
+                    // Cek per customer unik dari baris yang baru masuk: apakah dia masih
+                    // punya piutang lama (bulan sebelumnya) yang belum lunas?
+                    peringatkanPiutangLamaBatch(addedRowsExcel);
                 } catch (err) {
                     showToast('❌ Gagal baca file: ' + err.message, 'warning');
                 }
@@ -8513,11 +8529,47 @@
                         <td>${disc ? fmtRp(disc) : '-'}</td>
                     </tr>`;
             }).join('');
-            return `<table class="cash-card-produk-table">
+            const html = `<table class="cash-card-produk-table">
                     <thead><tr><th>Produk</th><th>Qty</th><th>Harga Jual</th><th>Harga Beli</th><th>Disc</th></tr></thead>
                     <tbody>${rows}</tbody>
                     <tfoot><tr><td>TOTAL</td><td>${totalQty}</td><td>${fmtRp(totalJual)}</td><td>${totalBeli ? fmtRp(totalBeli) : '-'}</td><td>${totalDisc ? fmtRp(totalDisc) : '-'}</td></tr></tfoot>
                 </table>`;
+            // Kembalikan juga total gabungan (bukan cuma HTML) supaya kartu bisa
+            // menampilkan Total per-FAKTUR (semua produk), bukan cuma total 1 baris.
+            return { html, totalQty, totalJual, totalBeli, totalDisc, itemCount: sumber.length };
+        }
+
+        // Rincian produk untuk 1 No.Faktur di kartu Cek Piutang (Tab 4) — analog dengan
+        // buildCashCardRincian di atas, dipakai supaya kartu piutang juga gabung jadi
+        // 1 kartu per faktur (bukan 1 kartu per baris produk), sama seperti modal Detail Faktur.
+        function buildPiutangCardRincian(noFaktur, fallbackRow) {
+            const items = salesData.filter(s => normFaktur(s['No.Faktur']) === normFaktur(noFaktur) && s
+                .Pembayaran === 'Tempo');
+            const sumber = items.length ? items : [fallbackRow];
+            let totalQty = 0,
+                totalJual = 0;
+            const rows = sumber.map(it => {
+                const isSalesRow = it && it.Produk !== undefined;
+                const jumlah = isSalesRow ? parseNumber(it.Jumlah) : 0;
+                const namaProduk = isSalesRow ? it.Produk : (it.produkNama || it.produk || '-');
+                const satuan = isSalesRow ? (it.Satuan || '') : '';
+                const totalBaris = isSalesRow ?
+                    (it.Total !== undefined && it.Total !== '' ? parseNumber(it.Total) : (jumlah * parseNumber(
+                        it['Harga Jual']))) : (it.total || 0);
+                totalQty += jumlah;
+                totalJual += totalBaris;
+                return `<tr>
+                        <td>${escapeHtml(namaProduk || '-')}</td>
+                        <td>${jumlah || 0} ${escapeHtml(satuan)}</td>
+                        <td>${fmtRp(totalBaris)}</td>
+                    </tr>`;
+            }).join('');
+            const html = `<table class="cash-card-produk-table">
+                    <thead><tr><th>Produk</th><th>Qty</th><th>Total</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                    <tfoot><tr><td>TOTAL</td><td>${totalQty}</td><td>${fmtRp(totalJual)}</td></tr></tfoot>
+                </table>`;
+            return { html, totalQty, totalJual, itemCount: sumber.length };
         }
 
         function renderCashCards(pageRows, start) {
@@ -8527,27 +8579,51 @@
                 wrap.innerHTML = `<div class="sales-card-empty">📂 Tidak ada data cash.</div>`;
                 return;
             }
-            wrap.innerHTML = pageRows.map((d, idx) => {
+            // Gabungkan baris2 yang No.Fakturnya sama (1 faktur bisa punya >1 baris
+            // produk di Bank Data Penjualan) supaya tampil sebagai 1 KARTU per faktur,
+            // dengan rincian semua produknya di dalam kartu itu — sama seperti modal
+            // Detail Faktur. Baris ke-2, ke-3, dst dari faktur yang sama dilewati di
+            // sini (bukan dihapus datanya, cuma tidak dirender jadi kartu terpisah).
+            const seenFaktur = new Set();
+            const groups = [];
+            pageRows.forEach((d, idx) => {
+                const key = normFaktur(d['No.Faktur']);
+                if (seenFaktur.has(key)) return;
+                seenFaktur.add(key);
+                groups.push({ row: d, idx });
+            });
+
+            wrap.innerHTML = groups.map(({ row: d, idx }) => {
                 const noFaktur = d['No.Faktur'] || '';
                 const cbChecked = cashChecked[noFaktur] ? 'checked' : '';
                 const statusLabel = d._status === 'cocok' ? '✅ Lunas' : '❌ Belum Lunas';
                 const kategori = (d.Produk || '').toLowerCase().includes('fitri') ? 'Minyak Fitri' : 'Rupa Rupa';
                 const noFakturSafe = escapeHtml(String(noFaktur));
+                const rincian = buildCashCardRincian(noFaktur, d);
+                const multiTag = rincian.itemCount > 1 ?
+                    ' <span title="Faktur ini punya beberapa item produk">🔗</span>' : '';
+                // Cek: customer ini masih punya piutang LAMA (bulan-bulan sebelum
+                // tanggal transaksi ini) yang belum lunas? Kalau ada, kasih badge
+                // peringatan supaya kelihatan langsung di kartunya.
+                const oldDebt = getOldDebtBadgeInfo(d.Customer, d.Alamat, noFaktur, d.Tanggal);
+                const oldDebtBadge = oldDebt ?
+                    ` <span class="badge" style="background:#fff7ed;color:#c2410c;border:1px solid #fdba74;" title="${escapeHtml(oldDebt.title)}">⚠️ Piutang lama (${oldDebt.count})</span>` :
+                    '';
                 return `<div class="sales-card${cbChecked ? ' selected' : ''}">
                     ${d._status === 'cocok' ? '<div class="sales-card-stempel-lunas">Lunas</div>' : ''}
                     <div class="sales-card-top">
                         <div class="sales-card-top-left">
                             <input type="checkbox" class="cash-row-checkbox" data-faktur="${noFakturSafe}" ${cbChecked}>
-                            <span class="faktur-link sales-card-faktur" data-idx="${start+idx}" data-src="cekCash" style="cursor:pointer;">${cashNotesMap[noFaktur] ? '📝 ' : ''}${noFakturSafe}</span>
+                            <span class="faktur-link sales-card-faktur" data-idx="${start+idx}" data-src="cekCash" style="cursor:pointer;">${cashNotesMap[noFaktur] ? '📝 ' : ''}${noFakturSafe}${multiTag}</span>
                         </div>
                         <span class="sales-card-date">${fmtTanggal(d.Tanggal)}</span>
                     </div>
                     <div class="sales-card-produk">${escapeHtml(d.Customer || '-')}</div>
                     <div class="sales-card-qty">${escapeHtml(d.Alamat || '-')}</div>
-                    ${buildCashCardRincian(noFaktur, d)}
+                    ${rincian.html}
                     <div class="sales-card-mid">
-                        <span class="sales-card-total">${fmtRp(d.Total || 0)}</span>
-                        <span class="sales-card-badges"><span class="badge pt-tercatat">${kategori}</span> <span class="badge ${d._status === 'cocok' ? 'cocok' : 'tidak'}">${statusLabel}</span></span>
+                        <span class="sales-card-total">${fmtRp(rincian.totalJual)}</span>
+                        <span class="sales-card-badges"><span class="badge pt-tercatat">${kategori}</span> <span class="badge ${d._status === 'cocok' ? 'cocok' : 'tidak'}">${statusLabel}</span>${oldDebtBadge}</span>
                     </div>
                     <div class="sales-card-foot">
                         <span><b>${escapeHtml(d.Sales || '-')}</b></span>
@@ -8904,6 +8980,102 @@
             return rows;
         }
 
+        // ================================================================
+        // DETEKSI PIUTANG LAMA DARI CUSTOMER YANG SAMA
+        // Dipakai di 2 tempat:
+        // 1) Saat ada transaksi/order BARU masuk (manual/import) -> tampilkan
+        //    peringatan langsung supaya tidak kelewat ditagih.
+        // 2) Saat kartu Cek Cash / Cek Piutang dirender -> tampil badge kalau
+        //    customer di kartu itu ternyata MASIH punya piutang lama (bulan
+        //    sebelumnya) yang belum lunas.
+        // Kuncinya dicocokkan dari Customer + Alamat (di-normalize), BUKAN dari
+        // No.Faktur, karena satu customer bisa order berkali-kali dengan
+        // No.Faktur berbeda-beda tiap kali order.
+        // ================================================================
+        function normCustomerKey(customer, alamat) {
+            const c = String(customer || '').trim().toLowerCase().replace(/\s+/g, ' ');
+            const a = String(alamat || '').trim().toLowerCase().replace(/\s+/g, ' ');
+            if (!c && !a) return '';
+            return c + '|' + a;
+        }
+
+        // Semua piutang BELUM LUNAS milik 1 customer. opts.sebelumTanggal membatasi
+        // hanya piutang yang tanggalnya SEBELUM tanggal itu (dipakai supaya yang
+        // dihitung cuma piutang yg "LAMA" relatif terhadap transaksi baru — bukan
+        // transaksi baru itu sendiri atau transaksi lain yg lebih baru).
+        // opts.excludeFaktur mengecualikan 1 No.Faktur (biar transaksi yang baru saja
+        // diinput tidak dianggap sbg "piutang lama" dari dirinya sendiri).
+        function cariPiutangLamaCustomer(customer, alamat, opts) {
+            opts = opts || {};
+            const key = normCustomerKey(customer, alamat);
+            if (!key) return [];
+            const excludeKey = opts.excludeFaktur ? normFaktur(opts.excludeFaktur) : null;
+            const batasTanggal = opts.sebelumTanggal || null;
+            const rows = (typeof ptBuildTempoRows === 'function') ? ptBuildTempoRows() : [];
+            const map = new Map();
+            rows.forEach(r => {
+                if (r.statusClass === 'lunas') return;
+                const fk = normFaktur(r.noFaktur);
+                if (excludeKey && fk === excludeKey) return;
+                if (normCustomerKey(r.customer, r.alamat) !== key) return;
+                if (batasTanggal && !(String(r.tanggal || '') < String(batasTanggal))) return;
+                if (!map.has(fk)) {
+                    map.set(fk, { noFaktur: r.noFaktur, tanggal: r.tanggal,
+                        sisa: Math.max(0, (r.totalFaktur || 0) - (r.totalBayar || 0)) });
+                }
+            });
+            return Array.from(map.values()).sort((a, b) => String(a.tanggal || '').localeCompare(String(b
+                .tanggal || '')));
+        }
+
+        // Info ringkas buat badge di kartu (Cek Cash & Cek Piutang): berapa banyak
+        // & berapa total sisa piutang lama customer ini, atau null kalau tidak ada.
+        function getOldDebtBadgeInfo(customer, alamat, excludeFaktur, tanggal) {
+            const lama = cariPiutangLamaCustomer(customer, alamat, { excludeFaktur, sebelumTanggal: tanggal });
+            if (!lama.length) return null;
+            const totalSisa = lama.reduce((s, x) => s + x.sisa, 0);
+            const daftar = lama.map(x => x.noFaktur).join(', ');
+            return { count: lama.length, totalSisa,
+                title: `Masih ada ${lama.length} piutang lama belum lunas: ${daftar} (sisa \u00b1${fmtRp(totalSisa)})`
+            };
+        }
+
+        // Tampilkan 1 toast peringatan untuk 1 transaksi baru (dipakai di "Tambah
+        // Data" manual, Tab 1).
+        function peringatkanJikaAdaPiutangLama(customer, alamat, noFakturBaru, tanggalBaru) {
+            const lama = cariPiutangLamaCustomer(customer, alamat, { excludeFaktur: noFakturBaru,
+                sebelumTanggal: tanggalBaru });
+            if (!lama.length) return;
+            const totalSisa = lama.reduce((s, x) => s + x.sisa, 0);
+            const daftar = lama.map(x => x.noFaktur).join(', ');
+            showToast(`⚠️ ${escapeHtml(customer || 'Customer ini')} masih punya ${lama.length} piutang lama belum lunas (${escapeHtml(daftar)}) — sisa \u00b1${fmtRp(totalSisa)}`,
+                'warning');
+        }
+
+        // Versi batch: dipakai sesudah import banyak baris sekaligus (Rapikan Data /
+        // Import Excel). Dicek per CUSTOMER UNIK dari baris2 yang baru masuk, supaya
+        // tidak muncul toast berkali-kali untuk faktur yang sama / customer yang sama.
+        function peringatkanPiutangLamaBatch(rowsBaru) {
+            if (!rowsBaru || !rowsBaru.length) return;
+            const seenCustomer = new Set();
+            const hasil = [];
+            rowsBaru.forEach(r => {
+                const key = normCustomerKey(r.Customer, r.Alamat);
+                if (!key || seenCustomer.has(key)) return;
+                seenCustomer.add(key);
+                const lama = cariPiutangLamaCustomer(r.Customer, r.Alamat, { excludeFaktur: r['No.Faktur'],
+                    sebelumTanggal: r.Tanggal });
+                if (lama.length) hasil.push({ customer: r.Customer, jumlahFaktur: lama.length,
+                    totalSisa: lama.reduce((s, x) => s + x.sisa, 0) });
+            });
+            if (!hasil.length) return;
+            const ringkas = hasil.slice(0, 5).map(h => `${h.customer || '-'} (${h.jumlahFaktur} faktur, \u00b1${fmtRp(h.totalSisa)})`)
+                .join('; ');
+            const lebih = hasil.length > 5 ? ` dan ${hasil.length - 5} customer lain` : '';
+            showToast(`⚠️ ${hasil.length} customer dalam batch ini masih punya piutang lama: ${ringkas}${lebih}`,
+                'warning');
+        }
+
         function ptRebuildFilterOptions() {
             const salesSet = new Set(),
                 bulanSet = new Set();
@@ -9112,42 +9284,53 @@
                 wrap.innerHTML = `<div class="sales-card-empty">📂 Belum ada data piutang tempo.</div>`;
                 return;
             }
-            // Hitung berapa kali tiap No.Faktur muncul (1 faktur bisa punya beberapa baris
-            // produk = beberapa kartu). Kalau muncul >1 kali, kartu2-nya diberi warna latar
-            // yang sama supaya mudah dikenali sebagai satu kelompok faktur.
-            const fakturCountMap = {};
-            (window._ptRowsCache || pageRows).forEach(r => {
-                const k = normFaktur(r.noFaktur);
-                fakturCountMap[k] = (fakturCountMap[k] || 0) + 1;
+            // Gabungkan baris2 yang No.Fakturnya sama (1 faktur bisa punya >1 baris
+            // produk di Bank Data Penjualan) supaya tampil sebagai 1 KARTU per faktur,
+            // dengan rincian semua produknya + Total Tagihan gabungan di dalam kartu
+            // itu — sama seperti modal Detail Faktur (bukan per-baris seperti dulu).
+            const seenFaktur = new Set();
+            const groups = [];
+            pageRows.forEach((r, i) => {
+                const key = normFaktur(r.noFaktur);
+                if (seenFaktur.has(key)) return;
+                seenFaktur.add(key);
+                groups.push({ row: r, idx: i });
             });
-            wrap.innerHTML = pageRows.map((r, i) => {
+
+            wrap.innerHTML = groups.map(({ row: r, idx: i }) => {
                 const realIdx = start + i;
                 const checked = ptChecked[r.noFaktur] ? 'checked' : '';
-                const sisaTagihan = r.statusClass === 'lunas' ? 0 : ptSisaTagihanBaris(r);
                 const noFakturSafe = escapeHtml(String(r.noFaktur || ''));
-                const fakturKey = normFaktur(r.noFaktur);
-                const isGrupFaktur = (fakturCountMap[fakturKey] || 0) > 1;
-                // Warna kelompok tidak dipakai saat kartu sedang dicentang (selected), supaya
-                // highlight seleksi (ungu muda) tetap terlihat jelas.
-                const bgStyle = (isGrupFaktur && !checked) ? ` style="background:${ptFakturColorPalette(fakturKey)};"` : '';
+                const rincian = buildPiutangCardRincian(r.noFaktur, r);
+                const sisaTagihan = r.statusClass === 'lunas' ? 0 : Math.max(0, rincian.totalJual - (r
+                    .totalBayar || 0));
+                const multiTag = rincian.itemCount > 1 ?
+                    ' <span title="Faktur ini punya beberapa item produk">🔗</span>' : '';
                 const statusBadge = r.statusClass === 'lunas' ?
                     '<span class="badge lunas-mini">✅ Lunas</span>' :
                     `<span class="badge pt-${r.statusClass}">${r.statusClass === 'overdue' && r.overdueDays != null ? `${r.overdueDays} hr/Overdue` : ptStatusLabel(r.statusClass)}</span>`;
-                return `<div class="sales-card${checked ? ' selected' : ''}"${bgStyle}>
+                // Cek: customer ini masih punya piutang LAMA LAIN (faktur beda,
+                // tanggal lebih tua) yang belum lunas? Kalau ada, tandai di kartu.
+                const oldDebt = getOldDebtBadgeInfo(r.customer, r.alamat, r.noFaktur, r.tanggal);
+                const oldDebtBadge = oldDebt ?
+                    ` <span class="badge" style="background:#fff7ed;color:#c2410c;border:1px solid #fdba74;" title="${escapeHtml(oldDebt.title)}">⚠️ Piutang lama (${oldDebt.count})</span>` :
+                    '';
+                return `<div class="sales-card${checked ? ' selected' : ''}">
                     ${r.statusClass === 'lunas' ? '<div class="sales-card-stempel-lunas">Lunas</div>' : ''}
                     <div class="sales-card-top">
                         <div class="sales-card-top-left">
                             <input type="checkbox" class="pt-row-checkbox" data-faktur="${noFakturSafe}" ${checked}>
-                            <a href="#" class="pt-faktur-link sales-card-faktur" data-idx="${realIdx}">${piutangNotesMap[r.noFaktur] ? '📝 ' : ''}${noFakturSafe}${isGrupFaktur ? ' <span title="Faktur ini punya beberapa baris produk">🔗</span>' : ''}</a>
+                            <a href="#" class="pt-faktur-link sales-card-faktur" data-idx="${realIdx}">${piutangNotesMap[r.noFaktur] ? '📝 ' : ''}${noFakturSafe}${multiTag}</a>
                         </div>
                         <span class="sales-card-date">${fmtTanggalYY(fmtTanggal(r.tanggal))}</span>
                     </div>
                     <div class="sales-card-produk">${escapeHtml(r.customer || '-')}</div>
-                    <div class="sales-card-qty">${escapeHtml(r.alamat || '-')}${r.produkNama ? ' · ' + escapeHtml(r.produkNama) : ''}</div>
+                    <div class="sales-card-qty">${escapeHtml(r.alamat || '-')}</div>
+                    ${rincian.html}
                     <div class="pt-card-tagihan-grid">
                         <div class="pt-card-tagihan-item">
                             <div class="pt-card-tagihan-label">Total Tagihan (awal transaksi)</div>
-                            <div class="pt-card-tagihan-value">${fmtRp(r.total)}</div>
+                            <div class="pt-card-tagihan-value">${fmtRp(rincian.totalJual)}</div>
                         </div>
                         <div class="pt-card-tagihan-item">
                             <div class="pt-card-tagihan-label">Total Dibayar</div>
@@ -9159,7 +9342,7 @@
                         </div>
                     </div>
                     <div class="sales-card-mid">
-                        <span class="sales-card-badges"><span class="badge pt-tercatat">${r.kategori === 'fitri' ? 'Minyak Fitri' : 'Rupa Rupa'}</span> ${statusBadge}</span>
+                        <span class="sales-card-badges"><span class="badge pt-tercatat">${r.kategori === 'fitri' ? 'Minyak Fitri' : 'Rupa Rupa'}</span> ${statusBadge}${oldDebtBadge}</span>
                     </div>
                     <div class="sales-card-foot">
                         <span><b>${escapeHtml(r.sales || '-')}</b></span>

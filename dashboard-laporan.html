@@ -2739,6 +2739,35 @@
                 try { window.dispatchEvent(new CustomEvent('perSalesDataChanged')); } catch (e) {}
             }
 
+            // Urutan kolom baku yang ingin ditampilkan di tabel Data, apapun urutan
+            // aslinya di file Excel yang di-upload. Header yang tidak ada di daftar ini
+            // akan ditaruh di akhir, sesuai urutan aslinya.
+            const KOLOM_URUTAN_BAKU = [
+                'No.Faktur', 'Tanggal', 'Customer', 'Alamat', 'Sales',
+                'Produk', 'Satuan', 'Jumlah', 'Harga Beli', 'Harga Jual',
+                'Total', 'Disc', 'Pembayaran'
+            ];
+            function normalizeHeaderOrder(hdrs) {
+                if (!Array.isArray(hdrs)) return hdrs;
+                const norm = s => String(s).trim().toLowerCase();
+                const used = new Set();
+                const ordered = [];
+                KOLOM_URUTAN_BAKU.forEach(target => {
+                    const match = hdrs.find(h => norm(h) === norm(target) && !used.has(h));
+                    if (match !== undefined) {
+                        ordered.push(match);
+                        used.add(match);
+                    }
+                });
+                hdrs.forEach(h => {
+                    if (!used.has(h)) {
+                        ordered.push(h);
+                        used.add(h);
+                    }
+                });
+                return ordered;
+            }
+
             function loadFromStorage() {
                 try {
                     const savedData = localStorage.getItem('bankData_allData');
@@ -2747,7 +2776,7 @@
                     
                     if (savedData && savedHeaders) {
                         allData = JSON.parse(savedData);
-                        headers = JSON.parse(savedHeaders);
+                        headers = normalizeHeaderOrder(JSON.parse(savedHeaders));
                         fileNameSaved = savedName || '';
                         return true;
                     }
@@ -2940,7 +2969,7 @@
                 dataTable.style.display = '';
 
                 if (headers.length === 0 && pageData.length > 0) {
-                    headers = Object.keys(pageData[0]);
+                    headers = normalizeHeaderOrder(Object.keys(pageData[0]));
                 }
                 // Kolom Profit di tabel Data ini VIRTUAL (dihitung saat render, bukan kolom asli
                 // dari file Excel) supaya jadi pembanding cepat per baris: Profit = Total - (Harga
@@ -3568,7 +3597,7 @@
                 }
 
                 const first = allData[0];
-                headers = Object.keys(first);
+                headers = normalizeHeaderOrder(Object.keys(first));
                 updateDropdowns();
 
                 // Reset filter lalu set ke bulan terakhir

@@ -7737,12 +7737,44 @@
         //  - Harga Jual kosong/0 padahal Jumlah > 0
         //  - Disc lebih besar dari nilai jual (Jumlah x Harga Jual), sehingga Total janggal
         // ================================================================
+        // ================================================================
+        // MEMORI "SUDAH DIPERIKSA" — supaya baris yang sudah dicek manual
+        // (mis. retur/void yang memang sah) tidak terus-terusan dideteksi
+        // ulang tiap kali tab dibuka lagi. Disimpan di localStorage per
+        // browser, berdasarkan tanda tangan isi baris (bukan index, karena
+        // index bisa berubah kalau ada baris lain dihapus/ditambah).
+        // ================================================================
+        const SALES_ANOMALI_DISMISS_KEY = 'salesAnomaliDismissed_v1';
+        function getSalesAnomaliDismissedSet() {
+            try {
+                const raw = localStorage.getItem(SALES_ANOMALI_DISMISS_KEY);
+                return raw ? new Set(JSON.parse(raw)) : new Set();
+            } catch (e) { return new Set(); }
+        }
+        function saveSalesAnomaliDismissedSet(set) {
+            try { localStorage.setItem(SALES_ANOMALI_DISMISS_KEY, JSON.stringify(Array.from(set))); } catch (e) {}
+        }
+        function buatKunciAnomaliSales(r) {
+            if (!r) return '';
+            return [
+                String(r['No.Faktur'] || '').trim().toUpperCase(),
+                String(r['Tanggal'] || '').trim(),
+                String(r['Produk'] || '').trim().toUpperCase(),
+                String(r.Jumlah), String(r['Harga Jual']), String(r.Disc), String(r.Total)
+            ].join('|||');
+        }
+
         function detectSalesAnomali(rows) {
-            const { toDeleteIdx, toFlagIdx } = cariBarisHantuSales(rows);
-            const ghostSet = new Set([...toDeleteIdx, ...toFlagIdx]);
+            const dismissed = getSalesAnomaliDismissedSet();
+            const { toDeleteIdx, toFlagIdx: toFlagIdxMentah } = cariBarisHantuSales(rows);
+            // Baris hantu (toDeleteIdx) tetap otomatis dibersihkan tiap saat, tidak perlu ditandai.
+            // Baris "minus tanpa pasangan" yang sudah pernah ditandai "sudah diperiksa" -> disaring keluar.
+            const toFlagIdx = toFlagIdxMentah.filter(idx => !dismissed.has(buatKunciAnomaliSales(rows[idx])));
+            const ghostSet = new Set([...toDeleteIdx, ...toFlagIdxMentah]);
             const totalMinus = [], hargaKosong = [], discBerlebih = [];
             rows.forEach((r, idx) => {
                 if (ghostSet.has(idx)) return; // sudah tercakup kategori baris hantu / minus tanpa pasangan
+                if (dismissed.has(buatKunciAnomaliSales(r))) return; // sudah pernah ditandai "sudah diperiksa"
                 const jumlah = parseNumber(r.Jumlah);
                 const harga = parseNumber(r['Harga Jual']);
                 const disc = parseNumber(r.Disc);
@@ -7867,9 +7899,10 @@
                     <tbody>${rowsHtml}</tbody>
                 </table>
                 </div>
-                <p style="margin:0 0 8px;font-size:11px;color:#666;">Centang baris yang sudah kamu periksa (misal retur/void yang sah), lalu pindahkan ke Sampah supaya tidak terus dianggap anomali di pengecekan berikutnya. Data masih bisa dipulihkan dari tab Trash &amp; Save.</p>
+                <p style="margin:0 0 8px;font-size:11px;color:#666;">Centang baris yang sudah kamu periksa (misal retur/void yang sah): pilih <b>"✅ Tandai Sudah Diperiksa"</b> kalau datanya memang benar dan mau tetap disimpan di Bank Data Penjualan (tidak akan dideteksi lagi), atau <b>"🗑️ Pindah ke Sampah"</b> kalau datanya memang mau dikeluarkan (masih bisa dipulihkan dari tab Trash &amp; Save). Pengecekan berikutnya hanya akan menyorot data yang benar-benar baru.</p>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 ${result.toDeleteIdx.length ? `<button class="btn" id="btnBersihkanDariModalAnomali" style="background:#0d6efd;border-color:#0d6efd;">🧹 Bersihkan Baris Hantu Sekarang</button>` : ''}
+                <button class="btn" id="btnAbaikanDariModalAnomali" style="background:#64748b;border-color:#64748b;">✅ Tandai Sudah Diperiksa (Terpilih)</button>
                 <button class="btn" id="btnPindahSampahDariModalAnomali" style="background:#b45309;border-color:#b45309;">🗑️ Pindah ke Sampah (Terpilih)</button>
                 </div>
             `;
@@ -7885,6 +7918,22 @@
             if (selectAllCb) {
                 selectAllCb.addEventListener('change', function() {
                     document.querySelectorAll('.anomali-row-checkbox').forEach(cb => { cb.checked = selectAllCb.checked; });
+                });
+            }
+            const btnAbaikanModal = document.getElementById('btnAbaikanDariModalAnomali');
+            if (btnAbaikanModal) {
+                btnAbaikanModal.addEventListener('click', function() {
+                    const idxs = Array.from(document.querySelectorAll('.anomali-row-checkbox:checked')).map(cb => parseInt(cb.dataset.idx, 10));
+                    if (!idxs.length) { showToast('⚠️ Centang minimal 1 baris yang mau ditandai sudah diperiksa.', 'warning'); return; }
+                    const dismissed = getSalesAnomaliDismissedSet();
+                    idxs.forEach(idx => {
+                        const r = salesData[idx];
+                        if (r) dismissed.add(buatKunciAnomaliSales(r));
+                    });
+                    saveSalesAnomaliDismissedSet(dismissed);
+                    document.getElementById('detailModalGlobal').classList.remove('show');
+                    checkAndShowSalesAnomaliBanner();
+                    showToast(`✅ ${idxs.length} baris ditandai sudah diperiksa. Data tetap ada di Bank Data Penjualan, tapi tidak akan dideteksi lagi di pengecekan berikutnya.`, 'success');
                 });
             }
             const btnPindahModal = document.getElementById('btnPindahSampahDariModalAnomali');

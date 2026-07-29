@@ -3927,6 +3927,7 @@
     </style>
 </head>
 <body>
+<div id="darkWrap">
     <!-- ===== Floating Selection Toolbar (Bank Data Penjualan) ===== -->
     <div class="selection-toolbar" id="salesSelectionToolbar">
         <div class="sel-info"><i class="bi bi-check2-square"></i> <span class="sel-count" id="salesToolbarCount">0</span> data dipilih</div>
@@ -13364,4 +13365,1208 @@
     <script src="sync-supabase.js?v=20260727"></script>
     <script src="sync-cash-income-supabase.js?v=20260727"></script>
     <script src="sync-pengeluaran-supabase.js?v=20260727"></script>
+</div><!-- /#darkWrap -->
+
+<button id="darkModeToggleBtn" title="Ganti Tampilan Terang/Gelap" aria-label="Ganti Tampilan Terang/Gelap">
+    <i class="bi bi-moon-stars-fill"></i>
+</button>
+
+<style>
+    #darkModeToggleBtn {
+        position: fixed;
+        bottom: 18px;
+        right: 18px;
+        z-index: 999999;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        border: none;
+        background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
+        color: #fbbf24;
+        font-size: 18px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+        transition: transform 0.15s ease, background 0.2s ease;
+    }
+    #darkModeToggleBtn:hover {
+        transform: scale(1.07);
+    }
+    #darkModeToggleBtn:active {
+        transform: scale(0.95);
+    }
+    html.gamas-dark-mode {
+        background: #171f2c;
+        color-scheme: dark;
+    }
+    html.gamas-dark-mode #darkModeToggleBtn {
+        background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+        color: #1a202c;
+    }
+
+    /* ===== Pelengkap umum: input/select/textarea, scrollbar, dsb ===== */
+    html.gamas-dark-mode input:not([type="checkbox"]):not([type="radio"]),
+    html.gamas-dark-mode select,
+    html.gamas-dark-mode textarea {
+        background: #1a2233 !important;
+        color: #e8ecf3 !important;
+        border-color: #3a4358 !important;
+    }
+    html.gamas-dark-mode input::placeholder,
+    html.gamas-dark-mode textarea::placeholder {
+        color: #6b7688 !important;
+    }
+    html.gamas-dark-mode a {
+        color: #8b9bf5;
+    }
+    html.gamas-dark-mode ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    html.gamas-dark-mode ::-webkit-scrollbar-track {
+        background: #171f2c;
+    }
+    html.gamas-dark-mode ::-webkit-scrollbar-thumb {
+        background: #3a4358;
+        border-radius: 6px;
+    }
+    html.gamas-dark-mode ::-webkit-scrollbar-thumb:hover {
+        background: #4a5568;
+    }
+
+    /* ===== Tema gelap hasil pemetaan otomatis dari CSS asli ===== */
+html.gamas-dark-mode body {
+    background: #171f2c !important;
+    color: #e8ecf3 !important;
+}
+
+html.gamas-dark-mode .tabs {
+    background: #161d2b !important;
+    border-bottom: 1px solid #2e3648 !important;
+}
+
+html.gamas-dark-mode .tab-btn {
+    border: 1px solid #2e3648 !important;
+    background: #1a2233 !important;
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .tab-btn[data-tab="tab1"].active,
+html.gamas-dark-mode .tab-btn[data-tab="tab2"].active,
+html.gamas-dark-mode .tab-btn[data-tab="tab3"].active,
+html.gamas-dark-mode .tab-btn[data-tab="tab4"].active,
+html.gamas-dark-mode .tab-btn[data-tab="tab6"].active,
+html.gamas-dark-mode .tab-btn[data-tab="tab7"].active,
+html.gamas-dark-mode .tab-btn[data-tab="tab8"].active,
+html.gamas-dark-mode .tab-btn[data-tab="tab10"].active {
+    background: linear-gradient(135deg, #8b9bf5 0%, #9868c9 100%) !important;
+}
+
+html.gamas-dark-mode .tab-btn .badge-tab {
+    background: #3a4358 !important;
+}
+
+html.gamas-dark-mode .selection-toolbar .sel-info .sel-count {
+    background: linear-gradient(135deg, #8b9bf5 0%, #9868c9 100%) !important;
+}
+
+html.gamas-dark-mode .selection-toolbar .btn-sel-trash {
+    background: linear-gradient(135deg, #f7b73d 0%, #f0940f 100%) !important;
+}
+
+html.gamas-dark-mode .confirm-modal-box {
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode .confirm-modal-icon {
+    background: linear-gradient(135deg, #f7b73d 0%, #f0940f 100%) !important;
+}
+
+html.gamas-dark-mode .confirm-modal-box h3 {
+    color: #e8ecf3 !important;
+}
+
+html.gamas-dark-mode .confirm-modal-box p {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .confirm-modal-reason label {
+    color: #c3cddc !important;
+}
+
+html.gamas-dark-mode .confirm-modal-reason input {
+    border: 1px solid #3a4358 !important;
+}
+
+html.gamas-dark-mode .confirm-modal-reason input:focus {
+    border-color: #8b9bf5 !important;
+}
+
+html.gamas-dark-mode .confirm-modal-btn-cancel {
+    background: #171f2c !important;
+    color: #c3cddc !important;
+}
+
+html.gamas-dark-mode .confirm-modal-btn-cancel:hover {
+    background: #2e3648 !important;
+}
+
+html.gamas-dark-mode .confirm-modal-btn-ok {
+    background: linear-gradient(135deg, #f7b73d 0%, #f0940f 100%) !important;
+}
+
+html.gamas-dark-mode .toolbar {
+    background: #161d2b !important;
+    border: 1px solid #3a4358 !important;
+}
+
+html.gamas-dark-mode .toolbar-left .label-cari {
+    color: #e8ecf3 !important;
+}
+
+html.gamas-dark-mode .toolbar-left input {
+    border: 1px solid #3a4358 !important;
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode .toolbar-right .hari-label {
+    color: #c3cddc !important;
+}
+
+html.gamas-dark-mode .toolbar-right .hari-label .num {
+    color: #e8ecf3 !important;
+}
+
+html.gamas-dark-mode .toolbar-right select {
+    border: 1px solid #3a4358 !important;
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode .file-group {
+    border-left: 1px solid #2e3648 !important;
+}
+
+html.gamas-dark-mode .file-wrap {
+    background: #1a2233 !important;
+    border: 1px solid #3a4358 !important;
+}
+
+html.gamas-dark-mode .file-wrap .file-name {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .file-wrap .file-name.empty {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .btn {
+    background: linear-gradient(135deg, #8b9bf5 0%, #9868c9 100%) !important;
+}
+
+html.gamas-dark-mode .btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #f45c5c 100%) !important;
+}
+
+html.gamas-dark-mode .btn-outline {
+    background: #161d2b !important;
+    color: #8b9bf5 !important;
+    border: 2px solid #8b9bf5 !important;
+}
+
+html.gamas-dark-mode .btn-outline:hover {
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode .btn-orange {
+    background: linear-gradient(135deg, #f7b73d 0%, #f0940f 100%) !important;
+}
+
+html.gamas-dark-mode .btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #1cc98a 100%) !important;
+}
+
+html.gamas-dark-mode .card {
+    background: linear-gradient(135deg, #8b9bf5 0%, #9868c9 100%) !important;
+}
+
+html.gamas-dark-mode .card .value.orange {
+    color: #f7b73d !important;
+}
+
+html.gamas-dark-mode .filter-bar {
+    background: linear-gradient(to right, #1a2233, #1a2233) !important;
+    border: 1px solid #1c2536 !important;
+}
+
+html.gamas-dark-mode .filter-bar .field label {
+    color: #8b9bf5 !important;
+}
+
+html.gamas-dark-mode .filter-bar .field input,
+html.gamas-dark-mode .filter-bar .field select {
+    border: 1.5px solid #3a4358 !important;
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode .filter-bar .field input:hover,
+html.gamas-dark-mode .filter-bar .field select:hover {
+    border-color: #8b9bf5 !important;
+}
+
+html.gamas-dark-mode .filter-bar .field input:focus,
+html.gamas-dark-mode .filter-bar .field select:focus {
+    border-color: #8b9bf5 !important;
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode .filter-bar .info-right {
+    color: #8b9bf5 !important;
+    border-left: 1px solid #2e3648 !important;
+}
+
+html.gamas-dark-mode .sales-edit-hint {
+    color: #f45c5c !important;
+}
+
+html.gamas-dark-mode .table-wrap {
+    border: 1px solid #3a4358 !important;
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode .table-wrap th {
+    background: linear-gradient(135deg, #8b9bf5 0%, #9868c9 100%) !important;
+}
+
+html.gamas-dark-mode .table-wrap td {
+    border-bottom: 1px solid #1c2536 !important;
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode .table-wrap tbody tr:hover {
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode .table-wrap tbody tr:nth-child(even) td {
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode .table-wrap tbody tr:nth-child(even):hover td {
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode .tab1-split-left {
+    background: #161d2b !important;
+    border: 1px solid #3a4358 !important;
+}
+
+html.gamas-dark-mode .tab1-split-left-head {
+    color: #3a7cad !important;
+    border-bottom: 1px solid #1c2536 !important;
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode .tab1-split-showall {
+    color: #e14b4b !important;
+    background: #3a1f22 !important;
+}
+
+html.gamas-dark-mode .tab1-split-item {
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode .tab1-split-item:hover {
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode .tab1-split-item .ti-top {
+    color: #3a7cad !important;
+}
+
+html.gamas-dark-mode .tab1-split-item .ti-bottom {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .tab1-split-item .ti-bottom .ti-total {
+    color: #34b573 !important;
+}
+
+html.gamas-dark-mode .tab1-split-empty {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .tab1-chip {
+    background: #161d2b !important;
+    color: #c3cddc !important;
+}
+
+html.gamas-dark-mode .tab1-chip .chip-count {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .tab1-chip.active {
+    background: linear-gradient(135deg, #8b9bf5 0%, #9868c9 100%) !important;
+}
+
+html.gamas-dark-mode .tab1-chip[data-chip="cash"].active {
+    background: linear-gradient(135deg, #10b981 0%, #1cc98a 100%) !important;
+}
+
+html.gamas-dark-mode .tab1-chip[data-chip="tempo"].active {
+    background: linear-gradient(135deg, #f7b73d 0%, #f0940f 100%) !important;
+}
+
+html.gamas-dark-mode .tab1-chip[data-chip="belum_lunas"].active {
+    background: linear-gradient(135deg, #ef4444 0%, #e14b4b 100%) !important;
+}
+
+html.gamas-dark-mode .tab1-view-btn {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .tab1-view-btn.active {
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode .pt-card-tagihan-grid {
+    border-top: 1px dashed #1c2536 !important;
+    border-bottom: 1px dashed #1c2536 !important;
+}
+
+html.gamas-dark-mode .pt-card-tagihan-label {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .pt-card-tagihan-value {
+    color: #e8ecf3 !important;
+}
+
+html.gamas-dark-mode .pt-card-tagihan-value.belum {
+    color: #e14b4b !important;
+}
+
+html.gamas-dark-mode .sales-card-stempel-lunas {
+    color: #e6584a !important;
+    border: 2px solid #e6584a !important;
+    background: rgba(230, 88, 74, 0.12) !important;
+    mix-blend-mode: normal !important;
+    text-shadow: none !important;
+}
+
+html.gamas-dark-mode .sales-card-stempel-lunas::before {
+    border: 1px solid #e6584a !important;
+}
+
+html.gamas-dark-mode .sales-card {
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode .sales-card-faktur {
+    color: #3a7cad !important;
+}
+
+html.gamas-dark-mode .sales-card-date {
+    color: #9fb0c8 !important;
+}
+
+html.gamas-dark-mode .sales-card-produk {
+    color: #e8ecf3 !important;
+}
+
+html.gamas-dark-mode .sales-card-qty {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .sales-card-mid {
+    border-top: 1px dashed #1c2536 !important;
+}
+
+html.gamas-dark-mode .sales-card-total {
+    color: #34b573 !important;
+}
+
+html.gamas-dark-mode .sales-card-foot {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .sales-card-foot b {
+    color: #e8ecf3 !important;
+}
+
+html.gamas-dark-mode .sales-card-empty {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .cash-card-produk-table th {
+    border-bottom: 1px solid #1c2536 !important;
+    color: #cbd5e1 !important;
+}
+
+html.gamas-dark-mode .cash-card-produk-table tfoot td {
+    color: #e8ecf3 !important;
+}
+
+html.gamas-dark-mode .badge.belum-mini {
+    background: #3a1f22 !important;
+    color: #e14b4b !important;
+}
+
+html.gamas-dark-mode .sales-anomali-banner-actions .btn {
+    background: #f0940f !important;
+    border-color: #f0940f !important;
+}
+
+html.gamas-dark-mode #tab3 .cash-table-wrap td:nth-child(1),
+html.gamas-dark-mode #tab3 .cash-table-wrap td:nth-child(2),
+html.gamas-dark-mode #tab4 .table-wrap td:nth-child(1),
+html.gamas-dark-mode #tab4 .table-wrap td:nth-child(2) {
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode #tab3 .cash-table-wrap tbody tr:nth-child(even) td:nth-child(1),
+html.gamas-dark-mode #tab3 .cash-table-wrap tbody tr:nth-child(even) td:nth-child(2),
+html.gamas-dark-mode #tab4 .table-wrap tbody tr:nth-child(even) td:nth-child(1),
+html.gamas-dark-mode #tab4 .table-wrap tbody tr:nth-child(even) td:nth-child(2) {
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode #tab3 .cash-table-wrap tbody tr:hover td:nth-child(1),
+html.gamas-dark-mode #tab3 .cash-table-wrap tbody tr:hover td:nth-child(2) {
+    background: #161d2b4f6 !important;
+}
+
+html.gamas-dark-mode #tab4 .table-wrap tbody tr:hover td:nth-child(1),
+html.gamas-dark-mode #tab4 .table-wrap tbody tr:hover td:nth-child(2) {
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode .table-wrap .expand-btn {
+    color: #8b9bf5 !important;
+}
+
+html.gamas-dark-mode .table-wrap .detail-cell {
+    background: linear-gradient(to right, #1a2233, #1a2233) !important;
+    border-bottom: 2px solid #1c2536 !important;
+}
+
+html.gamas-dark-mode .table-wrap .detail-label {
+    color: #8b9bf5 !important;
+}
+
+html.gamas-dark-mode .table-wrap .detail-value {
+    color: #e8ecf3 !important;
+}
+
+html.gamas-dark-mode .pg-excel-wrap th {
+    background: #2e3648 !important;
+}
+
+html.gamas-dark-mode .pg-excel-wrap td {
+    border: 1px solid #1c2536 !important;
+}
+
+html.gamas-dark-mode .pg-excel-wrap tr.pg-row-spacer td {
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode .pg-excel-wrap tr.pg-row-total td {
+    border-top: 2px solid #a8b3c4 !important;
+    border-bottom: 2px solid #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .pg-excel-wrap .pg-del-btn {
+    color: #e14b4b !important;
+}
+
+html.gamas-dark-mode .pg-excel-wrap .pg-del-btn:hover {
+    background: #3a1f22 !important;
+}
+
+html.gamas-dark-mode .pg-excel-wrap tr.pg-row-signature td {
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode .pg-excel-wrap tr.pg-row-signature-line td {
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode .pg-excel-wrap tr.pg-row-signature-line td span {
+    border-top: 1px solid #a8b3c4 !important;
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .pg-excel-wrap td input {
+    border: 1px solid #3a4358 !important;
+}
+
+html.gamas-dark-mode .pg-print-title div {
+    color: #cbd5e1 !important;
+}
+
+html.gamas-dark-mode .empty-msg {
+    color: #a8b3c4 !important;
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode .pagination {
+    background: linear-gradient(to right, #1a2233, #1a2233) !important;
+    border: 1px solid #1c2536 !important;
+}
+
+html.gamas-dark-mode .pagination button {
+    background: linear-gradient(135deg, #8b9bf5 0%, #9868c9 100%) !important;
+}
+
+html.gamas-dark-mode .pagination button:disabled {
+    background: linear-gradient(135deg, #3a4358 0%, #94a3b8 100%) !important;
+}
+
+html.gamas-dark-mode .badge-count {
+    color: #8b9bf5 !important;
+}
+
+html.gamas-dark-mode .two-col .sub-section {
+    border: 1px solid #3a4358 !important;
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode .two-col .sub-section .sub-title {
+    background: #171f2c !important;
+    color: #e8ecf3 !important;
+    border-bottom: 1px solid #3a4358 !important;
+}
+
+html.gamas-dark-mode .two-col .sub-section .sub-title .src {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .badge.cocok {
+    color: #1cc98a !important;
+}
+
+html.gamas-dark-mode .badge.tidak {
+    color: #f45c5c !important;
+}
+
+html.gamas-dark-mode .badge.cash {
+    background: #0f5b3f !important;
+    color: #4dffb0 !important;
+    border: 1px solid #1cc98a !important;
+}
+
+html.gamas-dark-mode .badge.tempo {
+    background: #6b2e0a !important;
+    color: #ffb84d !important;
+    border: 1px solid #f0940f !important;
+}
+
+html.gamas-dark-mode .badge.pt-lunas {
+    color: #1cc98a !important;
+}
+
+html.gamas-dark-mode .badge.pt-belum {
+    color: #f45c5c !important;
+}
+
+html.gamas-dark-mode .badge.pt-titip {
+    color: #f0940f !important;
+}
+
+html.gamas-dark-mode .badge.pt-tagih {
+    color: #f45c5c !important;
+}
+
+html.gamas-dark-mode .badge.pt-overdue {
+    color: #e14b4b !important;
+}
+
+html.gamas-dark-mode .badge.pt-tercatat {
+    color: #8b9bf5 !important;
+}
+
+html.gamas-dark-mode .badge.pt-tercatat {
+    color: #8b9bf5 !important;
+}
+
+html.gamas-dark-mode .pt-row-overdue td {
+    background: #161d2b5f5 !important;
+}
+
+html.gamas-dark-mode .pt-source-status {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .modal-box {
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode #detailModalGlobal .df-table-wrap {
+    border: 1px solid #2e3648 !important;
+}
+
+html.gamas-dark-mode #detailModalGlobal .df-table-wrap tbody tr:nth-child(even) {
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode #detailModalGlobal .df-total-box .df-total-value {
+    color: #1cc98a !important;
+}
+
+html.gamas-dark-mode .info-kosong-mencolok {
+    color: #e14b4b !important;
+}
+
+html.gamas-dark-mode .modal-tabs {
+    background: #1a2233 !important;
+    border-bottom: 1px solid #2e3648 !important;
+}
+
+html.gamas-dark-mode .modal-tab {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .modal-toolbar input[type="text"] {
+    border: 1px solid #3a4358 !important;
+}
+
+html.gamas-dark-mode .modal-summary {
+    color: #c3cddc !important;
+}
+
+html.gamas-dark-mode .modal-body .detail-card {
+    border: 1px solid #3a4358 !important;
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode .modal-body .detail-card h3 {
+    color: #cbd5e1 !important;
+    border-bottom: 1px solid #1c2536 !important;
+}
+
+html.gamas-dark-mode .modal-body .detail-card .row {
+    border-bottom: 1px dashed #1c2536 !important;
+}
+
+html.gamas-dark-mode .modal-body .detail-card .row .label {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .modal-body .detail-card .row .value {
+    color: #e8ecf3 !important;
+}
+
+html.gamas-dark-mode .modal-body .match-status {
+    background: #171f2c !important;
+}
+
+html.gamas-dark-mode .modal-actions {
+    border-top: 1px solid #1c2536 !important;
+}
+
+html.gamas-dark-mode .stempel-lunas-modal {
+    color: #e6584a !important;
+    border: 3px solid #e6584a !important;
+    background: rgba(230, 88, 74, 0.12) !important;
+    mix-blend-mode: normal !important;
+    text-shadow: none !important;
+}
+
+html.gamas-dark-mode .stempel-lunas-modal::before {
+    border: 1.5px solid #e6584a !important;
+}
+
+html.gamas-dark-mode .faktur-link,
+html.gamas-dark-mode .tab1-faktur-link,
+html.gamas-dark-mode .pt-faktur-link {
+    color: #6fb3ff !important;
+    text-decoration-color: #6fb3ff !important;
+}
+html.gamas-dark-mode .faktur-link:hover,
+html.gamas-dark-mode .tab1-faktur-link:hover,
+html.gamas-dark-mode .pt-faktur-link:hover {
+    color: #f45c5c !important;
+    text-decoration-color: #f45c5c !important;
+}
+html.gamas-dark-mode .tab1-faktur-link[title] {
+    color: #ffb84d !important;
+    text-decoration-color: #ffb84d !important;
+}
+html.gamas-dark-mode .btn-faktur {
+    background: #f0940f !important;
+}
+
+html.gamas-dark-mode .btn-faktur:hover {
+    background: #dd9527 !important;
+}
+
+html.gamas-dark-mode .ket-titip {
+    color: #f45c5c !important;
+}
+
+html.gamas-dark-mode .faktur-table-wrapper {
+    border: 1px solid #2e3648 !important;
+}
+
+html.gamas-dark-mode .faktur-table-wrapper td {
+    border-bottom: 1px solid #1c2536 !important;
+}
+
+html.gamas-dark-mode .toast.success {
+    background: #34b573 !important;
+}
+
+html.gamas-dark-mode .stempel-lunas {
+    color: #e6584a !important;
+    border: 1.7px solid #e6584a !important;
+    background: rgba(230, 88, 74, 0.12) !important;
+    mix-blend-mode: normal !important;
+    text-shadow: none !important;
+}
+
+html.gamas-dark-mode .stempel-lunas::before {
+    border: 1px solid #e6584a !important;
+}
+
+html.gamas-dark-mode .stempel-lunas-lg {
+    color: #e6584a !important;
+    border: 2.55px solid #e6584a !important;
+    background: rgba(230, 88, 74, 0.12) !important;
+    mix-blend-mode: normal !important;
+    text-shadow: none !important;
+}
+
+html.gamas-dark-mode .stempel-lunas-lg::before {
+    border: 1.5px solid #e6584a !important;
+}
+
+html.gamas-dark-mode .im-modal-head {
+    background: linear-gradient(135deg, #8b9bf5 0%, #9868c9 100%) !important;
+}
+
+html.gamas-dark-mode .im-target-toggle {
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode .im-toggle-btn {
+    border: 1.5px solid #2e3648 !important;
+    background: #161d2b !important;
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .im-toggle-btn.active {
+    background: linear-gradient(135deg, #8b9bf5 0%, #9868c9 100%) !important;
+}
+
+html.gamas-dark-mode .im-modal-body {
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode .im-section {
+    background: #161d2b !important;
+    border: 1px solid #1c2536 !important;
+}
+
+html.gamas-dark-mode .im-field label {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .im-field input {
+    border: 1.5px solid #2e3648 !important;
+}
+
+html.gamas-dark-mode .im-field input:focus {
+    border-color: #9868c9 !important;
+}
+
+html.gamas-dark-mode .im-total-box {
+    background: linear-gradient(135deg, #8b9bf5 0%, #9868c9 100%) !important;
+}
+
+html.gamas-dark-mode .im-modal-footer {
+    background: #161d2b !important;
+    border-top: 1px solid #1c2536 !important;
+}
+
+@media print {
+html.gamas-dark-mode body {
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode #tab6 .tg-block:not(:last-of-type)::after {
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode #tab6 .tg-summary {
+    border-top: 1px solid #e8ecf3 !important;
+}
+
+html.gamas-dark-mode #tab6 .tg-signature div {
+    border-bottom: 1px solid #e8ecf3 !important;
+}
+
+html.gamas-dark-mode #tab6 .tg-note {
+    border-top: 1px dashed #3a4358 !important;
+}
+
+html.gamas-dark-mode .tab-content#tab7.active {
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode #tab7 .card {
+    border: 1px solid #3a4358 !important;
+}
+
+html.gamas-dark-mode #tab7 .card-header {
+    background: #3a7cad !important;
+}
+
+html.gamas-dark-mode #tab7 .input-header {
+    border-bottom: 2px solid #e8ecf3 !important;
+}
+
+html.gamas-dark-mode #tab7 .table td,
+html.gamas-dark-mode #tab7 .table th {
+    border-color: #e8ecf3 !important;
+}
+
+html.gamas-dark-mode #tab7 .ttd-section .ttd-item .ttd-garis {
+    border-bottom: 1px solid #e8ecf3 !important;
+}
+
+html.gamas-dark-mode #tab7 body {
+    background: #161d2b !important;
+}
+
+}
+
+html.gamas-dark-mode #tab7 .card {
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode #tab7 .card-header {
+    background: #3a7cad !important;
+}
+
+html.gamas-dark-mode #tab7 .input-header {
+    border-bottom: 2px solid #3a7cad !important;
+}
+
+html.gamas-dark-mode #tab7 .input-header .judul-kecil {
+    color: #3a7cad !important;
+}
+
+html.gamas-dark-mode #tab7 .section-title {
+    border-left: 4px solid #3a7cad !important;
+}
+
+html.gamas-dark-mode #tab7 .table th,
+html.gamas-dark-mode #tab7 .table td {
+    border: 1px solid #7c8aa0 !important;
+}
+
+html.gamas-dark-mode #tab7 .table .form-control-sm {
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode #tab7 .table .form-control-sm[readonly] {
+    background: #171f2c !important;
+}
+
+html.gamas-dark-mode #tab7 .table .total-input {
+    background: #171f2c !important;
+}
+
+html.gamas-dark-mode #tab7 .table .total-baris {
+    background: #171f2c !important;
+}
+
+html.gamas-dark-mode #tab7 .table .row-spacer td {
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode #tab7 .ringkasan table td {
+    border: 1px solid #7c8aa0 !important;
+}
+
+html.gamas-dark-mode #tab7 .ttd-section {
+    border-top: 2px solid #3a7cad !important;
+}
+
+html.gamas-dark-mode #tab7 .ttd-section .ttd-item .ttd-garis {
+    border-bottom: 1px solid #e8ecf3 !important;
+}
+
+html.gamas-dark-mode #tab7 .status-info.status-flash-auto {
+    color: #1cc98a !important;
+}
+
+html.gamas-dark-mode #tab7 .card {
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode #tab7 .card-header {
+    background: #3a7cad !important;
+}
+
+html.gamas-dark-mode #tab7 .input-header {
+    border-bottom: 2px solid #3a7cad !important;
+}
+
+html.gamas-dark-mode #tab7 .input-header .judul-kecil {
+    color: #3a7cad !important;
+}
+
+html.gamas-dark-mode #tab7 .section-title {
+    border-left: 4px solid #3a7cad !important;
+}
+
+html.gamas-dark-mode #tab7 .table th {
+    border: 1px solid #7c8aa0 !important;
+}
+
+html.gamas-dark-mode #tab7 .table td {
+    border: 1px solid #7c8aa0 !important;
+}
+
+html.gamas-dark-mode #tab7 .table .form-control-sm {
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode #tab7 .table .form-control-sm:focus {
+    border-color: #3a7cad !important;
+}
+
+html.gamas-dark-mode #tab7 .table .form-control-sm[readonly] {
+    background: #171f2c !important;
+}
+
+html.gamas-dark-mode #tab7 .table .total-input {
+    background: #171f2c !important;
+}
+
+html.gamas-dark-mode #tab7 .table tfoot .form-control-sm {
+    background: #171f2c !important;
+}
+
+html.gamas-dark-mode #tab7 .table .total-baris {
+    background: #171f2c !important;
+}
+
+html.gamas-dark-mode #tab7 #piutangInputTable tbody td:nth-child(9) input,
+html.gamas-dark-mode #tab7 #piutangInputTable tbody td:nth-child(10) input,
+html.gamas-dark-mode #tab7 #cashInputTable tbody td:nth-child(9) input,
+html.gamas-dark-mode #tab7 #cashInputTable tbody td:nth-child(10) input {
+    background: #161d2b2CC !important;
+}
+
+html.gamas-dark-mode #tab7 #piutangInputTable tbody tr.row-spacer td,
+html.gamas-dark-mode #tab7 #cashInputTable tbody tr.row-spacer td {
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode #tab7 .ringkasan table thead th {
+    border: 1px solid #7c8aa0 !important;
+}
+
+html.gamas-dark-mode #tab7 .ringkasan table thead th.ringkasan-th-minyak {
+    background: #161d2b2CC !important;
+}
+
+html.gamas-dark-mode #tab7 .ringkasan table td {
+    border: 1px solid #7c8aa0 !important;
+}
+
+html.gamas-dark-mode #tab7 .ringkasan table .form-control-sm[readonly] {
+    background: #171f2c !important;
+}
+
+html.gamas-dark-mode #tab7 .ttd-section {
+    border-top: 2px solid #3a7cad !important;
+}
+
+html.gamas-dark-mode #tab7 .ttd-section .ttd-item .ttd-garis {
+    border-bottom: 1px solid #e8ecf3 !important;
+}
+
+html.gamas-dark-mode .menu-dropdown {
+    background: #161d2b !important;
+    border: 1px solid #3a4358 !important;
+}
+
+html.gamas-dark-mode .menu-dropdown .menu-item {
+    border-bottom: 1px solid #171f2c !important;
+}
+
+html.gamas-dark-mode .menu-dropdown .menu-item:hover {
+    background: #171f2c !important;
+}
+
+html.gamas-dark-mode .file-wrap-modal {
+    border-bottom: 1px solid #171f2c !important;
+}
+
+html.gamas-dark-mode .file-name-modal {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode .file-name-modal.empty {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode #tab8 .tab8-card {
+    background: #161d2b !important;
+    border: 1px solid #2e3648 !important;
+}
+
+html.gamas-dark-mode #tab8 .trash-filter-bar {
+    background: #1a2233 !important;
+    border: 1px solid #3a4358 !important;
+}
+
+html.gamas-dark-mode #tab8 .trash-filter-bar .field label {
+    color: #cbd5e1 !important;
+}
+
+html.gamas-dark-mode #tab8 .trash-filter-bar .field input,
+html.gamas-dark-mode #tab8 .trash-filter-bar .field select {
+    border: 1px solid #3a4358 !important;
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode #tab8 .trash-filter-bar .info-right {
+    color: #c3cddc !important;
+    border-left: 1px solid #2e3648 !important;
+}
+
+html.gamas-dark-mode #tab8 .trash-table-wrap {
+    border: 1px solid #3a4358 !important;
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode #tab8 .trash-table-wrap td {
+    border-bottom: 1px solid #1c2536 !important;
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode #tab8 .trash-table-wrap tbody tr:nth-child(even) td {
+    background: #171f2c !important;
+}
+
+html.gamas-dark-mode #tab8 .trash-table-wrap .btn-delete {
+    background: #f45c5c !important;
+}
+
+html.gamas-dark-mode #tab8 .trash-table-wrap .btn-delete:hover {
+    background: #e14b4b !important;
+}
+
+html.gamas-dark-mode #tab8 .trash-info {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode #tab8 .trash-info .count {
+    color: #e8ecf3 !important;
+}
+
+html.gamas-dark-mode #tab8 .trash-info .empty-msg {
+    color: #a8b3c4 !important;
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode #tab8 .save-summary-grid .summary-item {
+    background: #1a2233 !important;
+    border: 1px solid #2e3648 !important;
+}
+
+html.gamas-dark-mode #tab8 .save-summary-grid .summary-item .label {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode #tab8 .save-summary-grid .summary-item.sampah .number {
+    color: #ea6a2e !important;
+}
+
+html.gamas-dark-mode #tab8 .save-summary-grid .summary-item.sampah {
+    background: #2e2416 !important;
+}
+
+html.gamas-dark-mode #tab8 .save-status {
+    color: #a8b3c4 !important;
+}
+
+html.gamas-dark-mode #tab3 .cash-filter-bar {
+    background: #161d2b !important;
+    border: 1px solid #3a4358 !important;
+}
+
+html.gamas-dark-mode #tab3 .cash-filter-bar .field label {
+    color: #cbd5e1 !important;
+}
+
+html.gamas-dark-mode #tab3 .cash-filter-bar .field input,
+html.gamas-dark-mode #tab3 .cash-filter-bar .field select {
+    border: 1px solid #3a4358 !important;
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode #tab3 .cash-filter-bar .info-right {
+    color: #c3cddc !important;
+    border-left: 1px solid #2e3648 !important;
+}
+
+html.gamas-dark-mode #tab3 .cash-table-wrap {
+    background: #161d2b !important;
+}
+
+html.gamas-dark-mode #tab3 .cash-table-wrap th {
+    background: linear-gradient(135deg, #8b9bf5 0%, #9868c9 100%) !important;
+}
+
+html.gamas-dark-mode #tab3 .cash-table-wrap td {
+    border-bottom: 1px solid #1c2536 !important;
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode #tab3 .cash-table-wrap tbody tr:hover td {
+    background: #161d2b4f6 !important;
+}
+
+html.gamas-dark-mode #tab3 .cash-table-wrap tbody tr:nth-child(even) td {
+    background: #1a2233 !important;
+}
+
+html.gamas-dark-mode #tab3 .cash-table-wrap tbody tr:nth-child(even):hover td {
+    background: #161d2b4f6 !important;
+}
+
+html.gamas-dark-mode .data-baru-notif {
+    border: 1px solid #f7b73d !important;
+}
+
+</style>
+
+<script>
+(function () {
+    var STORAGE_KEY = 'gamasDarkModePref';
+    var htmlEl = document.documentElement;
+    var btn = document.getElementById('darkModeToggleBtn');
+    var icon = btn.querySelector('i');
+
+    function setTheme(isDark) {
+        htmlEl.classList.toggle('gamas-dark-mode', isDark);
+        icon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+        btn.title = isDark ? 'Ganti ke Tampilan Terang' : 'Ganti ke Tampilan Gelap';
+        try { localStorage.setItem(STORAGE_KEY, isDark ? '1' : '0'); } catch (e) {}
+    }
+
+    var saved = null;
+    try { saved = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+    setTheme(saved === '1');
+
+    btn.addEventListener('click', function () {
+        setTheme(!htmlEl.classList.contains('gamas-dark-mode'));
+    });
+})();
+</script>
 </body></html>

@@ -1394,8 +1394,241 @@
 
 
     </style>
+
+    <style>
+    #darkModeToggleBtn {
+        position: fixed;
+        bottom: 18px;
+        right: 18px;
+        z-index: 999999;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        border: none;
+        background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
+        color: #fbbf24;
+        font-size: 18px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+        transition: transform 0.15s ease, background 0.2s ease;
+    }
+    #darkModeToggleBtn:hover { transform: scale(1.07); }
+    #darkModeToggleBtn:active { transform: scale(0.95); }
+    html.gamas-dark-mode { background:#171f2c; color-scheme:dark; }
+    html.gamas-dark-mode #darkModeToggleBtn { background: linear-gradient(180deg,#f1f5f9 0%,#e2e8f0 100%); color:#1a202c; }
+
+    /* ===== Umum: input/select/textarea, link, scrollbar ===== */
+    html.gamas-dark-mode input:not([type="checkbox"]):not([type="radio"]),
+    html.gamas-dark-mode select,
+    html.gamas-dark-mode textarea { background:#1a2233 !important; color:#e8ecf3 !important; border-color:#3a4358 !important; }
+    html.gamas-dark-mode input::placeholder,
+    html.gamas-dark-mode textarea::placeholder { color:#6b7688 !important; }
+    html.gamas-dark-mode a { color:#8b9bf5; }
+    html.gamas-dark-mode ::-webkit-scrollbar { width:10px; height:10px; }
+    html.gamas-dark-mode ::-webkit-scrollbar-track { background:#171f2c; }
+    html.gamas-dark-mode ::-webkit-scrollbar-thumb { background:#3a4358; border-radius:6px; }
+    html.gamas-dark-mode ::-webkit-scrollbar-thumb:hover { background:#4a5568; }
+
+    /* ===== Body / header / tabs ===== */
+    html.gamas-dark-mode body { background:#171f2c; color:#e8ecf3; }
+    html.gamas-dark-mode .tabs { background:#161d2b !important; border-bottom:1px solid #232d40 !important; }
+    html.gamas-dark-mode .tab-btn { background:#1a2233 !important; color:#a8b3c4 !important; border-color:#2a3346 !important; }
+    html.gamas-dark-mode .tab-btn:hover { background:#232d45 !important; color:#c3cddc !important; border-color:#3a4358 !important; }
+    html.gamas-dark-mode .tab-btn .badge-tab { background:#2a3346 !important; color:#c3cddc !important; }
+
+    /* ===== Kartu ringkasan (.card gradient tetap, cukup readable) ===== */
+    html.gamas-dark-mode .card .value.orange { color:#ffb84d !important; }
+    html.gamas-dark-mode .card .value.purple { color:#c4b5fd !important; }
+
+    /* ===== Filter bar & toolbar ===== */
+    html.gamas-dark-mode .filter-bar { background:linear-gradient(to right,#161d2b,#182036) !important; border-color:#232d40 !important; }
+    html.gamas-dark-mode .filter-bar .info-right { color:#a8b3c4 !important; border-left-color:#2a3346 !important; }
+    html.gamas-dark-mode .btn-outline { background:#161d2b !important; }
+    html.gamas-dark-mode .toolbar { background:#161d2b !important; border-color:#232d40 !important; }
+    html.gamas-dark-mode .toolbar-left .label-cari { color:#e8ecf3 !important; }
+    html.gamas-dark-mode .toolbar-left input,
+    html.gamas-dark-mode .toolbar-right select { background:#1a2233 !important; border-color:#3a4358 !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode .toolbar-right .hari-label { color:#a8b3c4 !important; }
+    html.gamas-dark-mode .toolbar-right .hari-label .num { color:#e8ecf3 !important; }
+
+    /* ===== Tabel utama ===== */
+    html.gamas-dark-mode .table-wrap { background:#161d2b !important; border-color:#232d40 !important; }
+    html.gamas-dark-mode .table-wrap td { background:#161d2b !important; color:#e8ecf3 !important; border-bottom:1px solid #1c2536 !important; }
+    html.gamas-dark-mode .table-wrap tbody tr:nth-child(even) td { background:#1a2233 !important; }
+    html.gamas-dark-mode .table-wrap tbody tr:hover td { background:#232d45 !important; }
+    html.gamas-dark-mode .empty-msg { background:#161d2b !important; color:#a8b3c4 !important; }
+    html.gamas-dark-mode .pagination { background:linear-gradient(to right,#161d2b,#182036) !important; border-color:#232d40 !important; }
+    html.gamas-dark-mode .badge-count { color:#c4b5fd !important; border-color:rgba(196,181,253,0.3) !important; }
+
+    /* ===== Badge status (pt-lunas/pt-belum/pt-titip/pt-tercatat/pt-overdue) ===== */
+    html.gamas-dark-mode .badge.pt-lunas { background:#0f5b3f !important; color:#4dffb0 !important; border-color:#1cc98a !important; }
+    html.gamas-dark-mode .badge.pt-belum { background:#5b1414 !important; color:#ff8a8a !important; border-color:#e6584a !important; }
+    html.gamas-dark-mode .badge.pt-titip { background:#6b2e0a !important; color:#ffb84d !important; border-color:#f0940f !important; }
+    html.gamas-dark-mode .badge.pt-tercatat { background:#2a2560 !important; color:#b7aefc !important; border-color:#8b9bf5 !important; }
+    html.gamas-dark-mode .badge.pt-overdue { background:#5b1414 !important; color:#ff8a8a !important; border-color:#e6584a !important; }
+
+    /* ===== Stempel Lunas (perbaikan mix-blend-mode agar tidak lenyap di background gelap) ===== */
+    html.gamas-dark-mode .stempel-lunas { color:#4dffb0 !important; background:rgba(16,185,129,0.15) !important; border-color:#1cc98a !important; }
+
+    /* ===== Toast ===== */
+    html.gamas-dark-mode .toast.info { background:#2a3346 !important; }
+
+    /* ===== Modal umum ===== */
+    html.gamas-dark-mode .modal-box { background:#161d2b !important; }
+    html.gamas-dark-mode .modal-body { color:#e8ecf3 !important; }
+
+    /* ===== Modal Detail Faktur (Tab Uang Masuk) ===== */
+    html.gamas-dark-mode #fakturModalTab1 .modal-tabs { background:#161d2b !important; border-bottom-color:#232d40 !important; }
+    html.gamas-dark-mode #fakturModalTab1 .modal-tab { background:#1a2233 !important; color:#a8b3c4 !important; border-color:#2a3346 !important; }
+    html.gamas-dark-mode #fakturModalTab1 .modal-tab:hover { background:#232d45 !important; color:#c3cddc !important; }
+    html.gamas-dark-mode #fakturModalTab1 .modal-tab.active { background:#161d2b !important; color:#c4b5fd !important; border-color:#2a3346 !important; }
+    html.gamas-dark-mode #fakturModalTab1 #fakturSearchTab1 { background:#1a2233 !important; border-color:#3a4358 !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode #fakturModalTab1 .modal-summary { color:#c4b5fd !important; }
+    html.gamas-dark-mode .faktur-table-wrapper { border-color:#232d40 !important; }
+    html.gamas-dark-mode .faktur-table-wrapper tbody td { background:#161d2b !important; color:#e8ecf3 !important; border-bottom-color:#1c2536 !important; }
+    html.gamas-dark-mode .faktur-table-wrapper tbody tr:nth-child(even) td { background:#1a2233 !important; }
+    html.gamas-dark-mode .faktur-table-wrapper tbody tr:hover td { background:#232d45 !important; }
+    html.gamas-dark-mode .faktur-table-wrapper tbody td:nth-child(3) { color:#8b9bf5 !important; }
+    html.gamas-dark-mode .faktur-table-wrapper tr.faktur-total-row td { background:#232d45 !important; color:#e8ecf3 !important; border-top-color:#4a5568 !important; }
+    html.gamas-dark-mode .faktur-link { color:#8b9bf5 !important; }
+    html.gamas-dark-mode .faktur-link:hover { color:#c4b5fd !important; }
+    html.gamas-dark-mode .ket-badge.lunas { background:rgba(16,185,129,0.18) !important; color:#4dffb0 !important; }
+    html.gamas-dark-mode .ket-badge.titip { background:rgba(245,158,11,0.18) !important; color:#ffb84d !important; }
+    html.gamas-dark-mode .ket-badge.lain { background:rgba(139,155,245,0.18) !important; color:#b7aefc !important; }
+
+    /* ===== Modal Detail Profit (pum) ===== */
+    html.gamas-dark-mode #pumDetailModal .pum-section-title { color:#e8ecf3 !important; border-bottom-color:#2a3346 !important; }
+    html.gamas-dark-mode #pumDetailModal table.pum-profit-table th { background:#232d45 !important; color:#b7aefc !important; border-color:#2a3346 !important; }
+    html.gamas-dark-mode #pumDetailModal table.pum-profit-table td { border-color:#1c2536 !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode #pumDetailModal .pum-formula-box { background:#1a2233 !important; border-color:#3a4358 !important; color:#c3cddc !important; }
+    html.gamas-dark-mode #pumDetailModal .pum-warn-box { background:#3a2e0c !important; border-color:#f0940f !important; color:#ffd699 !important; }
+
+    /* ===== Kartu Piutang (pt-card-list) ===== */
+    html.gamas-dark-mode .pt-card-item { background:#161d2b !important; border-color:#232d40 !important; }
+    html.gamas-dark-mode .pt-card-item.pt-card-profit-missing { background:#2a1616 !important; border-color:#5b1414 !important; }
+    html.gamas-dark-mode .pt-card-row { color:#a8b3c4 !important; }
+    html.gamas-dark-mode .pt-card-row span:last-child { color:#e8ecf3 !important; }
+    html.gamas-dark-mode .pt-card-row.highlight { border-top-color:#2a3346 !important; }
+    html.gamas-dark-mode .pt-card-row.highlight span:first-child { color:#b7aefc !important; }
+
+    /* ===== Menu dropdown ===== */
+    html.gamas-dark-mode .menu-dropdown { background:#1a2233 !important; border-color:#3a4358 !important; }
+    html.gamas-dark-mode .menu-dropdown .menu-item { border-bottom-color:#232d40 !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode .menu-dropdown .menu-item:hover { background:#232d45 !important; }
+
+    /* ===== Notif data baru ===== */
+    html.gamas-dark-mode .data-baru-notif { background:#3a2e0c !important; color:#ffd699 !important; border-color:#f0940f !important; }
+
+    /* ===== Tab 7 - Pembayaran ===== */
+    html.gamas-dark-mode #tab7 .card { background:#161d2b !important; }
+    html.gamas-dark-mode #tab7 .input-header { background:#1a2233 !important; }
+    html.gamas-dark-mode #tab7 .input-header .judul-kecil { color:#8b9bf5 !important; }
+    html.gamas-dark-mode #tab7 .section-title { background:#232d45 !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tab7 .table-responsive { border-color:#2a3346 !important; }
+    html.gamas-dark-mode #tab7 .table th,
+    html.gamas-dark-mode #tab7 .table td { border-color:#2a3346 !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tab7 .table th { background:#232d45 !important; }
+    html.gamas-dark-mode #tab7 .table .form-control-sm { background:#1a2233 !important; border-color:#3a4358 !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tab7 .table .form-control-sm[readonly] { background:#202a3d !important; }
+    html.gamas-dark-mode #tab7 .table .total-input,
+    html.gamas-dark-mode #tab7 .table .total-baris { background:#202a3d !important; }
+    html.gamas-dark-mode #tab7 .ringkasan table td { border-color:#2a3346 !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tab7 .ttd-section { border-top-color:#3a4358 !important; }
+    html.gamas-dark-mode #tab7 .ttd-section .ttd-item .ttd-garis { border-bottom-color:#4a5568 !important; }
+
+    /* ===== Tab 8 - Trash & Save ===== */
+    html.gamas-dark-mode #tab8 .tab8-card { background:#161d2b !important; border-color:#232d40 !important; }
+    html.gamas-dark-mode #tab8 .save-summary-grid .summary-item { background:#1a2233 !important; border-color:#2a3346 !important; }
+    html.gamas-dark-mode #tab8 .save-summary-grid .summary-item .label { color:#a8b3c4 !important; }
+    html.gamas-dark-mode #tab8 .save-summary-grid .summary-item.sampah { background:#3a220c !important; border-color:#6b3e10 !important; }
+    html.gamas-dark-mode #tab8 .trash-table-wrap { background:#161d2b !important; border-color:#232d40 !important; }
+    html.gamas-dark-mode #tab8 .trash-table-wrap td { background:#161d2b !important; color:#e8ecf3 !important; border-bottom-color:#1c2536 !important; }
+    html.gamas-dark-mode #tab8 .trash-filter-bar { background:#1a2233 !important; border-color:#232d40 !important; }
+    html.gamas-dark-mode #tab8 .trash-filter-bar .field label { color:#a8b3c4 !important; }
+    html.gamas-dark-mode #tab8 .trash-filter-bar .field input,
+    html.gamas-dark-mode #tab8 .trash-filter-bar .field select { background:#1a2233 !important; border-color:#3a4358 !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tab8 .trash-filter-bar .info-right { color:#a8b3c4 !important; border-left-color:#2a3346 !important; }
+
+    /* ===== Tab Sales (embedded sales.html) ===== */
+    html.gamas-dark-mode #tabSales .sales-app-body { background:#171f2c !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tabSales .header-right .upload-area { background:#1a2233 !important; border-color:#2a3346 !important; }
+    html.gamas-dark-mode #tabSales .header-right .file-info { color:#a8b3c4 !important; }
+    html.gamas-dark-mode #tabSales .header-right .file-info .file-name { color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tabSales .header-right .file-info .badge-count { background:#2a3346 !important; color:#c3cddc !important; }
+    html.gamas-dark-mode #tabSales .tabs { background:#161d2b !important; box-shadow:none !important; }
+    html.gamas-dark-mode #tabSales .tabs button { color:#a8b3c4 !important; }
+    html.gamas-dark-mode #tabSales .tabs button:hover { background:#232d45 !important; }
+    html.gamas-dark-mode #tabSales .header-new .tabs { background:#161d2b !important; border-color:#2a3346 !important; }
+    html.gamas-dark-mode #tabSales .header-new .tabs button:hover { background:#232d45 !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tabSales .filter-bar { background:#161d2b !important; box-shadow:none !important; }
+    html.gamas-dark-mode #tabSales .filter-group label { color:#8593ab !important; }
+    html.gamas-dark-mode #tabSales .filter-group input,
+    html.gamas-dark-mode #tabSales .filter-group select { background:#1a2233 !important; border-color:#3a4358 !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tabSales .filter-group input::placeholder { color:#6b7688 !important; }
+    html.gamas-dark-mode #tabSales .filter-actions button { background:#1a2233 !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tabSales .filter-actions button:hover { background:#232d45 !important; }
+    html.gamas-dark-mode #tabSales .filter-actions button.clear { background:#3a1616 !important; color:#ff8a8a !important; }
+    html.gamas-dark-mode #tabSales .filter-actions button.clear:hover { background:#5b1414 !important; }
+    html.gamas-dark-mode #tabSales .stats-bar { color:#a8b3c4 !important; }
+    html.gamas-dark-mode #tabSales .stats-bar .right button { background:#1a2233 !important; border-color:#3a4358 !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tabSales .stats-bar .right button:hover:not(:disabled) { background:#232d45 !important; }
+    html.gamas-dark-mode #tabSales .stats-bar .right .page-info { color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tabSales .btn-perbedaan-profit { background:rgba(139,155,245,0.15) !important; color:#b7aefc !important; border-color:rgba(139,155,245,0.35) !important; }
+    html.gamas-dark-mode #tabSales .table-wrap { background:#161d2b !important; box-shadow:none !important; }
+    html.gamas-dark-mode #tabSales thead,
+    html.gamas-dark-mode #tabSales thead th { background:#232d45 !important; border-color:#2a3346 !important; color:#c3cddc !important; }
+    html.gamas-dark-mode #tabSales tbody tr { border-bottom-color:#1c2536 !important; }
+    html.gamas-dark-mode #tabSales tbody tr:hover { background:#1e2740 !important; }
+    html.gamas-dark-mode #tabSales tbody td { border-right-color:#1c2536 !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tabSales .td-number.negative { color:#ff8a8a !important; }
+    html.gamas-dark-mode #tabSales .td-sales { color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tabSales .td-faktur { color:#c3cddc !important; }
+    html.gamas-dark-mode #tabSales .td-faktur.aneh { color:#ff8a8a !important; }
+    html.gamas-dark-mode #tabSales .td-pembayaran.tunai { color:#4dffb0 !important; }
+    html.gamas-dark-mode #tabSales .td-pembayaran.kredit { color:#ff8a8a !important; }
+    html.gamas-dark-mode #tabSales .empty-state { color:#8593ab !important; }
+    html.gamas-dark-mode #tabSales .empty-state strong { color:#c3cddc !important; }
+    html.gamas-dark-mode #tabSales .filter-hint { color:#8593ab !important; }
+    html.gamas-dark-mode #tabSales .summary-wrap { background:#161d2b !important; box-shadow:none !important; }
+    html.gamas-dark-mode #tabSales .summary-wrap h3 { color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tabSales .summary-wrap table td { border-bottom-color:#1c2536 !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tabSales .summary-wrap .total-row td { background:#232d45 !important; border-color:#3a4358 !important; }
+    html.gamas-dark-mode #tabSales .summary-wrap .total-row:hover td { background:#2a3452 !important; }
+    html.gamas-dark-mode #tabSales .summary-wrap .grand-total td { background:#0d1420 !important; }
+    html.gamas-dark-mode #tabSales .summary-wrap .grand-total:hover td { background:#080d16 !important; }
+    html.gamas-dark-mode #tabSales .table-wrap::-webkit-scrollbar-track,
+    html.gamas-dark-mode #tabSales .summary-wrap::-webkit-scrollbar-track { background:#171f2c !important; }
+    html.gamas-dark-mode #tabSales .table-wrap::-webkit-scrollbar-thumb,
+    html.gamas-dark-mode #tabSales .summary-wrap::-webkit-scrollbar-thumb { background:#3a4358 !important; }
+    html.gamas-dark-mode #tabSales .ps-card { background:#161d2b !important; border-color:#232d40 !important; }
+    html.gamas-dark-mode #tabSales .ps-card-row { border-top-color:#1c2536 !important; }
+    html.gamas-dark-mode #tabSales .ps-card-label { color:#a8b3c4 !important; }
+    html.gamas-dark-mode #tabSales .ps-card-qty { color:#c3cddc !important; }
+    html.gamas-dark-mode #tabSales .ps-card-qty small { color:#8593ab !important; }
+    html.gamas-dark-mode #tabSales .ps-card-nominal { color:#4dffb0 !important; }
+    html.gamas-dark-mode #tabSales .ps-card-nominal-solo { color:#34d3b8 !important; }
+    html.gamas-dark-mode #tabSales .psfb-bar { background:#161d2b !important; border-color:#232d40 !important; }
+    html.gamas-dark-mode #tabSales .psfb-search { background:#1a2233 !important; border-color:#3a4358 !important; }
+    html.gamas-dark-mode #tabSales .psfb-search input { color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tabSales .psfb-select { background-color:#1a2233 !important; border-color:#3a4358 !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tabSales .psfb-btn-ghost { background:#1a2233 !important; color:#a8b3c4 !important; border-color:#3a4358 !important; }
+    html.gamas-dark-mode #tabSales .psfb-btn-ghost:hover { background:#232d45 !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tabSales .psfb-btn-reset { color:#8593ab !important; border-color:#3a4358 !important; }
+    html.gamas-dark-mode #tabSales .psfb-btn-reset:hover { background:#3a1616 !important; color:#ff8a8a !important; border-color:#5b1414 !important; }
+    html.gamas-dark-mode #tabSales .psfb-chip { background:rgba(139,155,245,0.15) !important; color:#b7aefc !important; border-color:rgba(139,155,245,0.35) !important; }
+    html.gamas-dark-mode #tabSales .psfb-chip-empty { color:#8593ab !important; }
+    html.gamas-dark-mode #tabSales .psfb-drawer { background:#161d2b !important; }
+    html.gamas-dark-mode #tabSales .psfb-field label { color:#a8b3c4 !important; }
+    html.gamas-dark-mode #tabSales .psfb-field select { background:#1a2233 !important; border-color:#3a4358 !important; color:#e8ecf3 !important; }
+    html.gamas-dark-mode #tabSales .psfb-drawer-footer { border-top-color:#2a3346 !important; }
+    html.gamas-dark-mode #tabSales .offline-banner { background:#3a2e0c !important; color:#ffd699 !important; border-color:#f0940f !important; }
+    </style>
 </head>
 <body>
+<div id="darkWrap">
     <div class="pwa-float-nav">
         <a href="index.html" title="Kembali ke Hub">⬅️ Dashboard</a>
         <a href="dashboard-kerja.html" title="Buka Dashboard Kerja">🛠️ Kerja</a>
@@ -6528,5 +6761,34 @@
             }
         })();
     </script>
+</div><!-- /#darkWrap -->
+
+<button id="darkModeToggleBtn" title="Ganti Tampilan Terang/Gelap" aria-label="Ganti Tampilan Terang/Gelap">
+    <i class="bi bi-moon-stars-fill"></i>
+</button>
+
+<script>
+(function () {
+    var STORAGE_KEY = 'gamasDarkModePref';
+    var htmlEl = document.documentElement;
+    var btn = document.getElementById('darkModeToggleBtn');
+    var icon = btn.querySelector('i');
+
+    function setTheme(isDark) {
+        htmlEl.classList.toggle('gamas-dark-mode', isDark);
+        icon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+        btn.title = isDark ? 'Ganti ke Tampilan Terang' : 'Ganti ke Tampilan Gelap';
+        try { localStorage.setItem(STORAGE_KEY, isDark ? '1' : '0'); } catch (e) {}
+    }
+
+    var saved = null;
+    try { saved = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+    setTheme(saved === '1');
+
+    btn.addEventListener('click', function () {
+        setTheme(!htmlEl.classList.contains('gamas-dark-mode'));
+    });
+})();
+</script>
 </body>
 </html>

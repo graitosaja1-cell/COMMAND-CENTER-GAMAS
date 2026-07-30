@@ -4110,6 +4110,9 @@
                     <div class="menu-item">
                         <button class="btn btn-outline" id="btnBersihkanHantu" style="flex:1;margin:0;border-color:#0d6efd;color:#0d6efd;" title="Hapus pasangan baris minus/plus akibat edit faktur (baris hantu), tandai sisanya untuk diperiksa manual">🧹 Bersihkan Baris Hantu</button>
                     </div>
+                    <div class="menu-item">
+                        <button class="btn btn-outline" id="btnBersihkanDuplikatMenu" style="flex:1;margin:0;border-color:#7c3aed;color:#7c3aed;" title="Hapus baris duplikat persis (isi sama plek-ketiplek dengan baris lain), 1 baris/kelompok dipertahankan">📋 Bersihkan Duplikat</button>
+                    </div>
                     <div class="menu-item" id="btnPiutangModeContainer" style="display:none;">
                         <button class="btn btn-orange" id="btnPiutangMode" style="flex:1;margin:0;">📋 Piutang</button>
                     </div>
@@ -8175,6 +8178,11 @@
                 document.getElementById('salesMenuDropdown').classList.remove('active');
                 document.getElementById('detailModalGlobal').classList.add('show');
             }
+        });
+
+        document.getElementById('btnBersihkanDuplikatMenu').addEventListener('click', async function() {
+            document.getElementById('salesMenuDropdown').classList.remove('active');
+            await bersihkanDuplikatPersisSales();
         });
 
         document.getElementById('fileImportSales').addEventListener('change', function(e) {

@@ -762,6 +762,65 @@
             font-size: 9px;
             margin-top: 2px;
         }
+        /* Dropdown checkbox multi-bulan khusus Cek Piutang (#ptBulan) */
+        .pt-bulan-btn {
+            padding: 6px 8px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 9px;
+            font-family: inherit;
+            background: #ffffff;
+            height: 28px;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: all 0.2s ease;
+        }
+        .pt-bulan-btn:hover { border-color: #667eea; }
+        .pt-bulan-panel {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 4px;
+            background: #ffffff;
+            border: 1.5px solid #667eea;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+            padding: 6px;
+            z-index: 50;
+            min-width: 175px;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+        .pt-bulan-panel.show { display: block; }
+        .pt-bulan-panel label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            padding: 4px 6px;
+            border-radius: 5px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .pt-bulan-panel label:hover { background: #f0f4ff; }
+        .pt-bulan-panel .pt-bulan-sep { border-top: 1px solid #e5e7eb; margin: 4px 0; }
+        html.gamas-dark-mode .pt-bulan-btn {
+            border: 1.5px solid #3a4358 !important;
+            background: #161d2b !important;
+            color: #e8ecf3 !important;
+        }
+        html.gamas-dark-mode .pt-bulan-btn:hover { border-color: #8b9bf5 !important; }
+        html.gamas-dark-mode .pt-bulan-panel {
+            background: #161d2b !important;
+            border-color: #8b9bf5 !important;
+        }
+        html.gamas-dark-mode .pt-bulan-panel label:hover { background: #232d45 !important; }
+        html.gamas-dark-mode .pt-bulan-panel .pt-bulan-sep { border-top-color: #3a4358 !important; }
         .filter-bar .info-right {
             font-size: 9px;
             font-weight: 600;
@@ -4242,7 +4301,7 @@
         <div class="filter-bar">
             <div class="field" style="min-width:150px;"><label>Cari Faktur/Customer</label><input type="text" id="ptSearch" placeholder="No faktur / nama toko..."></div>
             <div class="field"><label>Tanggal</label><input type="date" id="ptTanggal"></div>
-            <div class="field"><label>Bulan</label><select id="ptBulan"><option value="">Semua</option></select></div>
+            <div class="field pt-bulan-field" style="min-width:170px; position:relative;"><label>Bulan</label><button type="button" id="ptBulanBtn" class="pt-bulan-btn">Semua</button><div id="ptBulanPanel" class="pt-bulan-panel"></div></div>
             <div class="field"><label>Sales</label><select id="ptSales"><option value="">Semua</option></select></div>
             <div class="field"><label>Kategori</label><select id="ptKategori"><option value="">Semua</option><option value="fitri">Minyak Fitri</option><option value="rupa">Rupa Rupa</option></select></div>
             <div class="field" style="min-width:170px;"><label>Status</label><select id="ptStatus"><option value="">Semua</option><option value="lunas">Sudah Lunas</option><option value="belum_gabungan">Belum Lunas (Semua)</option><option value="titip">🟠 Titip</option></select></div>
@@ -9015,6 +9074,55 @@
             return rows;
         }
 
+        // Menyimpan bulan-bulan yang sedang dicentang di filter multi-bulan Cek Piutang.
+        // Kosong (Set kosong) = "Semua Bulan". Diisi otomatis dengan 2 bulan terakhir
+        // hanya SEKALI saat pertama kali dibuka (lihat ptBulanDidDefault), supaya kalau
+        // user sudah mengubah pilihannya sendiri, sync data di belakang layar tidak
+        // menimpa ulang pilihan itu.
+        let ptSelectedBulan = new Set();
+        let ptBulanDidDefault = false;
+
+        function ptBulanSummaryLabel(bulanArr) {
+            if (!ptSelectedBulan.size || ptSelectedBulan.size >= bulanArr.length) return 'Semua';
+            const terpilih = bulanArr.filter(k => ptSelectedBulan.has(k));
+            if (terpilih.length <= 2) return terpilih.map(fmtBulanTahun).join(', ');
+            return terpilih.length + ' bulan dipilih';
+        }
+
+        function ptRenderBulanPanel(bulanArr) {
+            const panel = document.getElementById('ptBulanPanel');
+            if (!panel) return;
+            const semuaChecked = !ptSelectedBulan.size || ptSelectedBulan.size >= bulanArr.length;
+            panel.innerHTML = `
+                <label><input type="checkbox" id="ptBulanSemua" ${semuaChecked ? 'checked' : ''}> <b>Semua</b></label>
+                <div class="pt-bulan-sep"></div>
+                ${bulanArr.map(k => `<label><input type="checkbox" class="pt-bulan-item" value="${k}" ${(!semuaChecked && ptSelectedBulan.has(k)) ? 'checked' : ''}> ${fmtBulanTahun(k)}</label>`).join('')}
+            `;
+            const btn = document.getElementById('ptBulanBtn');
+            if (btn) btn.textContent = ptBulanSummaryLabel(bulanArr);
+
+            const cbSemua = document.getElementById('ptBulanSemua');
+            if (cbSemua) {
+                cbSemua.addEventListener('change', () => {
+                    if (cbSemua.checked) ptSelectedBulan = new Set();
+                    userSetBulan.pt = true;
+                    ptRenderBulanPanel(bulanArr);
+                    ptPage = 1;
+                    ptRenderTempoTable();
+                });
+            }
+            panel.querySelectorAll('.pt-bulan-item').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    const checkedItems = Array.from(panel.querySelectorAll('.pt-bulan-item:checked')).map(c => c.value);
+                    ptSelectedBulan = new Set(checkedItems);
+                    userSetBulan.pt = true;
+                    ptRenderBulanPanel(bulanArr);
+                    ptPage = 1;
+                    ptRenderTempoTable();
+                });
+            });
+        }
+
         function ptRebuildFilterOptions() {
             const salesSet = new Set(),
                 bulanSet = new Set();
@@ -9027,17 +9135,18 @@
                     `<option value="${s}">${s}</option>`).join('');
                 fSales.value = curSales;
             }
-            const fBulan = document.getElementById('ptBulan');
-            const curBulan = fBulan ? fBulan.value : '';
-            if (fBulan) {
-                fBulan.innerHTML = '<option value="">Semua</option>' + Array.from(bulanSet).sort().map(k =>
-                    `<option value="${k}">${fmtBulanTahun(k)}</option>`).join('');
-                // Cek Piutang selalu default "Semua Bulan" (tidak auto pilih bulan berjalan),
-                // karena faktur yang statusnya "Sudah Lunas" umumnya berasal dari bulan-bulan
-                // sebelumnya (bukan bulan berjalan). Kalau bulan auto-terisi, filter Status
-                // bisa terlihat "tidak jalan / data kosong" padahal sebenarnya tersembunyi oleh filter Bulan.
-                fBulan.value = curBulan && bulanSet.has(curBulan) ? curBulan : '';
+            const bulanArr = Array.from(bulanSet).sort();
+            // Default "2 bulan terakhir" HANYA sekali di awal (saat pertama kali tab ini
+            // dimuat di sesi ini) — supaya piutang tempo bulan lalu yang baru lunas bulan
+            // ini tetap kelihatan tanpa perlu ganti-ganti filter tiap buka halaman.
+            if (!ptBulanDidDefault && bulanArr.length) {
+                ptSelectedBulan = new Set(bulanArr.slice(-2));
+                ptBulanDidDefault = true;
+            } else if (ptBulanDidDefault && ptSelectedBulan.size) {
+                // Buang bulan yang sudah tidak ada lagi di data (jaga-jaga data berubah)
+                ptSelectedBulan = new Set(Array.from(ptSelectedBulan).filter(k => bulanSet.has(k)));
             }
+            ptRenderBulanPanel(bulanArr);
             // Re-attach listeners after rebuilding options
             if (typeof attachPtFilterListeners === 'function') {
                 attachPtFilterListeners();
@@ -9048,7 +9157,7 @@
             const search = document.getElementById('ptSearch').value.trim().toLowerCase();
             const tanggalEl = document.getElementById('ptTanggal');
             const tanggal = tanggalEl ? tanggalEl.value : '';
-            const bulan = document.getElementById('ptBulan').value;
+            const bulanAktif = ptSelectedBulan; // Set kosong = Semua Bulan
             const sales = document.getElementById('ptSales').value;
             const kategori = document.getElementById('ptKategori').value;
             const status = ignoreStatus ? '' : document.getElementById('ptStatus').value;
@@ -9070,9 +9179,9 @@
                     return true;
                 }
                 
-                // NORMAL FILTER: Apply semua filter termasuk bulan
+                // NORMAL FILTER: Apply semua filter termasuk bulan (bisa lebih dari 1 bulan dicentang)
                 if (tanggal && String(r.tanggal || '') !== tanggal) return false;
-                if (bulan && String(r.tanggal || '').slice(0, 7) !== bulan) return false;
+                if (bulanAktif.size && !bulanAktif.has(String(r.tanggal || '').slice(0, 7))) return false;
                 if (sales && r.sales !== sales) return false;
                 if (kategori && r.kategori !== kategori) return false;
                 if (status === 'belum_gabungan') { 
@@ -9788,7 +9897,7 @@
         }
         const debouncedPtRender = debounce(() => { ptPage = 1;
             ptRenderTempoTable(); }, 300);
-        const ptFilterIds = ['ptSearch', 'ptTanggal', 'ptBulan', 'ptSales', 'ptKategori', 'ptStatus'];
+        const ptFilterIds = ['ptSearch', 'ptTanggal', 'ptSales', 'ptKategori', 'ptStatus'];
         
         function attachPtFilterListeners() {
             ptFilterIds.forEach(id => {
@@ -9802,17 +9911,30 @@
         }
         
         attachPtFilterListeners();
-        document.getElementById('ptBulan').addEventListener('change', () => { userSetBulan.pt = true; });
         document.getElementById('ptBtnReset').addEventListener('click', () => {
             document.getElementById('ptSearch').value = '';
             document.getElementById('ptTanggal').value = '';
-            document.getElementById('ptBulan').value = '';
+            ptSelectedBulan = new Set(); // Reset -> kembali ke "Semua Bulan"
             userSetBulan.pt = true;
+            const bulanArrReset = Array.from(new Set(salesData.filter(r => r.Tanggal).map(r => String(r.Tanggal).slice(0, 7)))).sort();
+            ptRenderBulanPanel(bulanArrReset);
             document.getElementById('ptSales').value = '';
             document.getElementById('ptKategori').value = '';
             document.getElementById('ptStatus').value = '';
             ptPage = 1;
             ptRenderTempoTable();
+        });
+        // Buka/tutup panel checkbox multi-bulan
+        document.getElementById('ptBulanBtn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            document.getElementById('ptBulanPanel').classList.toggle('show');
+        });
+        document.addEventListener('click', function(e) {
+            const panel = document.getElementById('ptBulanPanel');
+            const btn = document.getElementById('ptBulanBtn');
+            if (panel && panel.classList.contains('show') && !panel.contains(e.target) && e.target !== btn) {
+                panel.classList.remove('show');
+            }
         });
         document.getElementById('ptBtnRefresh').addEventListener('click', async () => { 
             await loadAllCashDataBeforePtRefresh();

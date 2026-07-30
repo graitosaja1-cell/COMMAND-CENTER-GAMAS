@@ -7785,11 +7785,60 @@
         }
 
         // ================================================================
+        // DETEKSI DUPLIKAT PERSIS: 2+ baris POSITIF dengan isi identik
+        // plek-ketiplek (faktur, tanggal, produk, jumlah, satuan, harga jual,
+        // harga beli, disc, total sama semua). Ini kasus terpisah dari
+        // "baris hantu" (pasangan minus/plus akibat edit faktur) — biasanya
+        // sisa bug duplikasi sinkronisasi lama. Untuk tiap kelompok duplikat,
+        // baris pertama dipertahankan sebagai "asli", sisanya ditandai untuk
+        // dibersihkan.
+        // ================================================================
+        function kunciDuplikatPersisSales(r) {
+            if (!r) return '';
+            return [
+                String(r['No.Faktur'] || '').trim().toUpperCase(),
+                String(r['Tanggal'] || '').trim(),
+                String(r['Produk'] || '').trim().toUpperCase(),
+                String(r.Jumlah),
+                String(r.Satuan || '').trim().toUpperCase(),
+                String(r['Harga Jual']),
+                String(r['Harga Beli']),
+                String(r.Disc),
+                String(r.Total)
+            ].join('|||');
+        }
+
+        function cariDuplikatPersisSales(rows) {
+            // Kumpulkan lokasi baris per kunci isi (hanya baris POSITIF;
+            // baris minus sudah ditangani terpisah oleh cariBarisHantuSales).
+            const lookup = new Map();
+            rows.forEach((r, idx) => {
+                const jml = Number(r.Jumlah);
+                if (!isFinite(jml) || jml <= 0) return;
+                const key = kunciDuplikatPersisSales(r);
+                if (!lookup.has(key)) lookup.set(key, []);
+                lookup.get(key).push(idx);
+            });
+
+            const duplicateIdx = [];      // semua baris berlebih (siap dihapus), 1 baris/kelompok dipertahankan
+            const duplicateGroups = [];   // detail per kelompok, untuk konfirmasi/laporan
+            lookup.forEach((idxList) => {
+                if (idxList.length > 1) {
+                    const [keepIdx, ...extraIdx] = idxList;
+                    duplicateGroups.push({ keepIdx, extraIdx });
+                    duplicateIdx.push(...extraIdx);
+                }
+            });
+            return { duplicateIdx, duplicateGroups };
+        }
+
+        // ================================================================
         // DETEKSI ANOMALI BANK DATA PENJUALAN (banner otomatis + modal detail)
         // Kategori yang dideteksi:
         //  - Baris hantu (pasangan minus/plus dari edit faktur) -> siap dibersihkan otomatis
         //  - Baris minus TANPA pasangan -> kemungkinan retur/void asli, perlu periksa manual
-        //  - Total transaksi minus (di luar 2 kategori di atas)
+        //  - Duplikat persis (2+ baris positif identik plek-ketiplek) -> siap dibersihkan otomatis
+        //  - Total transaksi minus (di luar kategori di atas)
         //  - Harga Jual kosong/0 padahal Jumlah > 0
         //  - Disc lebih besar dari nilai jual (Jumlah x Harga Jual), sehingga Total janggal
         // ================================================================
@@ -7826,10 +7875,16 @@
             // Baris hantu (toDeleteIdx) tetap otomatis dibersihkan tiap saat, tidak perlu ditandai.
             // Baris "minus tanpa pasangan" yang sudah pernah ditandai "sudah diperiksa" -> disaring keluar.
             const toFlagIdx = toFlagIdxMentah.filter(idx => !dismissed.has(buatKunciAnomaliSales(rows[idx])));
-            const ghostSet = new Set([...toDeleteIdx, ...toFlagIdxMentah]);
+
+            const { duplicateIdx: duplicateIdxMentah } = cariDuplikatPersisSales(rows);
+            // Sama seperti baris hantu, duplikat persis siap dibersihkan otomatis, tapi tetap
+            // dihormati kalau pernah ditandai "sudah diperiksa" (mis. memang disengaja).
+            const duplicateIdx = duplicateIdxMentah.filter(idx => !dismissed.has(buatKunciAnomaliSales(rows[idx])));
+
+            const ghostSet = new Set([...toDeleteIdx, ...toFlagIdxMentah, ...duplicateIdxMentah]);
             const totalMinus = [], hargaKosong = [], discBerlebih = [];
             rows.forEach((r, idx) => {
-                if (ghostSet.has(idx)) return; // sudah tercakup kategori baris hantu / minus tanpa pasangan
+                if (ghostSet.has(idx)) return; // sudah tercakup kategori baris hantu / minus tanpa pasangan / duplikat
                 if (dismissed.has(buatKunciAnomaliSales(r))) return; // sudah pernah ditandai "sudah diperiksa"
                 const jumlah = parseNumber(r.Jumlah);
                 const harga = parseNumber(r['Harga Jual']);
@@ -7839,12 +7894,12 @@
                 if (jumlah > 0 && (!isFinite(harga) || harga <= 0)) { hargaKosong.push(idx); return; }
                 if (isFinite(disc) && disc > 0 && isFinite(jumlah) && isFinite(harga) && disc > (jumlah * harga)) { discBerlebih.push(idx); return; }
             });
-            return { toDeleteIdx, toFlagIdx, totalMinus, hargaKosong, discBerlebih };
+            return { toDeleteIdx, toFlagIdx, duplicateIdx, totalMinus, hargaKosong, discBerlebih };
         }
 
         function totalAnomaliCount(result) {
-            return result.toDeleteIdx.length + result.toFlagIdx.length + result.totalMinus.length +
-                result.hargaKosong.length + result.discBerlebih.length;
+            return result.toDeleteIdx.length + result.toFlagIdx.length + result.duplicateIdx.length +
+                result.totalMinus.length + result.hargaKosong.length + result.discBerlebih.length;
         }
 
         function formatSalesAnomaliMsg(result) {
@@ -7853,6 +7908,7 @@
             const parts = [];
             if (result.toDeleteIdx.length) parts.push(`${result.toDeleteIdx.length} baris hantu (siap dibersihkan otomatis)`);
             if (result.toFlagIdx.length) parts.push(`${result.toFlagIdx.length} minus tanpa pasangan`);
+            if (result.duplicateIdx.length) parts.push(`${result.duplicateIdx.length} baris duplikat persis (siap dibersihkan otomatis)`);
             if (result.totalMinus.length) parts.push(`${result.totalMinus.length} Total transaksi minus`);
             if (result.hargaKosong.length) parts.push(`${result.hargaKosong.length} Harga Jual kosong/0`);
             if (result.discBerlebih.length) parts.push(`${result.discBerlebih.length} Disc lebih besar dari nilai jual`);
@@ -7928,6 +7984,7 @@
             let rowsHtml = '';
             result.toDeleteIdx.forEach(idx => rowsHtml += anomaliRowHtml(idx, '🧹 Baris Hantu (siap dibersihkan)'));
             result.toFlagIdx.forEach(idx => rowsHtml += anomaliRowHtml(idx, '⚠️ Minus tanpa pasangan'));
+            result.duplicateIdx.forEach(idx => rowsHtml += anomaliRowHtml(idx, '📋 Duplikat Persis (siap dibersihkan)'));
             result.totalMinus.forEach(idx => rowsHtml += anomaliRowHtml(idx, '🔻 Total minus'));
             result.hargaKosong.forEach(idx => rowsHtml += anomaliRowHtml(idx, '❓ Harga Jual kosong/0'));
             result.discBerlebih.forEach(idx => rowsHtml += anomaliRowHtml(idx, '❗ Disc > nilai jual'));
@@ -7937,6 +7994,7 @@
                 <p style="margin-bottom:10px;font-size:12px;color:#555;">
                     Ringkasan: <b>${result.toDeleteIdx.length}</b> baris hantu siap dibersihkan otomatis,
                     <b>${result.toFlagIdx.length}</b> baris minus tanpa pasangan (perlu periksa manual),
+                    <b>${result.duplicateIdx.length}</b> baris duplikat persis siap dibersihkan otomatis,
                     <b>${result.totalMinus.length}</b> Total transaksi minus,
                     <b>${result.hargaKosong.length}</b> baris Harga Jual kosong/0,
                     <b>${result.discBerlebih.length}</b> baris Disc lebih besar dari nilai jual.
@@ -7958,6 +8016,7 @@
                 <p style="margin:0 0 8px;font-size:11px;color:#666;">Centang baris yang sudah kamu periksa (misal retur/void yang sah): pilih <b>"✅ Tandai Sudah Diperiksa"</b> kalau datanya memang benar dan mau tetap disimpan di Bank Data Penjualan (tidak akan dideteksi lagi), atau <b>"🗑️ Pindah ke Sampah"</b> kalau datanya memang mau dikeluarkan (masih bisa dipulihkan dari tab Trash &amp; Save). Pengecekan berikutnya hanya akan menyorot data yang benar-benar baru.</p>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 ${result.toDeleteIdx.length ? `<button class="btn" id="btnBersihkanDariModalAnomali" style="background:#0d6efd;border-color:#0d6efd;">🧹 Bersihkan Baris Hantu Sekarang</button>` : ''}
+                ${result.duplicateIdx.length ? `<button class="btn" id="btnBersihkanDuplikatDariModalAnomali" style="background:#7c3aed;border-color:#7c3aed;">📋 Bersihkan Duplikat Sekarang</button>` : ''}
                 <button class="btn" id="btnAbaikanDariModalAnomali" style="background:#64748b;border-color:#64748b;">✅ Tandai Sudah Diperiksa (Terpilih)</button>
                 <button class="btn" id="btnPindahSampahDariModalAnomali" style="background:#b45309;border-color:#b45309;">🗑️ Pindah ke Sampah (Terpilih)</button>
                 </div>
@@ -7968,6 +8027,13 @@
                 btnBersihkanModal.addEventListener('click', function() {
                     document.getElementById('detailModalGlobal').classList.remove('show');
                     document.getElementById('btnBersihkanHantu').click();
+                });
+            }
+            const btnBersihkanDuplikatModal = document.getElementById('btnBersihkanDuplikatDariModalAnomali');
+            if (btnBersihkanDuplikatModal) {
+                btnBersihkanDuplikatModal.addEventListener('click', async function() {
+                    document.getElementById('detailModalGlobal').classList.remove('show');
+                    await bersihkanDuplikatPersisSales();
                 });
             }
             const selectAllCb = document.getElementById('anomaliSelectAllCheckbox');
@@ -8011,6 +8077,40 @@
                     const reasonInputEl = document.getElementById('confirmModalReasonInput');
                     if (reasonInputEl) reasonInputEl.value = 'Sudah diperiksa - retur/void sah';
                 });
+            }
+        }
+
+        // ================================================================
+        // PEMBERSIHAN DUPLIKAT PERSIS — dipanggil dari tombol di modal
+        // deteksi anomali. Untuk tiap kelompok baris identik plek-ketiplek,
+        // hanya baris pertama yang dipertahankan, sisanya dihapus.
+        // ================================================================
+        async function bersihkanDuplikatPersisSales() {
+            if (!salesData.length) { showToast('Tidak ada data di Bank Data Penjualan.', 'warning'); return; }
+
+            const { duplicateIdx, duplicateGroups } = cariDuplikatPersisSales(salesData);
+
+            if (!duplicateIdx.length) {
+                showToast('✅ Tidak ditemukan baris duplikat persis di Bank Data Penjualan.', 'success');
+                return;
+            }
+
+            const konfirmasi = `Ditemukan ${duplicateIdx.length} baris duplikat persis ` +
+                `(isi sama plek-ketiplek dengan baris lain) dari ${duplicateGroups.length} kelompok data.\n` +
+                `Untuk tiap kelompok, HANYA 1 baris yang akan DIPERTAHANKAN, sisanya akan DIHAPUS.\n\nLanjutkan?`;
+            if (!confirm(konfirmasi)) return;
+
+            // Hapus dari index terbesar ke terkecil supaya index baris lain tidak kacau
+            duplicateIdx.slice().sort((a, b) => b - a).forEach(idx => salesData.splice(idx, 1));
+
+            const okSave = await saveSalesData();
+            rebuildSalesFilterOptions();
+            salesCurrentDateIndex = Infinity;
+            renderSales();
+            checkAndShowSalesAnomaliBanner();
+
+            if (okSave) {
+                showToast(`📋 ${duplicateIdx.length} baris duplikat persis berhasil dihapus.`, 'success');
             }
         }
 

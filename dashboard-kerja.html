@@ -4250,6 +4250,7 @@
             <div class="actions">
                 <span class="data-baru-notif" id="cashDataBaruNotif" style="display:none;" title="Klik Muat Ulang untuk memperbarui tabel">🆕 Data baru masuk</span>
                 <button class="btn" id="cekBtnRefresh">🔄 Muat Ulang</button>
+                <button class="btn btn-outline" id="btnExportCekCash" title="Download data Cek Cash yang sedang tampil (sesuai filter aktif) sebagai file Excel">📥 Download Excel</button>
             </div>
         </div>
 
@@ -4317,6 +4318,9 @@
                         <div class="menu-item">
                             <button class="btn" id="ptBtnInputManual" style="flex:1;margin:0;">✍️ Input Manual</button>
                         </div>
+                        <div class="menu-item">
+                            <button class="btn btn-outline" id="ptBtnExportExcel" style="flex:1;margin:0;" title="Download data Cek Piutang yang sedang tampil (sesuai filter aktif) sebagai file Excel">📥 Download Excel</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -4372,6 +4376,7 @@
             <div class="action-inline">
                 <button class="btn" id="tagihanBtnRefresh">🔄 Refresh</button>
                 <button class="btn btn-outline" id="tagihanBtnPrint">🖨️ Cetak Semua</button>
+                <button class="btn btn-outline" id="tagihanBtnExportExcel" title="Download daftar faktur yang sedang tampil di Cetak Tagihan sebagai file Excel">📥 Download Excel</button>
                 <button class="btn btn-success" id="tagihanBtnKirimPembayaran">✅ Ditagihkan → Kirim ke Pembayaran</button>
                 <button class="btn btn-danger" id="tagihanBtnClearSelection">✖ Hapus Semua Pilihan</button>
             </div>
@@ -4483,6 +4488,9 @@
                                     </div>
                                     <div class="menu-item">
                                         <button class="btn btn-outline" id="btnResetHarian" style="flex:1;margin:0;"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                                    </div>
+                                    <div class="menu-item">
+                                        <button class="btn btn-outline" id="btnExportHarianExcel" style="flex:1;margin:0;" title="Download data Piutang Tempo &amp; Cash Dropping tanggal ini sebagai file Excel"><i class="bi bi-download"></i> Download Excel</button>
                                     </div>
                                 </div>
                             </div>
@@ -4895,6 +4903,9 @@
                     </div>
                     <div class="menu-item">
                         <button type="button" class="btn btn-outline" id="pengeluaranExportBtn" style="flex:1;margin:0;">📥 Export JSON</button>
+                    </div>
+                    <div class="menu-item">
+                        <button type="button" class="btn btn-outline" id="pengeluaranExportExcelBtn" style="flex:1;margin:0;" title="Download data Pengeluaran bulan yang sedang tampil sebagai file Excel">📥 Download Excel</button>
                     </div>
                     <div class="menu-item">
                         <button type="button" class="btn btn-outline" id="pengeluaranPrintBtn" style="flex:1;margin:0;">🖨️ Print / Cetak Laporan</button>
@@ -12091,6 +12102,217 @@
             XLSX.writeFile(wbOut, 'produk_harga_' + tgl + '.xlsx');
             showToast('📥 File Excel Produk & Harga berhasil di-download.', 'success');
         }
+
+        // ================================================================
+        // DOWNLOAD EXCEL — Cek Cash, Cek Piutang, Cetak Tagihan, Pembayaran,
+        // Pengeluaran. Masing-masing generate .xlsx dari data yang SEDANG
+        // TAMPIL (mengikuti filter/bulan/tanggal aktif di tab tersebut),
+        // bukan seluruh data mentah di database.
+        // ================================================================
+        function exportCekCashExcel() {
+            if (!cashTableFiltered.length) {
+                showToast('⚠️ Tidak ada data Cek Cash untuk di-download (sesuai filter aktif).', 'warning');
+                return;
+            }
+            const data = cashTableFiltered.map(d => ({
+                'No.Faktur': d['No.Faktur'] || '',
+                'Tanggal Transaksi': fmtTanggal(d.Tanggal),
+                'Customer': d.Customer || '',
+                'Alamat': d.Alamat || '',
+                'Sales': d.Sales || '',
+                'Kategori': (d.Produk || '').toLowerCase().includes('fitri') ? 'Minyak Fitri' : 'Rupa Rupa',
+                'Nominal': parseNumber(d.Total) || 0,
+                'Status': d._status === 'cocok' ? 'Lunas' : 'Belum Lunas'
+            }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            ws['!cols'] = [{ wch: 18 }, { wch: 14 }, { wch: 22 }, { wch: 22 }, { wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 14 }];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Cek Cash');
+            const filename = 'Cek_Cash_' + new Date().toISOString().slice(0, 10) + '.xlsx';
+            XLSX.writeFile(wb, filename);
+            showToast('📥 ' + filename + ' (' + data.length + ' baris)', 'success');
+        }
+
+        function exportCekPiutangExcel() {
+            const rows = ptGetFilteredTempo();
+            if (!rows.length) {
+                showToast('⚠️ Tidak ada data Cek Piutang untuk di-download (sesuai filter aktif).', 'warning');
+                return;
+            }
+            const data = rows.map(r => {
+                const sisaTagihan = ptSisaTagihanBaris(r);
+                const statusText = r.statusClass === 'lunas' ? 'Sudah Lunas' :
+                    (r.statusClass === 'overdue' && r.overdueDays != null ? `${r.overdueDays} Hari Overdue` : ptStatusLabel(r.statusClass));
+                return {
+                    'No.Faktur': r.noFaktur || '',
+                    'Tgl Transaksi': fmtTanggal(r.tanggal),
+                    'Customer': r.customer || '',
+                    'Alamat': r.alamat || '',
+                    'Sales': r.sales || '',
+                    'Kategori': r.kategori === 'fitri' ? 'Minyak Fitri' : 'Rupa Rupa',
+                    'Produk': r.produkNama || '',
+                    'Total Tagihan': parseNumber(r.total) || 0,
+                    'Total Dibayar': r.totalBayar != null ? parseNumber(r.totalBayar) : 0,
+                    'Sisa Tagihan': r.statusClass === 'lunas' ? 0 : sisaTagihan,
+                    'Jatuh Tempo': r.jt ? fmtTanggal(r.jt) : '',
+                    'Status': statusText,
+                    'Tgl Bayar': r.tanggalBayar || '',
+                    'Tgl Cetak Tagihan': cetakTagihanMap[r.noFaktur] || '',
+                    'Keterangan': r.ketRaw || ''
+                };
+            });
+            const ws = XLSX.utils.json_to_sheet(data);
+            ws['!cols'] = [{ wch: 18 }, { wch: 14 }, { wch: 22 }, { wch: 22 }, { wch: 12 }, { wch: 14 }, { wch: 20 },
+                { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 12 }, { wch: 18 }, { wch: 12 }, { wch: 16 }, { wch: 20 }];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Cek Piutang');
+            const filename = 'Cek_Piutang_' + new Date().toISOString().slice(0, 10) + '.xlsx';
+            XLSX.writeFile(wb, filename);
+            showToast('📥 ' + filename + ' (' + data.length + ' baris)', 'success');
+        }
+
+        function exportCetakTagihanExcel() {
+            const rows = window._tagihanSelectedRows || [];
+            if (!rows.length) {
+                showToast('⚠️ Belum ada faktur yang tampil di Cetak Tagihan untuk di-download.', 'warning');
+                return;
+            }
+            const data = rows.map((r, i) => {
+                const nominal = ptNominalTagih(r);
+                const produkNama = r.produk || r.produkNama || '';
+                const isFitri = produkNama.toLowerCase().includes('fitri');
+                const sumberLabel = r.tipe === 'cash' ? 'CASH' : 'PIUTANG';
+                const ket = (isFitri ? 'MINYAK' : 'RUPA2') + ' (' + sumberLabel + ')';
+                const produkDisplay = produkNama || (isFitri ? 'Minyak Fitri' : 'Rupa Rupa');
+                return {
+                    'NO': i + 1,
+                    'NO FAKTUR': r.noFaktur || '',
+                    'NAMA OUTLET': r.customer || '',
+                    'ALAMAT': r.alamat || '',
+                    'SALESMAN': r.sales || '',
+                    'PRODUK': produkDisplay,
+                    'TGL NOTA': fmtTanggal(r.tanggal),
+                    'TGL TEMPO': r.jt || '',
+                    'TAGIHAN': nominal,
+                    'KET': ket
+                };
+            });
+            const ws = XLSX.utils.json_to_sheet(data);
+            ws['!cols'] = [{ wch: 5 }, { wch: 18 }, { wch: 22 }, { wch: 22 }, { wch: 12 }, { wch: 20 }, { wch: 14 },
+                { wch: 14 }, { wch: 14 }, { wch: 18 }];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Cetak Tagihan');
+            const filename = 'Cetak_Tagihan_' + new Date().toISOString().slice(0, 10) + '.xlsx';
+            XLSX.writeFile(wb, filename);
+            showToast('📥 ' + filename + ' (' + data.length + ' baris)', 'success');
+        }
+
+        // Baca langsung dari input di tabel (bukan array data terpisah), karena Tab 7
+        // (Pembayaran/Input Harian) memang berupa form yang diedit manual per tanggal.
+        function bacaBarisInputHarian(tbodyId) {
+            const tbody = document.getElementById(tbodyId);
+            if (!tbody) return [];
+            const hasil = [];
+            tbody.querySelectorAll('tr').forEach(tr => {
+                const inputs = tr.querySelectorAll('input');
+                if (inputs.length < 13) return; // baris tidak lengkap/kosong, lewati
+                const [sales, noFaktur, namaToko, alamat, tglFaktur, jt, tagihan,
+                    cashMinyak, transferMinyak, cashRupa, transferRupa, ket, total] =
+                    Array.from(inputs).map(inp => inp.value.trim());
+                // Lewati baris yang benar-benar kosong (belum diisi sama sekali)
+                if (!noFaktur && !namaToko && !tagihan && !total) return;
+                hasil.push({ sales, noFaktur, namaToko, alamat, tglFaktur, jt, tagihan,
+                    cashMinyak, transferMinyak, cashRupa, transferRupa, ket, total });
+            });
+            return hasil;
+        }
+
+        function exportPembayaranHarianExcel() {
+            const piutangRows = bacaBarisInputHarian('piutangInputBody');
+            const cashRows = bacaBarisInputHarian('cashInputBody');
+            if (!piutangRows.length && !cashRows.length) {
+                showToast('⚠️ Belum ada data terisi di Piutang Tempo maupun Cash Dropping untuk tanggal ini.', 'warning');
+                return;
+            }
+            const kolom = (rows, labelSales) => rows.map(r => ({
+                [labelSales]: r.sales, 'NO FAKTUR': r.noFaktur, 'NAMA TOKO': r.namaToko, 'ALAMAT': r.alamat,
+                'TGL FAKTUR': r.tglFaktur, 'JT': r.jt, 'TAGIHAN/NOMINAL': r.tagihan,
+                'CASH (Minyak)': r.cashMinyak, 'TRANSFER (Minyak)': r.transferMinyak,
+                'CASH (Rupa-Rupa)': r.cashRupa, 'TRANSFER (Rupa-Rupa)': r.transferRupa,
+                'KET': r.ket, 'TOTAL': r.total
+            }));
+            const wsPiutang = XLSX.utils.json_to_sheet(kolom(piutangRows, 'SALES'));
+            const wsCash = XLSX.utils.json_to_sheet(kolom(cashRows, 'DROPPING/SALES'));
+            const colWidths = [{ wch: 14 }, { wch: 18 }, { wch: 20 }, { wch: 20 }, { wch: 12 }, { wch: 12 },
+                { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 16 }, { wch: 14 }];
+            wsPiutang['!cols'] = colWidths;
+            wsCash['!cols'] = colWidths;
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, wsPiutang, 'Piutang Tempo');
+            XLSX.utils.book_append_sheet(wb, wsCash, 'Cash Dropping');
+            const tglEl = document.getElementById('tanggalHarian');
+            const tglVal = (tglEl && tglEl.value) ? tglEl.value : new Date().toISOString().slice(0, 10);
+            const filename = 'Pembayaran_Harian_' + tglVal + '.xlsx';
+            XLSX.writeFile(wb, filename);
+            showToast('📥 ' + filename + ' berhasil di-download.', 'success');
+        }
+
+        function exportPengeluaranExcel() {
+            if (!pengeluaranFiltered.length) {
+                showToast('⚠️ Tidak ada data Pengeluaran untuk bulan ini.', 'warning');
+                return;
+            }
+            const rows = [];
+            let dayStartSaldo = 0;
+            pengeluaranFiltered.forEach(day => {
+                const list = (day.transaksi && day.transaksi.length) ? day.transaksi :
+                    [{ ket: day.keterangan || '', jumlah: 0, tipe: 'pengeluaran', kategori: 'kantor' }];
+                let cumMasuk = 0, sumKantor = 0, sumBurung = 0;
+                list.forEach((t, i) => {
+                    const isMasuk = t.tipe === 'masuk';
+                    const kategori = t.kategori === 'burung' ? 'burung' : 'kantor';
+                    if (isMasuk) cumMasuk += (t.jumlah || 0);
+                    else if (kategori === 'burung') sumBurung += (t.jumlah || 0);
+                    else sumKantor += (t.jumlah || 0);
+                    rows.push({
+                        'Tanggal': i === 0 ? fmtTanggal(day.tanggal) : '',
+                        'Keterangan': t.ket || '',
+                        'Masuk': isMasuk ? (t.jumlah || 0) : '',
+                        'Kantor': (!isMasuk && kategori === 'kantor') ? (t.jumlah || 0) : '',
+                        'Burung': (!isMasuk && kategori === 'burung') ? (t.jumlah || 0) : '',
+                        'Total Harian': '', 'Saldo': ''
+                    });
+                });
+                const dayTotal = sumKantor + sumBurung;
+                const dayEndSaldo = (day.saldo !== undefined && day.saldo !== null) ? day.saldo :
+                    (dayStartSaldo + cumMasuk - dayTotal);
+                rows.push({ 'Tanggal': '', 'Keterangan': 'TOTAL HARI INI', 'Masuk': '', 'Kantor': '', 'Burung': '',
+                    'Total Harian': dayTotal, 'Saldo': dayEndSaldo });
+                dayStartSaldo = dayEndSaldo;
+            });
+            const ws = XLSX.utils.json_to_sheet(rows);
+            ws['!cols'] = [{ wch: 12 }, { wch: 32 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 14 }];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Pengeluaran');
+            const filename = 'Pengeluaran_' + (pengeluaranBulan || new Date().toISOString().slice(0, 7)) + '.xlsx';
+            XLSX.writeFile(wb, filename);
+            showToast('📥 ' + filename + ' berhasil di-download.', 'success');
+        }
+
+        document.getElementById('btnExportCekCash').addEventListener('click', exportCekCashExcel);
+        document.getElementById('ptBtnExportExcel').addEventListener('click', function() {
+            document.getElementById('ptMenuDropdown').classList.remove('active');
+            exportCekPiutangExcel();
+        });
+        document.getElementById('tagihanBtnExportExcel').addEventListener('click', exportCetakTagihanExcel);
+        document.getElementById('btnExportHarianExcel').addEventListener('click', function() {
+            document.getElementById('harianMenuDropdown').classList.remove('active');
+            exportPembayaranHarianExcel();
+        });
+        document.getElementById('pengeluaranExportExcelBtn').addEventListener('click', function() {
+            document.getElementById('pgMenuDropdown').classList.remove('active');
+            exportPengeluaranExcel();
+        });
 
         function bukaModalProdukHarga() {
             _produkHargaWorking = loadProdukHargaMaster().slice().sort((a, b) =>

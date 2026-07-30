@@ -782,16 +782,13 @@
         .pt-bulan-btn:hover { border-color: #667eea; }
         .pt-bulan-panel {
             display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            margin-top: 4px;
+            position: fixed;
             background: #ffffff;
             border: 1.5px solid #667eea;
             border-radius: 8px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.14);
             padding: 6px;
-            z-index: 50;
+            z-index: 500;
             min-width: 175px;
             max-height: 240px;
             overflow-y: auto;
@@ -9924,18 +9921,40 @@
             ptPage = 1;
             ptRenderTempoTable();
         });
-        // Buka/tutup panel checkbox multi-bulan
+        // Buka/tutup panel checkbox multi-bulan. Panel pakai position:fixed (bukan
+        // absolute di dalam .filter-bar), karena .filter-bar punya overflow-x:auto
+        // yang akan memotong/menyembunyikan apapun yang meluber ke bawahnya.
+        function ptTutupBulanPanel() {
+            const panel = document.getElementById('ptBulanPanel');
+            if (panel) panel.classList.remove('show');
+        }
+        function ptPosisikanBulanPanel() {
+            const btn = document.getElementById('ptBulanBtn');
+            const panel = document.getElementById('ptBulanPanel');
+            if (!btn || !panel) return;
+            const rect = btn.getBoundingClientRect();
+            panel.style.top = (rect.bottom + 4) + 'px';
+            let left = rect.left;
+            const maxLeft = window.innerWidth - 180; // jaga-jaga supaya tidak keluar layar kanan
+            if (left > maxLeft) left = Math.max(4, maxLeft);
+            panel.style.left = left + 'px';
+        }
         document.getElementById('ptBulanBtn').addEventListener('click', function(e) {
             e.stopPropagation();
-            document.getElementById('ptBulanPanel').classList.toggle('show');
+            const panel = document.getElementById('ptBulanPanel');
+            const willOpen = !panel.classList.contains('show');
+            if (willOpen) { ptPosisikanBulanPanel(); panel.classList.add('show'); }
+            else { ptTutupBulanPanel(); }
         });
         document.addEventListener('click', function(e) {
             const panel = document.getElementById('ptBulanPanel');
             const btn = document.getElementById('ptBulanBtn');
             if (panel && panel.classList.contains('show') && !panel.contains(e.target) && e.target !== btn) {
-                panel.classList.remove('show');
+                ptTutupBulanPanel();
             }
         });
+        window.addEventListener('scroll', ptTutupBulanPanel, true);
+        window.addEventListener('resize', ptTutupBulanPanel);
         document.getElementById('ptBtnRefresh').addEventListener('click', async () => { 
             await loadAllCashDataBeforePtRefresh();
             await ptRefresh(true);

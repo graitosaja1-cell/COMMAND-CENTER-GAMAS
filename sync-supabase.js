@@ -301,6 +301,12 @@
             if (typeof renderSales === 'function') {
                 try { renderSales(); } catch (e) { /* abaikan error render sementara */ }
             }
+            // Cek ulang banner anomali juga tiap halaman, supaya kalau data yang
+            // baru ditarik dari cloud ternyata mengandung baris hantu/anomali,
+            // banner-nya langsung muncul tanpa perlu refresh manual.
+            if (typeof checkAndShowSalesAnomaliBanner === 'function') {
+                try { checkAndShowSalesAnomaliBanner(); } catch (e) { /* abaikan error sementara */ }
+            }
             // PENTING: simpan ke lokal per halaman juga (bukan cuma di akhir),
             // supaya kalau tab ditutup/koneksi putus di tengah, data yang
             // sudah masuk tidak hilang begitu saja.
@@ -368,6 +374,11 @@
             }
             if (typeof rebuildSalesFilterOptions === 'function') rebuildSalesFilterOptions();
             if (typeof renderSales === 'function') renderSales();
+            // Sama seperti render progresif per-halaman di atas: pastikan banner
+            // anomali ikut disegarkan begitu sync selesai, tidak menunggu refresh.
+            if (typeof checkAndShowSalesAnomaliBanner === 'function') {
+                try { checkAndShowSalesAnomaliBanner(); } catch (e) { /* abaikan error sementara */ }
+            }
             const pushRes = await pushSalesDeltaToCloud();
             const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
             setBadge('ok', '☁️ Sinkron · ' + now);

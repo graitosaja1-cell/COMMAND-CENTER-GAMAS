@@ -4245,6 +4245,7 @@
             <div class="field"><label>Sales</label><select id="ptSales"><option value="">Semua</option></select></div>
             <div class="field"><label>Kategori</label><select id="ptKategori"><option value="">Semua</option><option value="fitri">Minyak Fitri</option><option value="rupa">Rupa Rupa</option></select></div>
             <div class="field" style="min-width:170px;"><label>Status</label><select id="ptStatus"><option value="">Semua</option><option value="lunas">Sudah Lunas</option><option value="belum_gabungan">Belum Lunas (Semua)</option><option value="titip">🟠 Titip</option></select></div>
+            <div class="field" style="min-width:140px;"><label>Overdue</label><select id="ptOverdue"><option value="">Semua</option><option value="belumjt">Belum JT</option><option value="1-7">1–7 hari</option><option value="8-30">8–30 hari</option><option value="31plus">≥ 31 hari</option></select></div>
             <div class="field" style="justify-content:flex-end;"><label>&nbsp;</label><button class="btn btn-reset" id="ptBtnReset">↺ Reset</button></div>
             <div class="action-inline">
                 <span class="data-baru-notif" id="ptDataBaruNotif" style="display:none;" title="Klik Muat Ulang untuk memperbarui tabel">🆕 Data baru masuk</span>
@@ -9013,7 +9014,19 @@
             const sales = document.getElementById('ptSales').value;
             const kategori = document.getElementById('ptKategori').value;
             const status = ignoreStatus ? '' : document.getElementById('ptStatus').value;
-            
+            const overdueEl = document.getElementById('ptOverdue');
+            const overdue = ignoreStatus ? '' : (overdueEl ? overdueEl.value : '');
+
+            const cocokOverdue = (r) => {
+                if (!overdue) return true;
+                if (overdue === 'belumjt') return r.statusClass !== 'lunas' && r.overdueDays == null;
+                if (r.overdueDays == null) return false;
+                if (overdue === '1-7') return r.overdueDays >= 1 && r.overdueDays <= 7;
+                if (overdue === '8-30') return r.overdueDays >= 8 && r.overdueDays <= 30;
+                if (overdue === '31plus') return r.overdueDays >= 31;
+                return true;
+            };
+
             return ptBuildTempoRows().filter(r => {
                 // SEARCH FILTER: Bypass bulan filter jika ada search (cari di semua periode)
                 if (search) {
@@ -9023,6 +9036,7 @@
                     if (tanggal && String(r.tanggal || '') !== tanggal) return false;
                     if (sales && r.sales !== sales) return false;
                     if (kategori && r.kategori !== kategori) return false;
+                    if (!cocokOverdue(r)) return false;
                     if (status === 'belum_gabungan') { 
                         if (r.statusClass === 'lunas') return false; 
                     } else if (status === 'titip') {
@@ -9036,6 +9050,7 @@
                 if (bulan && String(r.tanggal || '').slice(0, 7) !== bulan) return false;
                 if (sales && r.sales !== sales) return false;
                 if (kategori && r.kategori !== kategori) return false;
+                if (!cocokOverdue(r)) return false;
                 if (status === 'belum_gabungan') { 
                     if (r.statusClass === 'lunas') return false; 
                 } else if (status === 'titip') {
@@ -9752,7 +9767,7 @@
         }
         const debouncedPtRender = debounce(() => { ptPage = 1;
             ptRenderTempoTable(); }, 300);
-        const ptFilterIds = ['ptSearch', 'ptTanggal', 'ptBulan', 'ptSales', 'ptKategori', 'ptStatus'];
+        const ptFilterIds = ['ptSearch', 'ptTanggal', 'ptBulan', 'ptSales', 'ptKategori', 'ptStatus', 'ptOverdue'];
         
         function attachPtFilterListeners() {
             ptFilterIds.forEach(id => {
@@ -9775,6 +9790,8 @@
             document.getElementById('ptSales').value = '';
             document.getElementById('ptKategori').value = '';
             document.getElementById('ptStatus').value = '';
+            const ptOverdueEl = document.getElementById('ptOverdue');
+            if (ptOverdueEl) ptOverdueEl.value = '';
             ptPage = 1;
             ptRenderTempoTable();
         });

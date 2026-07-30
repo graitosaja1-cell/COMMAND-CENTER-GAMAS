@@ -9952,7 +9952,9 @@
             const tglCetak = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2,
                 '0') + '/' + now.getFullYear();
             document.getElementById('tagihanTanggalCetak').textContent = tglCetak;
-            document.getElementById('tagihanJumlahTerpilih2').textContent = selectedRows.length + ' faktur';
+            const jumlahFakturUnikTampil = new Set(selectedRows.map(r => normFaktur(r.noFaktur))).size;
+            document.getElementById('tagihanJumlahTerpilih2').textContent = jumlahFakturUnikTampil + ' faktur' +
+                (selectedRows.length !== jumlahFakturUnikTampil ? ` (${selectedRows.length} item produk)` : '');
 
             const skipNotice = document.getElementById('tagihanLunasSkipNotice');
             if (skipNotice) {
@@ -10013,7 +10015,7 @@
             window._tagihanTotal = total;
 
             hitungDisetorkan();
-            document.getElementById('badgeTagihan').textContent = selectedRows.length;
+            document.getElementById('badgeTagihan').textContent = jumlahFakturUnikTampil;
         }
 
         function hitungDisetorkan() {
@@ -10065,7 +10067,10 @@
 
             document.getElementById('ptSendConfirmBody').innerHTML = html;
             document.getElementById('ptSendConfirmTotal').textContent = fmtRp(total);
-            document.getElementById('ptSendConfirmCount').textContent = selectedRows.length + ' faktur' +
+            const jumlahFakturUnikKonfirmasi = new Set(selectedRows.map(r => normFaktur(r.noFaktur))).size;
+            document.getElementById('ptSendConfirmCount').textContent = jumlahFakturUnikKonfirmasi + ' faktur' +
+                (selectedRows.length !== jumlahFakturUnikKonfirmasi ? ` (${selectedRows.length} item produk)` :
+                    '') +
                 (piutangLunasSkip.length > 0 ? ` (${new Set(piutangLunasSkip.map(r=>r.noFaktur)).size} faktur lunas dilewati)` : '');
             document.getElementById('ptSendConfirmModal').classList.add('show');
         }
@@ -10370,8 +10375,9 @@
                 showToast('Tidak ada faktur dipilih untuk ditagihkan.', 'warning');
                 return;
             }
+            const jumlahFakturUnikKirim = new Set(selectedRows.map(r => normFaktur(r.noFaktur))).size;
             if (!confirm(
-                    `Tandai ${selectedRows.length} faktur sebagai sudah ditagihkan dan kirim hasilnya ke tab Pembayaran? Pilihan di Cek Piutang / Cek Cash akan dikosongkan setelah ini.`
+                    `Tandai ${jumlahFakturUnikKirim} faktur${selectedRows.length !== jumlahFakturUnikKirim ? ` (${selectedRows.length} item produk)` : ''} sebagai sudah ditagihkan dan kirim hasilnya ke tab Pembayaran? Pilihan di Cek Piutang / Cek Cash akan dikosongkan setelah ini.`
                 )) return;
 
             let tgl = document.getElementById('tanggalHarian').value;
@@ -10429,7 +10435,7 @@
             updatePiutangSelectedInfo();
             updateCashSelectedInfo();
 
-            showToast(`✅ ${selectedRows.length} faktur ditagihkan & masuk ke Pembayaran (${tgl}).`, 'success');
+            showToast(`✅ ${jumlahFakturUnikKirim} faktur${selectedRows.length !== jumlahFakturUnikKirim ? ` (${selectedRows.length} item produk)` : ''} ditagihkan & masuk ke Pembayaran (${tgl}).`, 'success');
             switchTab('tab7');
         });
 

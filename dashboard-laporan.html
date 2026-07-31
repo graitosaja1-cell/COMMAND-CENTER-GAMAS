@@ -5670,11 +5670,50 @@
             rows.forEach(r => { const c=(r.Customer||'').trim().toLowerCase(); if(c) set.add(c); });
             return set;
         }
+        // Cari No.Faktur lain di Bank Data Penjualan yang mirip (typo 1-2 karakter), TAPI wajib
+        // customer & bulan-nya sama persis dulu. Dipakai sebagai fallback OTOMATIS (bukan cuma
+        // saran) supaya faktur yang No.Faktur-nya kepencet/typo kecil saat input, tapi transaksinya
+        // SUDAH ADA di tab Sales pada bulan yang sama, tetap bisa dipasangkan Modal-nya sendiri
+        // tanpa perlu dibetulkan manual satu-satu.
+        function cariFakturMiripSamaBulanCustomer(keyTarget, namaTokoNorm, refBulan){
+            if(!namaTokoNorm || !refBulan) return null;
+            let best=null, bestDist=Infinity;
+            salesByFakturRaw.forEach((rows, key) => {
+                if(key===keyTarget) return;
+                if(Math.abs(key.length-keyTarget.length)>3) return;
+                const customerMatch=rows.some(r=>(r.Customer||'').trim().toLowerCase()===namaTokoNorm);
+                if(!customerMatch) return;
+                const rowsBulanIni=rows.filter(r=>(r.Tanggal||'').slice(0,7)===refBulan);
+                if(!rowsBulanIni.length) return;
+                const dist=levenshteinDistance(keyTarget, key);
+                if(dist<bestDist){ bestDist=dist; best={key, rows:rowsBulanIni, dist}; }
+            });
+            if(best && best.dist<=2) return best;
+            return null;
+        }
         function cariSalesMatch(noFaktur, tglAcuan, namaTokoAcuan){
             const key=normFaktur(noFaktur);
             if(!key) return null;
-            const kandidat=salesByFakturRaw.get(key);
-            if(!kandidat || !kandidat.length) return null;
+            const namaTokoNorm=(namaTokoAcuan||'').trim().toLowerCase();
+            // KASUS LAMA: TOKO NUNUNG. Faktur-faktur lama toko ini tidak perlu lagi dicocokkan/
+            // dihitung Modal-nya (data lama, sudah tidak bisa dipastikan). Kalau ada pembayaran
+            // masuk, langsung dianggap Profit penuh (Modal dianggap 0) tanpa perlu cari di Bank
+            // Data Penjualan sama sekali.
+            if(namaTokoNorm.includes('nunung')){
+                return { produkSet:new Set(), hasFitri:false, salesName:'', modalTotal:0, modalAda:true, items:[] };
+            }
+            let kandidat=salesByFakturRaw.get(key);
+            const refKey=toDateKey(tglAcuan);
+            const refBulan=refKey?refKey.slice(0,7):'';
+            if(!kandidat || !kandidat.length){
+                // Fallback otomatis: cari No.Faktur mirip (typo kecil) dengan customer & bulan
+                // transaksi yang sama persis di Bank Data Penjualan (tab Sales). Ini menutup kasus
+                // No.Faktur di Piutang Tempo/Cash Dropping ketik-kepencet, padahal transaksinya
+                // sudah tercatat di tab Sales untuk bulan tersebut.
+                const mirip=cariFakturMiripSamaBulanCustomer(key, namaTokoNorm, refBulan);
+                if(!mirip) return null;
+                return agregasiBarisFaktur(mirip.rows);
+            }
             let dipakai=kandidat;
             // PENTING: No.Faktur bisa dipakai ulang untuk CUSTOMER YANG BERBEDA (mis. penomoran
             // reset tiap bulan). Kalau langsung digabung tanpa cek nama customer, Harga Beli
@@ -5682,7 +5721,6 @@
             // bikin Profit jadi salah total (bisa minus besar padahal sudah Lunas).
             // Jadi: kalau No.Faktur ini dipakai oleh lebih dari satu customer berbeda di Bank
             // Data Penjualan, wajib cocokkan dulu nama customer/toko-nya sebelum dipakai.
-            const namaTokoNorm=(namaTokoAcuan||'').trim().toLowerCase();
             const customerSet=distinctCustomers(kandidat);
             if(customerSet.size>1){
                 if(!namaTokoNorm) return null;
@@ -5690,12 +5728,10 @@
                 if(!samaCustomer.length) return null;
                 dipakai=samaCustomer;
             }
-            const refKey=toDateKey(tglAcuan);
             if(refKey){
                 const persisSama=dipakai.filter(r=>r.Tanggal===refKey);
                 if(persisSama.length) dipakai=persisSama;
                 else {
-                    const refBulan=refKey.slice(0,7);
                     const bulanSama=dipakai.filter(r=>(r.Tanggal||'').slice(0,7)===refBulan);
                     if(bulanSama.length) dipakai=bulanSama;
                 }

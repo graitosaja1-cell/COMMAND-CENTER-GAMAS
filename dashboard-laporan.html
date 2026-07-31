@@ -176,6 +176,10 @@
         .pt-card-item.pt-card-profit-missing { background:#fef2f2; border-color:#fecaca; border-left-color:#ef4444; }
         .pt-card-top { display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:2px; }
         .pt-card-top .faktur-link { font-size:11px; }
+        .pt-produk-box { margin:6px 0; padding:6px 8px; background:#f8fafc; border-radius:6px; }
+        .pt-produk-label { font-size:9px; font-weight:700; color:#64748b; margin-bottom:2px; }
+        .pt-produk-item { display:flex; justify-content:space-between; gap:6px; padding:2px 0; border-bottom:1px dashed #e2e8f0; color:#334155; }
+        .pt-produk-qty { white-space:nowrap; color:#475569; }
         .pt-card-row { display:flex; justify-content:space-between; gap:8px; font-size:10px; color:#64748b; }
         .pt-card-row span:last-child { font-weight:600; color:#1e293b; text-align:right; }
         .pt-card-row.highlight { border-top:1px dashed #e2e8f0; padding-top:5px; margin-top:2px; font-size:10.5px; }
@@ -1513,6 +1517,10 @@
     html.gamas-dark-mode .pt-card-row span:last-child { color:#e8ecf3 !important; }
     html.gamas-dark-mode .pt-card-row.highlight { border-top-color:#2a3346 !important; }
     html.gamas-dark-mode .pt-card-row.highlight span:first-child { color:#b7aefc !important; }
+    html.gamas-dark-mode .pt-produk-box { background:#0f1522 !important; }
+    html.gamas-dark-mode .pt-produk-label { color:#7c8aa5 !important; }
+    html.gamas-dark-mode .pt-produk-item { color:#dbe2ee !important; border-bottom-color:#232d40 !important; }
+    html.gamas-dark-mode .pt-produk-qty { color:#93a1ba !important; }
 
     /* ===== Menu dropdown ===== */
     html.gamas-dark-mode .menu-dropdown { background:#1a2233 !important; border-color:#3a4358 !important; }
@@ -6238,7 +6246,7 @@
         if(pageRows.length===0){ cardList.innerHTML='<div class="empty-msg">📂 Tidak ada data piutang tempo dari Data Uang Masuk.</div>'; return; }
         cardList.innerHTML=pageRows.map(d=>{
             const items=(Array.isArray(d.profitItems)&&d.profitItems.length>0)?d.profitItems:[{produk:d.produk||'-',qty:'',satuan:''}];
-            const produkListHtml=items.map(it=>`<div style="display:flex;justify-content:space-between;gap:6px;padding:2px 0;border-bottom:1px dashed #e2e8f0;"><span>${escapeHtml(it.produk||'-')}</span><span style="white-space:nowrap;color:#475569;">${it.qty!==''&&it.qty!=null?it.qty:''} ${it.satuan||''}</span></div>`).join('');
+            const produkListHtml=items.map(it=>`<div class="pt-produk-item"><span>${escapeHtml(it.produk||'-')}</span><span class="pt-produk-qty">${it.qty!==''&&it.qty!=null?it.qty:''} ${it.satuan||''}</span></div>`).join('');
             const profitMissing=(d.profit===''||d.profit==null);
             return `
             <div class="pt-card-item ${d.statusClass==='overdue'?'pt-card-overdue':''} ${profitMissing?'pt-card-profit-missing':''}" onclick="openPumDetail(${d._id})">
@@ -6250,8 +6258,8 @@
                 <div class="pt-card-row"><span>Sales</span><span>${d.sales||'-'}</span></div>
                 <div class="pt-card-row"><span>Tgl Transaksi</span><span>${d.tglFaktur||'-'}</span></div>
                 <div class="pt-card-row"><span>Jatuh Tempo</span><span>${d.jatuhTempo||'-'}${d.overdueDays!=null?` (${d.overdueDays} hr)`:''}</span></div>
-                <div style="margin:6px 0;padding:6px 8px;background:#f8fafc;border-radius:6px;">
-                    <div style="font-size:9px;font-weight:700;color:#64748b;margin-bottom:2px;">PRODUK</div>
+                <div class="pt-produk-box">
+                    <div class="pt-produk-label">PRODUK</div>
                     ${produkListHtml}
                 </div>
                 <div class="pt-card-row"><span>Total Tagihan</span><span>${fmtRp(d.tagihan)}</span></div>

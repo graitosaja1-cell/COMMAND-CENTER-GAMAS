@@ -5644,17 +5644,44 @@
         const todayPtUM=new Date(); todayPtUM.setHours(0,0,0,0);
 
         // Bangun lookup Produk, Kategori, Sales & Modal (Harga Beli x Qty) dari Bank Data Penjualan
-        // (salesData), dikelompokkan per No.Faktur MENTAH (belum diagregasi) supaya bisa dicocokkan
+        // (salesData) DIGABUNG dengan data yang di-upload/dicari user di tab Sales (allData, lewat
+        // window.getSalesBankData()). Sebelumnya cuma pakai salesData saja — padahal data yang
+        // benar-benar dipakai & dicari user sehari-hari ada di tab Sales, sehingga banyak faktur
+        // yang sebenarnya SUDAH ADA (terbukti ketemu saat dicari manual di tab Sales) tapi tetap
+        // gagal cocok otomatis di sini. Sekarang dua sumber ini digabung supaya konsisten dengan
+        // apa yang user lihat saat mencari No.Faktur/Nama Toko di tab Sales.
+        // Data dikelompokkan per No.Faktur MENTAH (belum diagregasi) supaya bisa dicocokkan
         // lebih ketat dengan tanggal transaksi. Ini penting karena No.Faktur bisa terpakai ulang di
         // bulan/periode berbeda — kalau langsung digabung per No.Faktur saja (tanpa tanggal), produk
         // & harga beli dari faktur nomor sama di bulan lain bisa ikut tercampur dan bikin Profit salah.
+        function _tglBarisKeISO(val){
+            if(val===undefined||val===null||val==='') return '';
+            if(typeof val==='string'){
+                if(/^\d{4}-\d{2}-\d{2}/.test(val)) return val.slice(0,10);
+                const dmy=val.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+                if(dmy) return dmy[3]+'-'+dmy[2].padStart(2,'0')+'-'+dmy[1].padStart(2,'0');
+                const cleaned=val.replace(/[^0-9\-:.\s]/g,'').trim();
+                const parsed=new Date(cleaned);
+                return isNaN(parsed)?'':parsed.toISOString().slice(0,10);
+            }
+            if(typeof val==='number'){
+                const d=new Date((val-25569)*86400*1000);
+                return isNaN(d)?'':d.toISOString().slice(0,10);
+            }
+            if(val instanceof Date && !isNaN(val)) return val.toISOString().slice(0,10);
+            return '';
+        }
         const salesByFakturRaw=new Map();
-        salesData.forEach(r => {
+        function _daftarkanBarisSales(r){
             const key=normFaktur(r['No.Faktur']);
             if(!key) return;
+            const tglIso=_tglBarisKeISO(r.Tanggal);
+            const rPakai=(tglIso && tglIso!==r.Tanggal)?Object.assign({},r,{Tanggal:tglIso}):r;
             if(!salesByFakturRaw.has(key)) salesByFakturRaw.set(key,[]);
-            salesByFakturRaw.get(key).push(r);
-        });
+            salesByFakturRaw.get(key).push(rPakai);
+        }
+        salesData.forEach(_daftarkanBarisSales);
+        _getSalesTabRows().forEach(_daftarkanBarisSales);
         // PENGAMAN ANTI-DUPLIKAT: kalau 1 No.Faktur punya baris yang PERSIS IDENTIK di Bank Data
         // Penjualan (Produk, Jumlah, Harga Jual, Harga Beli, Satuan & Tanggal semuanya sama persis),
         // itu hampir pasti hasil import Excel yang ke-upload dobel (bukan transaksi baru yang
@@ -5709,6 +5736,36 @@
             rows.forEach(r => { const c=(r.Customer||'').trim().toLowerCase(); if(c) set.add(c); });
             return set;
         }
+        function levenshteinDistance(a, b) {
+            const m = a.length, n = b.length;
+            if (m === 0) return n;
+            if (n === 0) return m;
+            let prev = new Array(n + 1);
+            for (let j = 0; j <= n; j++) prev[j] = j;
+            for (let i = 1; i <= m; i++) {
+                const cur = [i];
+                for (let j = 1; j <= n; j++) {
+                    const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+                    cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+                }
+                prev = cur;
+            }
+            return prev[n];
+        }
+        // Bandingkan 2 nama toko secara LONGGAR (typo-tolerant), bukan string persis sama.
+        // Dipakai di semua titik pencocokan customer supaya konsisten dengan pencarian di tab
+        // Sales (mis. nama toko "TOKO OKI SUBUR" tetap cocok dengan "TOKO OKO SUBUR" di data lain).
+        function namaTokoMirip(a, b){
+            if(!a || !b) return false;
+            if(a===b) return true;
+            const wa=a.split(/\s+/).filter(Boolean), wb=b.split(/\s+/).filter(Boolean);
+            if(!wa.length || !wb.length) return false;
+            return wa.every(w1 => wb.some(w2 => {
+                if(w1===w2 || w1.includes(w2) || w2.includes(w1)) return true;
+                const tol = w1.length<=4?1:(w1.length<=7?2:3);
+                return Math.abs(w1.length-w2.length)<=tol && levenshteinDistance(w1,w2)<=tol;
+            }));
+        }
         // Cari No.Faktur lain di Bank Data Penjualan yang mirip (typo 1-2 karakter), TAPI wajib
         // customer & bulan-nya sama persis dulu. Dipakai sebagai fallback OTOMATIS (bukan cuma
         // saran) supaya faktur yang No.Faktur-nya kepencet/typo kecil saat input, tapi transaksinya
@@ -5720,7 +5777,7 @@
             salesByFakturRaw.forEach((rows, key) => {
                 if(key===keyTarget) return;
                 if(Math.abs(key.length-keyTarget.length)>3) return;
-                const customerMatch=rows.some(r=>(r.Customer||'').trim().toLowerCase()===namaTokoNorm);
+                const customerMatch=rows.some(r=>namaTokoMirip((r.Customer||'').trim().toLowerCase(), namaTokoNorm));
                 if(!customerMatch) return;
                 const rowsBulanIni=rows.filter(r=>(r.Tanggal||'').slice(0,7)===refBulan);
                 if(!rowsBulanIni.length) return;
@@ -5759,11 +5816,12 @@
             // milik transaksi customer lain bisa ikut kehitung sebagai Modal faktur ini, dan
             // bikin Profit jadi salah total (bisa minus besar padahal sudah Lunas).
             // Jadi: kalau No.Faktur ini dipakai oleh lebih dari satu customer berbeda di Bank
-            // Data Penjualan, wajib cocokkan dulu nama customer/toko-nya sebelum dipakai.
+            // Data Penjualan, wajib cocokkan dulu nama customer/toko-nya sebelum dipakai (LONGGAR/
+            // typo-tolerant, bukan string persis sama).
             const customerSet=distinctCustomers(kandidat);
             if(customerSet.size>1){
                 if(!namaTokoNorm) return null;
-                const samaCustomer=kandidat.filter(r=>(r.Customer||'').trim().toLowerCase()===namaTokoNorm);
+                const samaCustomer=kandidat.filter(r=>namaTokoMirip((r.Customer||'').trim().toLowerCase(), namaTokoNorm));
                 if(!samaCustomer.length) return null;
                 dipakai=samaCustomer;
             }
@@ -5783,22 +5841,6 @@
         // Dipakai untuk kolom "Kemungkinan Penyebab" di modal Faktur Belum
         // Dihitung Profit, supaya user tidak perlu tebak-tebak sendiri.
         // ================================================================
-        function levenshteinDistance(a, b) {
-            const m = a.length, n = b.length;
-            if (m === 0) return n;
-            if (n === 0) return m;
-            let prev = new Array(n + 1);
-            for (let j = 0; j <= n; j++) prev[j] = j;
-            for (let i = 1; i <= m; i++) {
-                const cur = [i];
-                for (let j = 1; j <= n; j++) {
-                    const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-                    cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
-                }
-                prev = cur;
-            }
-            return prev[n];
-        }
         function diffPrefixSisa(a, b) {
             const maxI = Math.min(a.length, b.length);
             let i = 0;
@@ -5815,7 +5857,7 @@
                 const dist = levenshteinDistance(keyTarget, key);
                 if (dist < bestDist) { bestDist = dist; best = { key, rows, dist }; }
                 else if (dist === bestDist && best) {
-                    const custMatch = rows.some(r => (r.Customer || '').trim().toLowerCase() === namaTokoNorm);
+                    const custMatch = rows.some(r => namaTokoMirip((r.Customer || '').trim().toLowerCase(), namaTokoNorm));
                     if (custMatch) best = { key, rows, dist };
                 }
             });
@@ -5843,13 +5885,14 @@
             }
             const customerSet = distinctCustomers(kandidat);
             if (customerSet.size > 1) {
-                const cocok = namaTokoNorm && kandidat.some(r => (r.Customer || '').trim().toLowerCase() === namaTokoNorm);
+                const cocok = namaTokoNorm && kandidat.some(r => namaTokoMirip((r.Customer || '').trim().toLowerCase(), namaTokoNorm));
                 if (!cocok) {
                     return { type: 'customer_beda', namaTercatat: namaTokoAsli || '-', customerDitemukan: Array.from(customerSet).map(c => c || '-') };
                 }
             }
             return { type: 'harga_beli_kosong' };
         }
+
 
         // PRA-PASS: kalau 1 No.Faktur punya LEBIH DARI 1 baris di Data Uang Masuk PADA HARI/BATCH
         // YANG SAMA (mis. faktur dengan banyak item dicatat sebagai beberapa baris terpisah di

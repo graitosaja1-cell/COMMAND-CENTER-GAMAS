@@ -4171,8 +4171,8 @@
         </div>
         <div class="toolbar">
             <div class="toolbar-left">
-                <span class="label-cari">CARI FAKTUR</span>
-                <input type="text" id="cariFakturInput" placeholder="No Faktur...">
+                <span class="label-cari">CARI FAKTUR / TOKO</span>
+                <input type="text" id="cariFakturInput" placeholder="No Faktur atau nama toko...">
                 <button class="btn" id="cariFakturBtn">Cari</button>
                 <button class="btn btn-reset" id="resetCariBtn">✕ Reset</button>
             </div>
@@ -6355,8 +6355,9 @@
 
         // Cari faktur di SEMUA periode data (dari bulan paling awal sampai paling akhir yang ada di database),
         // tidak terpengaruh oleh filter bulan yang sedang aktif di layar.
-        async function cariFakturDiSemuaData(noFaktur) {
-            const target = noFaktur.trim();
+        async function cariFakturDiSemuaData(query) {
+            const target = query.trim();
+            const targetLower = target.toLowerCase();
             const merged = {};
             try {
                 const semuaRecord = await db.cashIncome.toArray();
@@ -6365,10 +6366,16 @@
             // Timpa dengan data di memori (mis. bulan yang sedang dibuka & belum tentu sudah tersimpan)
             for (const bulan in cashDataMap) { merged[bulan] = cashDataMap[bulan]; }
 
-            // Ambil catatan PALING BARU untuk nomor faktur ini (bukan yang pertama ketemu),
-            // supaya konsisten dengan tab Cek Piutang yang juga selalu pakai status terbaru.
+            // Boleh cari pakai No. Faktur (cocok persis) ATAU nama toko (cocok sebagian,
+            // tidak case-sensitive) — supaya kalau lupa nomor fakturnya, bisa ketik nama
+            // tokonya saja.
+            const cocok = (f) => f.noFaktur.trim() === target || (f.namaToko || '').toLowerCase().includes(targetLower);
+
+            // Ambil catatan PALING BARU yang cocok (bukan yang pertama ketemu), supaya
+            // konsisten dengan tab Cek Piutang yang juga selalu pakai status terbaru.
             // Ini penting kalau 1 faktur sempat dicatat lebih dari sekali (mis. awalnya "Titip",
-            // lalu diupdate jadi "Lunas" di tanggal lain).
+            // lalu diupdate jadi "Lunas" di tanggal lain), dan juga kalau pencarian nama toko
+            // menghasilkan beberapa faktur (ambil yang terbaru).
             let terbaru = null;
             for (const bulan of Object.keys(merged).sort()) {
                 const dataBulan = merged[bulan];
@@ -6377,11 +6384,11 @@
                     const dayPart = String(day.tanggal || '').split('-')[0].padStart(2, '0');
                     const sortKey = bulan + '-' + dayPart;
                     if (day.piutangDetail && Array.isArray(day.piutangDetail)) {
-                        const found = day.piutangDetail.find(f => f.noFaktur.trim() === target);
+                        const found = day.piutangDetail.find(cocok);
                         if (found && (!terbaru || sortKey >= terbaru.sortKey)) terbaru = { sumber: 'piutang', tanggalHari: day.tanggal, bulan, detail: found, sortKey };
                     }
                     if (day.cashDroppingDetail && Array.isArray(day.cashDroppingDetail)) {
-                        const found = day.cashDroppingDetail.find(f => f.noFaktur.trim() === target);
+                        const found = day.cashDroppingDetail.find(cocok);
                         if (found && (!terbaru || sortKey >= terbaru.sortKey)) terbaru = { sumber: 'dropping', tanggalHari: day.tanggal, bulan, detail: found, sortKey };
                     }
                 }
@@ -6391,9 +6398,9 @@
         document.getElementById('cariFakturBtn').addEventListener('click', async function() {
             const input = document.getElementById('cariFakturInput');
             const noFaktur = input.value.trim();
-            if (!noFaktur) { showToast('Masukkan nomor faktur.', 'warning'); return; }
+            if (!noFaktur) { showToast('Masukkan nomor faktur atau nama toko.', 'warning'); return; }
             const result = await cariFakturDiSemuaData(noFaktur);
-            if (!result) { showToast('Faktur "' + noFaktur + '" tidak ditemukan.', 'warning'); return; }
+            if (!result) { showToast('Faktur/toko "' + noFaktur + '" tidak ditemukan.', 'warning'); return; }
             const item = { tanggal: result.tanggalHari, piutangDetail: [], cashDroppingDetail: [] };
             if (result.sumber === 'piutang') { item.piutangDetail = [result.detail]; } else { item.cashDroppingDetail = [
                     result.detail

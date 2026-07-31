@@ -726,7 +726,7 @@
             min-width: 60px;
         }
         .filter-bar .field label {
-            font-size: 7px;
+            font-size: 11px;
             font-weight: 700;
             color: #667eea;
             text-transform: uppercase;
@@ -734,13 +734,13 @@
         }
         .filter-bar .field input,
         .filter-bar .field select {
-            padding: 6px 8px;
+            padding: 8px 10px;
             border: 1.5px solid #d1d5db;
             border-radius: 6px;
-            font-size: 9px;
+            font-size: 13.5px;
             font-family: inherit;
             background: #ffffff;
-            height: 28px;
+            height: 34px;
             min-width: 70px;
             width: 100%;
             transition: all 0.2s ease;
@@ -757,20 +757,20 @@
             background: #f0f4ff;
         }
         .filter-bar .field .btn {
-            height: 28px;
+            height: 34px;
             padding: 0 10px;
-            font-size: 9px;
+            font-size: 13px;
             margin-top: 2px;
         }
         /* Dropdown checkbox multi-bulan khusus Cek Piutang (#ptBulan) */
         .pt-bulan-btn {
-            padding: 6px 8px;
+            padding: 8px 10px;
             border: 1.5px solid #d1d5db;
             border-radius: 6px;
-            font-size: 9px;
+            font-size: 13.5px;
             font-family: inherit;
             background: #ffffff;
-            height: 28px;
+            height: 34px;
             width: 100%;
             text-align: left;
             cursor: pointer;
@@ -819,7 +819,7 @@
         html.gamas-dark-mode .pt-bulan-panel label:hover { background: #232d45 !important; }
         html.gamas-dark-mode .pt-bulan-panel .pt-bulan-sep { border-top-color: #3a4358 !important; }
         .filter-bar .info-right {
-            font-size: 9px;
+            font-size: 11px;
             font-weight: 600;
             color: #667eea;
             margin-left: auto;
@@ -866,11 +866,19 @@
             background: #fff;
             box-shadow: var(--shadow);
         }
+        /* Tab 4 (Cek Piutang): samakan tampilan wadah tabel dengan Cek Cash
+           (tanpa border tipis, sudut lebih membulat, shadow lebih tebal) supaya
+           bagian bawah tabel terlihat menyatu rapi dengan pagination di bawahnya. */
+        #tab4 .table-wrap {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
         .table-wrap table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            font-size: 0.65rem;
+            font-size: 13px;
             min-width: 480px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
@@ -880,10 +888,10 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #ffffff;
             text-align: left;
-            padding: 12px 8px;
-            font-size: 0.6rem;
+            padding: 10px 8px;
+            font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.2px;
             border-right: 1px solid rgba(255, 255, 255, 0.1);
             white-space: nowrap;
             font-weight: 700;
@@ -891,10 +899,10 @@
             border: none;
         }
         .table-wrap td {
-            padding: 10px 8px;
+            padding: 6px 8px;
             border-bottom: 1px solid #e8ecf4;
             white-space: nowrap;
-            font-size: 0.65rem;
+            font-size: 13px;
             background: #fafbfc;
             transition: all 0.2s ease;
         }
@@ -1624,7 +1632,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 16px;
+            padding: 8px 16px;
             font-size: 10px;
             flex-wrap: wrap;
             gap: 8px;
@@ -1639,13 +1647,13 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #fff;
             border: none;
-            padding: 6px 12px;
+            padding: 5px 12px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 9px;
             font-weight: 600;
             transition: all 0.2s ease;
-            height: 28px;
+            height: 24px;
             line-height: 1;
             box-shadow: 0 2px 6px rgba(102, 126, 234, 0.2);
         }
@@ -3817,7 +3825,7 @@
             min-width: 70px;
         }
         #tab3 .cash-filter-bar .field label {
-            font-size: 7px;
+            font-size: 11px;
             font-weight: 700;
             color: #4a5568;
             text-transform: uppercase;
@@ -3825,23 +3833,23 @@
         }
         #tab3 .cash-filter-bar .field input,
         #tab3 .cash-filter-bar .field select {
-            padding: 2px 6px;
+            padding: 8px 10px;
             border: 1px solid #d1d5db;
             border-radius: 4px;
-            font-size: 9px;
+            font-size: 13.5px;
             font-family: inherit;
             background: #fff;
-            height: 26px;
+            height: 34px;
             min-width: 70px;
             width: 100%;
         }
         #tab3 .cash-filter-bar .field .btn {
-            height: 26px;
+            height: 34px;
             padding: 0 10px;
-            font-size: 9px;
+            font-size: 13px;
         }
         #tab3 .cash-filter-bar .info-right {
-            font-size: 9px;
+            font-size: 11px;
             font-weight: 600;
             color: #475569;
             margin-left: auto;
@@ -3867,7 +3875,7 @@
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            font-size: 0.65rem;
+            font-size: 13px;
             min-width: 700px;
             border-radius: 12px;
         }
@@ -3877,10 +3885,10 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #ffffff;
             text-align: left;
-            padding: 12px 8px;
-            font-size: 0.6rem;
+            padding: 10px 8px;
+            font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.2px;
             border-right: 1px solid rgba(255, 255, 255, 0.1);
             white-space: nowrap;
             font-weight: 700;
@@ -3888,10 +3896,10 @@
             border: none;
         }
         #tab3 .cash-table-wrap td {
-            padding: 10px 8px;
+            padding: 6px 8px;
             border-bottom: 1px solid #e8ecf4;
             white-space: nowrap;
-            font-size: 0.65rem;
+            font-size: 13px;
             background: #fafbfc;
             transition: all 0.2s ease;
         }
@@ -4085,14 +4093,14 @@
             </div>
         </div>
         <div class="filter-bar">
-            <div class="field"><label>Cari Faktur</label><input type="text" id="fFakturSales" placeholder="cth: 011003260700046"></div>
-            <div class="field"><label>Produk</label><input type="text" id="fProdukSales" placeholder="cth: Indomie"></div>
+            <div class="field"><label>Cari Faktur / Toko</label><input type="text" id="fFakturSales" placeholder="No Faktur atau nama toko..."></div>
             <div class="field"><label>Sales</label><select id="fSalesSales"><option value="">Semua</option></select></div>
-            <div class="field"><label>Dari Tanggal</label><input type="date" id="fTanggalSalesFrom"></div>
-            <div class="field"><label>Sampai Tanggal</label><input type="date" id="fTanggalSalesTo"></div>
+            <div class="field"><label>Tanggal</label><input type="date" id="fTanggalSalesSingle"></div>
+            <input type="date" id="fTanggalSalesFrom" style="display:none;">
+            <input type="date" id="fTanggalSalesTo" style="display:none;">
             <div class="field"><label>Periode</label><select id="fBulanSales"><option value="">Semua</option></select></div>
             <div class="field"><label>Kategori</label><select id="fKategoriSales"><option value="">Semua</option><option value="Fitri">Fitri</option><option value="Rupa Rupa">Rupa Rupa</option></select></div>
-            <div class="field"><label>Pembayaran</label><select id="fPembayaranSales"><option value="">Semua</option><option value="Cash">Cash</option><option value="Tempo">Tempo</option></select></div>
+            <select id="fPembayaranSales" style="display:none;"><option value="">Semua</option><option value="Cash">Cash</option><option value="Tempo">Tempo</option></select>
             <div class="field" style="justify-content:flex-end;"><label>&nbsp;</label><button class="btn btn-reset" id="btnResetSales">↺ Reset</button></div>
             <span class="info-right" id="salesRangeLabel" style="display:none;">Belum ada data</span>
             <span class="sales-edit-hint">klik No Faktur untuk Edit Data Penjualan</span>
@@ -4355,6 +4363,11 @@
         <div class="pagination">
             <div><button id="ptPrevPage" disabled="">◀ Sebelumnya</button><span id="ptPageInfo">Halaman 1 dari 1</span><button id="ptNextPage" disabled="">Berikutnya ▶</button></div>
             <div><span class="badge-count" id="ptTotalData">0 data</span></div>
+        </div>
+
+        <div style="font-size:8px;color:#6b7280;margin-top:8px;text-align:center;border-top:1px solid #e5e9ef;padding-top:6px;">
+            💾 Data Piutang (Tempo) dari <strong>Bank Data Penjualan</strong> dicocokkan dengan status pembayaran di <strong>Data Uang Masuk</strong>.
+            Klik nomor faktur untuk melihat detail. Centang faktur lalu <strong>Kirim ke Cetak Tagihan</strong>.
         </div>
     </div>
 
@@ -7040,24 +7053,22 @@
 
         function getFilteredSales() {
             const faktur = document.getElementById('fFakturSales').value.trim().toLowerCase();
-            const produk = document.getElementById('fProdukSales').value.trim().toLowerCase();
             const sales = document.getElementById('fSalesSales').value;
             const tanggalFrom = document.getElementById('fTanggalSalesFrom').value;
             const tanggalTo = document.getElementById('fTanggalSalesTo').value;
             const bulan = document.getElementById('fBulanSales').value;
             const pembayaran = document.getElementById('fPembayaranSales').value;
             const kategori = document.getElementById('fKategoriSales').value;
-            const key = `${faktur}|${produk}|${sales}|${tanggalFrom}|${tanggalTo}|${bulan}|${pembayaran}|${kategori}`;
+            const key = `${faktur}|${sales}|${tanggalFrom}|${tanggalTo}|${bulan}|${pembayaran}|${kategori}`;
             if (filterCache.has(key)) return filterCache.get(key);
             
             const result = salesData.filter(r => {
-                // FILTER PRODUK: berlaku di semua mode (search faktur maupun normal)
-                if (produk && !((r.Produk || '').trim().toLowerCase().startsWith(produk))) return false;
-
-                // SEARCH FILTER: Bypass period filter (tanggal & bulan) jika ada search
+                // SEARCH FILTER (No.Faktur ATAU nama toko/Customer): Bypass period filter (tanggal & bulan) jika ada search
                 if (faktur) {
-                    if (!(r['No.Faktur'] || '').toLowerCase().includes(faktur)) return false;
-                    // Jika ada search faktur, apply sales, pembayaran, kategori tapi SKIP tanggal/bulan (range)
+                    const cocokFaktur = (r['No.Faktur'] || '').toLowerCase().includes(faktur);
+                    const cocokToko = (r.Customer || '').toLowerCase().includes(faktur);
+                    if (!cocokFaktur && !cocokToko) return false;
+                    // Jika ada search faktur/toko, apply sales, pembayaran, kategori tapi SKIP tanggal/bulan (range)
                     if (sales && r.Sales !== sales) return false;
                     if (pembayaran && r.Pembayaran !== pembayaran) return false;
                     if (kategori === 'Fitri' && !(r.Produk || '').toLowerCase().includes('fitri')) return false;
@@ -7519,7 +7530,7 @@
         }
         const debouncedRenderSales = debounce(() => { salesCurrentDateIndex = Infinity;
             renderSales(); }, 300);
-        ['fFakturSales', 'fProdukSales', 'fSalesSales', 'fTanggalSalesFrom', 'fTanggalSalesTo', 'fBulanSales',
+        ['fFakturSales', 'fSalesSales', 'fTanggalSalesFrom', 'fTanggalSalesTo', 'fBulanSales',
             'fPembayaranSales', 'fKategoriSales'
         ].forEach(
         id => {
@@ -7528,16 +7539,29 @@
                 el.addEventListener('change', debouncedRenderSales); }
         });
         document.getElementById('fBulanSales').addEventListener('change', () => { userSetBulan.sales = true; });
+        // Field "Tanggal" tunggal (gabungan Dari/Sampai Tanggal): isi kedua input
+        // tersembunyi (from & to) dengan tanggal yang sama supaya filter tetap
+        // berfungsi sebagai pencarian 1 hari, tanpa mengubah logic filter di bawah.
+        (function() {
+            const single = document.getElementById('fTanggalSalesSingle');
+            if (!single) return;
+            single.addEventListener('input', () => {
+                document.getElementById('fTanggalSalesFrom').value = single.value;
+                document.getElementById('fTanggalSalesTo').value = single.value;
+                salesCurrentDateIndex = Infinity;
+                debouncedRenderSales();
+            });
+        })();
         document.getElementById('salesPrevDate').addEventListener('click', () => { salesCurrentDateIndex--;
             renderSales(); });
         document.getElementById('salesNextDate').addEventListener('click', () => { salesCurrentDateIndex++;
             renderSales(); });
         document.getElementById('btnResetSales').addEventListener('click', () => {
             document.getElementById('fFakturSales').value = '';
-            document.getElementById('fProdukSales').value = '';
             document.getElementById('fSalesSales').value = '';
             document.getElementById('fTanggalSalesFrom').value = '';
             document.getElementById('fTanggalSalesTo').value = '';
+            document.getElementById('fTanggalSalesSingle').value = '';
             document.getElementById('fBulanSales').value = '';
             userSetBulan.sales = true;
             document.getElementById('fPembayaranSales').value = '';
@@ -11731,10 +11755,10 @@
                 if (rect.width === 0 && rect.height === 0) return;
                 const tabContent = wrap.closest('.tab-content');
                 const pagination = tabContent ? tabContent.querySelector(':scope > .pagination') : null;
-                let reserve = 6;
+                let reserve = 4;
                 if (pagination) {
                     const pRect = pagination.getBoundingClientRect();
-                    if (pRect.height > 0) reserve += pRect.height + 4;
+                    if (pRect.height > 0) reserve += pRect.height + 2;
                 }
                 const isTwoCol = !!wrap.closest('.two-col');
                 const minH = isTwoCol ? 200 : 260;

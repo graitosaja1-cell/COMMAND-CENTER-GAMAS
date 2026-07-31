@@ -2136,24 +2136,25 @@
         }
         .toast {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            top: 64px;
+            left: 50%;
             background: #2d3748;
             color: #fff;
             padding: 6px 16px;
             border-radius: var(--radius);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             font-size: 10px;
-            z-index: 100;
+            z-index: 10000;
             opacity: 0;
-            transform: translateY(16px);
+            transform: translate(-50%, -10px);
             transition: all 0.25s ease;
             pointer-events: none;
             max-width: 90vw;
+            text-align: center;
         }
         .toast.show {
             opacity: 1;
-            transform: translateY(0);
+            transform: translate(-50%, 0);
         }
         .toast.success {
             background: #1e7a46;
@@ -8994,11 +8995,18 @@
             if (fBulan) {
                 fBulan.innerHTML = '<option value="">Semua</option>' + Array.from(bulanSet).sort().map(k =>
                     `<option value="${k}">${fmtBulanTahun(k)}</option>`).join('');
-                // Cek Piutang selalu default "Semua Bulan" (tidak auto pilih bulan berjalan),
-                // karena faktur yang statusnya "Sudah Lunas" umumnya berasal dari bulan-bulan
-                // sebelumnya (bukan bulan berjalan). Kalau bulan auto-terisi, filter Status
-                // bisa terlihat "tidak jalan / data kosong" padahal sebenarnya tersembunyi oleh filter Bulan.
-                fBulan.value = curBulan && bulanSet.has(curBulan) ? curBulan : '';
+                // Saat pertama dibuka (belum pernah diubah user), Cek Piutang default ke
+                // bulan berjalan/terakhir (mis. Juli), sama seperti tab Sales & Cek Cash.
+                // Item yang masih "Titip"/belum lunas dari bulan sebelumnya tetap ikut tampil
+                // walau difilter ke bulan ini (lihat ptGetFilteredTempo), jadi filter bulan
+                // tidak lagi menyembunyikan piutang lama yang belum dibayar.
+                if (curBulan && bulanSet.has(curBulan)) {
+                    fBulan.value = curBulan;
+                } else if (!userSetBulan.pt && APP_DEFAULT_BULAN && bulanSet.has(APP_DEFAULT_BULAN)) {
+                    fBulan.value = APP_DEFAULT_BULAN;
+                } else {
+                    fBulan.value = '';
+                }
             }
             // Re-attach listeners after rebuilding options
             if (typeof attachPtFilterListeners === 'function') {
@@ -9047,7 +9055,15 @@
                 
                 // NORMAL FILTER: Apply semua filter termasuk bulan
                 if (tanggal && String(r.tanggal || '') !== tanggal) return false;
-                if (bulan && String(r.tanggal || '').slice(0, 7) !== bulan) return false;
+                if (bulan) {
+                    const rBulan = String(r.tanggal || '').slice(0, 7);
+                    // Faktur yang belum lunas (termasuk Titip) dianggap masih "nyangkut" sampai
+                    // dibayar, jadi tetap ikut tampil selama transaksinya di bulan filter atau
+                    // sebelumnya. Faktur yang sudah Lunas tetap dicocokkan persis ke bulan itu.
+                    if (r.statusClass !== 'lunas') {
+                        if (rBulan > bulan) return false;
+                    } else if (rBulan !== bulan) return false;
+                }
                 if (sales && r.sales !== sales) return false;
                 if (kategori && r.kategori !== kategori) return false;
                 if (!cocokOverdue(r)) return false;

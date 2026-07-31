@@ -2570,7 +2570,7 @@
         <div class="psfb-bar" id="filterBar">
             <div class="psfb-search">
                 <i class="bi bi-search"></i>
-                <input type="text" id="filterFaktur" placeholder="Cari No. Faktur..." />
+                <input type="text" id="filterFaktur" placeholder="Cari No. Faktur / Nama Toko..." />
             </div>
 
             <select id="filterPeriode" class="psfb-select" title="Periode"><option value="">Semua Bulan</option></select>
@@ -3308,6 +3308,39 @@
                 });
             }
 
+            // ========== Fuzzy/typo-tolerant text match (dipakai utk cari Nama Toko) ==========
+            // Supaya pencarian tetap ketemu walau ada typo kecil, misalnya ketik "oki"
+            // padahal nama toko aslinya "oko" (beda 1 huruf).
+            function levenshteinLocal(a, b) {
+                const m = a.length, n = b.length;
+                if (m === 0) return n;
+                if (n === 0) return m;
+                let prev = new Array(n + 1);
+                for (let j = 0; j <= n; j++) prev[j] = j;
+                for (let i = 1; i <= m; i++) {
+                    const cur = [i];
+                    for (let j = 1; j <= n; j++) {
+                        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+                        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+                    }
+                    prev = cur;
+                }
+                return prev[n];
+            }
+            function fuzzyIncludes(haystack, needle) {
+                if (!needle) return false;
+                if (!haystack) return false;
+                if (haystack.includes(needle)) return true; // cocok persis dulu, lebih cepat
+                const hWords = haystack.split(/\s+/).filter(Boolean);
+                const nWords = needle.split(/\s+/).filter(Boolean);
+                if (!nWords.length) return false;
+                return nWords.every(nw => {
+                    if (hWords.some(hw => hw.includes(nw))) return true; // substring per-kata
+                    const toleransi = nw.length <= 4 ? 1 : (nw.length <= 7 ? 2 : 3);
+                    return hWords.some(hw => Math.abs(hw.length - nw.length) <= toleransi && levenshteinLocal(hw, nw) <= toleransi);
+                });
+            }
+
             // ========== Apply Filters ==========
             function applyFilters() {
                 const qFaktur = filterFaktur.value.trim().toLowerCase();
@@ -3330,7 +3363,13 @@
                         if (qFaktur) {
                             const faktur = safeStr(row['No.Faktur'] || row['no.faktur'] || row['NO.FAKTUR'] || '')
                                 .toLowerCase();
-                            if (!faktur.includes(qFaktur)) return false;
+                            const customerNama = safeStr(row['Customer'] || row['CUSTOMER'] || row['customer'] || '')
+                                .toLowerCase();
+                            // Cocok kalau No.Faktur mengandung kata kunci PERSIS, ATAU nama toko
+                            // cocok (termasuk longgar/typo kecil, mis. "oki" vs "oko").
+                            const cocokFaktur = faktur.includes(qFaktur);
+                            const cocokToko = fuzzyIncludes(customerNama, qFaktur);
+                            if (!cocokFaktur && !cocokToko) return false;
                         }
 
                         const rawDate = row['Tanggal'] || row['tanggal'] || row['TANGGAL'] || '';
@@ -3372,7 +3411,7 @@
                     filteredData = sortByDateDesc(filteredData);
 
                     const parts = [];
-                    if (qFaktur) parts.push('No.Faktur');
+                    if (qFaktur) parts.push('No.Faktur/Toko');
                     if (tglDay || tglMonth || tglYear) parts.push('Tanggal');
                     if (sales) parts.push('Sales');
                     if (produk) parts.push('Produk');

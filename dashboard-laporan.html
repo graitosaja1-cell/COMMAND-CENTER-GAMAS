@@ -209,6 +209,10 @@
         .rk2-note-line + .rk2-note-line { margin-top:5px; }
         .rk2-note-line .ico { flex:0 0 auto; }
         .rk2-note-line b { font-weight:800; }
+        .rk2-note-clickable { cursor:pointer; border-radius:6px; margin:-3px -5px; padding:3px 5px; transition:background 0.15s ease; }
+        .rk2-note-clickable:hover { background:rgba(217,119,6,0.08); }
+        .rk2-note-link { color:#d97706; font-weight:800; text-decoration:underline; white-space:nowrap; margin-left:2px; }
+        .rk2-recon-line.rk2-note-clickable:hover { background:rgba(220,38,38,0.06); }
 
         .rk2-recon { background:#f8fafc; border:1px solid #e6eaf2; border-radius:14px; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:12px; }
         .rk2-recon-left { flex:1; min-width:260px; }
@@ -2002,7 +2006,7 @@
                 <div class="rk2-note-box orange">
                     <div class="rk2-note-line"><span class="ico">✅</span><span>Rasio Kolektibilitas: <b id="rk2CddRasio">0%</b></span></div>
                     <div class="rk2-note-line"><span class="ico">✅</span><span>Margin Profit: <b id="rk2CddMargin">0%</b> dari nominal faktur.</span></div>
-                    <div class="rk2-note-line"><span class="ico">⚠️</span><span>Selisih <b id="rk2CddSelisih">Rp 0</b> antara nominal vs uang masuk. (Cek potongan admin/kesalahan input)</span></div>
+                    <div class="rk2-note-line rk2-note-clickable" id="rk2CddSelisihLine"><span class="ico">⚠️</span><span>Selisih <b id="rk2CddSelisih">Rp 0</b> antara nominal vs uang masuk. (Cek potongan admin/kesalahan input) <span class="rk2-note-link">Lihat detail →</span></span></div>
                 </div>
             </div>
         </div>
@@ -2012,7 +2016,7 @@
             <div class="rk2-recon-left">
                 <div class="rk2-recon-title">🔄 Rekonsiliasi &amp; Catatan Kritis</div>
                 <div class="rk2-recon-line"><span>✅</span><span>Total Profit = Piutang (<b id="rk2ReconPt">Rp 0</b>) + Cash Drop (<b id="rk2ReconCdd">Rp 0</b>) = <b id="rk2ReconTotal">Rp 0</b> (sesuai).</span></div>
-                <div class="rk2-recon-line"><span>⚠️</span><span>Selisih Cash Dropping sebesar <b id="rk2ReconSelisih">Rp 0</b> perlu ditelusuri (biaya admin / potongan).</span></div>
+                <div class="rk2-recon-line rk2-note-clickable" id="rk2ReconSelisihLine"><span>⚠️</span><span>Selisih Cash Dropping sebesar <b id="rk2ReconSelisih">Rp 0</b> perlu ditelusuri (biaya admin / potongan). <span class="rk2-note-link">Lihat detail →</span></span></div>
                 <div class="rk2-recon-line"><span>🔴</span><span>Outstanding Piutang <b id="rk2ReconOutstanding">Rp 0</b> (<b id="rk2ReconOutstandingPct">0%</b>) — tim penagihan difokuskan di awal <b id="rk2ReconNextMonth">bulan depan</b>.</span></div>
             </div>
             <button type="button" class="rk2-recon-btn">✅ Rekonsiliasi Selesai</button>
@@ -4434,6 +4438,32 @@
                 <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; font-size:11px; color:#92400e;">
                     💡 <strong>Tips:</strong> supaya lebih apple-to-apple, samakan dulu periode filter (Tanggal/Bulan) di kedua tab sebelum membandingkan angkanya.
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="rk2SelisihModal">
+        <div class="modal-box" style="max-width:820px;">
+            <div class="modal-head"><h2>⚠️ Daftar Faktur Penyumbang Selisih Cash Dropping</h2><button class="modal-close" id="rk2SelisihClose">✕</button></div>
+            <div class="modal-body">
+                <div id="rk2SelisihInfo" style="font-size:11px; color:#64748b; margin-bottom:10px; line-height:1.6;"></div>
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse:collapse; font-size:11px;">
+                        <thead>
+                            <tr style="background:#f8fafc;">
+                                <th style="padding:6px 8px; border:1px solid #e2e8f0; text-align:left;">No. Faktur</th>
+                                <th style="padding:6px 8px; border:1px solid #e2e8f0; text-align:left;">Customer</th>
+                                <th style="padding:6px 8px; border:1px solid #e2e8f0; text-align:left;">Sales</th>
+                                <th style="padding:6px 8px; border:1px solid #e2e8f0; text-align:right;">Nominal</th>
+                                <th style="padding:6px 8px; border:1px solid #e2e8f0; text-align:right;">Uang Masuk</th>
+                                <th style="padding:6px 8px; border:1px solid #e2e8f0; text-align:right;">Selisih</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rk2SelisihTbody"></tbody>
+                        <tfoot id="rk2SelisihTfoot"></tfoot>
+                    </table>
+                </div>
+                <div id="rk2SelisihEmpty" style="display:none; text-align:center; padding:24px; color:#94a3b8; font-size:12px;">✅ Tidak ada selisih pada periode ini — semua faktur sudah sesuai.</div>
             </div>
         </div>
     </div>
@@ -7256,6 +7286,62 @@
         rkLapRender();
         showToast('🔄 Ringkasan dimuat ulang.', 'success');
     });
+
+    // ----- Modal: daftar faktur penyumbang selisih Cash Dropping (nominal vs uang masuk) -----
+    function rk2OpenSelisihModal() {
+        const sel = document.getElementById('rkLapBulan');
+        const bulan = sel ? sel.value : '';
+        const bulanLabel = bulan ? fmtBulanTahun(bulan) : '-';
+        const rows = (cashDroppingUangMasukData || []).filter(d => d._bulan === bulan);
+        const list = rows.map(d => {
+            const nominal = parseNumber(d.tagihan) || 0;
+            const masuk = (parseNumber(d.bayarCash) || 0) + (parseNumber(d.bayarTransfer) || 0);
+            const diff = nominal - masuk;
+            return { d, nominal, masuk, diff };
+        }).filter(r => Math.abs(r.diff) >= 1)
+          .sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff));
+
+        const tbody = document.getElementById('rk2SelisihTbody');
+        const tfoot = document.getElementById('rk2SelisihTfoot');
+        const empty = document.getElementById('rk2SelisihEmpty');
+        const info = document.getElementById('rk2SelisihInfo');
+
+        info.innerHTML = `Periode <b>${bulanLabel}</b> &nbsp;·&nbsp; <b>${list.length}</b> dari ${rows.length} faktur Cash Dropping punya selisih antara nominal faktur dan uang yang benar-benar masuk (Cash + Transfer). Klik <b>No. Faktur</b> untuk lihat detail lengkap.`;
+
+        if (!list.length) {
+            tbody.innerHTML = '';
+            tfoot.innerHTML = '';
+            empty.style.display = 'block';
+        } else {
+            empty.style.display = 'none';
+            let totalNominal = 0, totalMasuk = 0, totalDiff = 0;
+            tbody.innerHTML = list.map(r => {
+                totalNominal += r.nominal; totalMasuk += r.masuk; totalDiff += r.diff;
+                const diffColor = r.diff > 0 ? '#dc2626' : '#0d8a5f';
+                const diffSign = r.diff > 0 ? '−' : '+';
+                return `<tr>
+                    <td style="padding:6px 8px;border:1px solid #e2e8f0;"><span class="faktur-link" style="cursor:pointer;color:#4338ca;font-weight:700;" onclick="document.getElementById('rk2SelisihModal').classList.remove('show'); openPumDetail(${r.d._id}, 'cash');">${escapeHtml(r.d.noFaktur || '-')}</span></td>
+                    <td style="padding:6px 8px;border:1px solid #e2e8f0;">${escapeHtml(r.d.namaToko || '-')}</td>
+                    <td style="padding:6px 8px;border:1px solid #e2e8f0;">${escapeHtml(r.d.sales || '-')}</td>
+                    <td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;">${fmtRp(r.nominal)}</td>
+                    <td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;">${fmtRp(r.masuk)}</td>
+                    <td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;color:${diffColor};font-weight:800;">${diffSign} ${fmtRp(Math.abs(r.diff))}</td>
+                </tr>`;
+            }).join('');
+            tfoot.innerHTML = `<tr style="background:#f8fafc;font-weight:800;">
+                <td style="padding:6px 8px;border:1px solid #e2e8f0;" colspan="3">Total</td>
+                <td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;">${fmtRp(totalNominal)}</td>
+                <td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;">${fmtRp(totalMasuk)}</td>
+                <td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;color:${totalDiff>0?'#dc2626':'#0d8a5f'};">${fmtRp(Math.abs(totalDiff))}</td>
+            </tr>`;
+        }
+        document.getElementById('rk2SelisihModal').classList.add('show');
+    }
+    function closeRk2SelisihModal() { document.getElementById('rk2SelisihModal').classList.remove('show'); }
+    document.getElementById('rk2CddSelisihLine').addEventListener('click', rk2OpenSelisihModal);
+    document.getElementById('rk2ReconSelisihLine').addEventListener('click', rk2OpenSelisihModal);
+    document.getElementById('rk2SelisihClose').addEventListener('click', closeRk2SelisihModal);
+    document.getElementById('rk2SelisihModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeRk2SelisihModal(); });
 
 
     // Event listeners Tab 9

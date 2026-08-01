@@ -313,15 +313,86 @@ addToggleButton();
 
 // ====================== HITUNG RINGKASAN ======================
 const IDB_NAME = 'GajahMas2026DB';
-
-function openIdbReadonly() {
-    return new Promise((resolve, reject) => {
-        const req = indexedDB.open(IDB_NAME);
-        req.onsuccess = e => resolve(e.target.result);
-        req.onerror = e => reject(e.target.error || new Error('Gagal membuka data'));
-        req.onupgradeneeded = () => {};
+// PENTING: skema & versi ini HARUS SAMA PERSIS dengan dashboard-kerja.html,
+// supaya keduanya berbagi satu database fisik yang sama di browser, dan
+// supaya halaman mana pun yang PERTAMA KALI dibuka di suatu device tetap
+// membuat SEMUA object store yang dibutuhkan (bukan cuma sebagian) — kalau
+// tidak, saat dashboard-kerja.html dibuka belakangan dengan versi yang
+// sama, upgrade tidak akan terpicu lagi dan store yang ia butuhkan bisa
+// hilang.
+const IDB_VERSION = 2;
+const IDB_STORES = ['sales', 'cashIncome', 'printHistory', 'trash', 'piutangNotes', 'cashNotes', 'cetakTagihanMap', 'inputHarian', 'pengeluaran'];
+const IDB_INDEXES = {
+    cashIncome: ['bulan'],
+    pengeluaran: ['bulan'],
+    piutangNotes: ['noFaktur'],
+    cetakTagihanMap: ['noFaktur'],
+    cashNotes: ['noFaktur'],
+    inputHarian: ['tanggal']
+};
+let _idbPromise = null;
+function openIdb() {
+    if (_idbPromise) return _idbPromise;
+    _idbPromise = new Promise((resolve, reject) => {
+        const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+        req.onupgradeneeded = function (e) {
+            const dbi = e.target.result;
+            const tx = e.target.transaction;
+            IDB_STORES.forEach(function (name) {
+                let store;
+                if (!dbi.objectStoreNames.contains(name)) {
+                    store = dbi.createObjectStore(name, { keyPath: 'id', autoIncrement: true });
+                } else {
+                    store = tx.objectStore(name);
+                }
+                (IDB_INDEXES[name] || []).forEach(function (field) {
+                    if (!store.indexNames.contains(field)) {
+                        store.createIndex(field, field, { unique: false });
+                    }
+                });
+            });
+        };
+        req.onsuccess = function (e) { resolve(e.target.result); };
+        req.onerror = function (e) { reject(e.target.error || new Error('Gagal membuka IndexedDB')); };
     });
+    return _idbPromise;
 }
+
+// Wrapper kecil ala Dexie di atas IndexedDB mentah — bentuknya SENGAJA
+// dibuat identik dengan yang ada di dashboard-kerja.html/dashboard-
+// laporan.html, karena inilah "kontrak" (db.sales, db.cashIncome, dst)
+// yang dipakai oleh sync-supabase.js & sync-cash-income-supabase.js.
+class LocalTable {
+    constructor(name) { this.name = name; }
+    async _store(mode) { const dbi = await openIdb(); return dbi.transaction(this.name, mode).objectStore(this.name); }
+    async add(obj) { const store = await this._store('readwrite'); return new Promise((resolve, reject) => { const req = store.add(obj); req.onsuccess = () => resolve(req.result); req.onerror = () => reject(req.error); }); }
+    async bulkAdd(arr) { if (!arr || !arr.length) return; const store = await this._store('readwrite'); return new Promise((resolve, reject) => { let i = 0; function next() { if (i >= arr.length) { resolve(); return; } const req = store.add(arr[i]); i++; req.onsuccess = next; req.onerror = () => reject(req.error); } next(); }); }
+    async toArray() { const store = await this._store('readonly'); return new Promise((resolve, reject) => { const req = store.getAll(); req.onsuccess = () => resolve(req.result); req.onerror = () => reject(req.error); }); }
+    async count() { const store = await this._store('readonly'); return new Promise((resolve, reject) => { const req = store.count(); req.onsuccess = () => resolve(req.result); req.onerror = () => reject(req.error); }); }
+    async clear() { const store = await this._store('readwrite'); return new Promise((resolve, reject) => { const req = store.clear(); req.onsuccess = () => resolve(); req.onerror = () => reject(req.error); }); }
+    async delete(id) { const store = await this._store('readwrite'); return new Promise((resolve, reject) => { const req = store.delete(id); req.onsuccess = () => resolve(); req.onerror = () => reject(req.error); }); }
+    async update(id, changes) { const store = await this._store('readwrite'); return new Promise((resolve, reject) => { const getReq = store.get(id); getReq.onsuccess = () => { const existing = getReq.result; if (!existing) { resolve(); return; } const updated = Object.assign({}, existing, changes, { id: id }); const putReq = store.put(updated); putReq.onsuccess = () => resolve(); putReq.onerror = () => reject(putReq.error); }; getReq.onerror = () => reject(getReq.error); }); }
+    where(field) { return { equals: (value) => ({ first: async () => {
+        const store = await this._store('readonly');
+        const matches = await new Promise((resolve, reject) => {
+            if (store.indexNames.contains(field)) {
+                const req = store.index(field).getAll(value);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            } else {
+                const req = store.getAll();
+                req.onsuccess = () => resolve(req.result.filter(row => row[field] === value));
+                req.onerror = () => reject(req.error);
+            }
+        });
+        if (!matches.length) return undefined;
+        if (matches.length > 1) matches.sort((a, b) => String(b.tanggal || '').localeCompare(String(a.tanggal || '')));
+        return matches[0];
+    } }) }; }
+}
+const NAMA_TABEL = ['sales', 'cashIncome', 'printHistory', 'trash', 'piutangNotes', 'cashNotes', 'cetakTagihanMap', 'inputHarian'];
+const db = {};
+NAMA_TABEL.forEach(nama => { db[nama] = new LocalTable(nama); });
 
 function getAllFromStore(dbi, storeName) {
     return new Promise((resolve) => {
@@ -332,6 +403,44 @@ function getAllFromStore(dbi, storeName) {
         req.onerror = () => resolve([]);
     });
 }
+
+// ================================================================
+// JEMBATAN KE sync-supabase.js & sync-cash-income-supabase.js
+// ================================================================
+// Kedua file itu awalnya ditulis untuk dashboard-kerja.html: mereka
+// menempel ke variabel/fungsi global berikut untuk bisa menarik (pull)
+// & mengirim (push) data dari/ke Supabase secara otomatis begitu
+// halaman dibuka. INILAH INTI PERBAIKANNYA — sebelumnya Ringkasan tidak
+// memasang script sync ini sama sekali, jadi dia hanya membaca apa pun
+// yang KEBETULAN sudah ada di IndexedDB lokal device tsb (baru terisi
+// kalau Dashboard Kerja pernah dibuka duluan di device yang sama).
+// Ringkasan ini read-only, jadi loadCashData/saveCashData cukup versi
+// kosong — yang penting fungsinya ADA supaya sync-nya mau otomatis jalan.
+let salesData = [];
+let cashDataMap = {};
+
+async function loadSalesData() {
+    salesData = await db.sales.toArray();
+}
+async function saveSalesData() {
+    try {
+        await db.sales.clear();
+        if (salesData.length) await db.sales.bulkAdd(salesData);
+        return true;
+    } catch (e) {
+        console.warn('[ringkasan] gagal menyimpan salesData ke lokal:', e);
+        return false;
+    }
+}
+async function loadCashData() { /* no-op: sync-cash-income-supabase.js yang mengisi db.cashIncome */ }
+async function saveCashData() { /* no-op: Ringkasan tidak pernah mengedit data */ }
+
+// Dipanggil otomatis oleh kedua script sync setiap kali ada data baru
+// dari cloud (baik saat load pertama maupun saat auto-sync tiap 20 detik)
+// — supaya kartu-kartu di Ringkasan ikut refresh sendiri tanpa perlu
+// reload manual.
+function renderSales() { refreshRingkasan(); }
+function renderPemasukan() { refreshRingkasan(); }
 
 function parseNumber(v) {
     if (v === null || v === undefined || v === '') return 0;
@@ -379,9 +488,9 @@ function ukuranBotol(produk) {
 }
 
 async function hitungRingkasan() {
-    const dbi = await openIdbReadonly();
-    const salesData = await getAllFromStore(dbi, 'sales');
-    const cashRecords = await getAllFromStore(dbi, 'cashIncome');
+    // salesData sudah dimuat & disinkronkan lewat loadSalesData() (dibungkus
+    // sync-supabase.js) — lihat startRingkasanInit() di bagian bawah.
+    const cashRecords = await db.cashIncome.toArray();
 
     if (!salesData.length) return null;
 
@@ -592,7 +701,7 @@ function escHtml(s) {
     return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 }
 
-(async function init() {
+async function refreshRingkasan() {
     try {
         const data = await hitungRingkasan();
         render(data);
@@ -600,9 +709,46 @@ function escHtml(s) {
         console.error(e);
         document.getElementById('statusText').textContent = 'Gagal memuat data';
         document.getElementById('content').innerHTML =
-            `<div class="card empty-state"><div class="ic">⚠️</div><div>Terjadi kesalahan saat membaca data. Coba buka <a href="dashboard-kerja.html">Dashboard Kerja</a> lalu kembali lagi ke sini.</div></div>`;
+            `<div class="card empty-state"><div class="ic">⚠️</div><div>Terjadi kesalahan saat membaca data. Coba refresh halaman ini sebentar lagi, atau buka <a href="dashboard-kerja.html">Dashboard Kerja</a> lalu kembali lagi ke sini.</div></div>`;
     }
-})();
+}
+
+// ====================== INIT (setelah script sync terpasang) ======================
+// loadSalesData()/loadCashData() yang dipanggil di sini BUKAN lagi versi
+// polos di atas — begitu sync-supabase.js & sync-cash-income-supabase.js
+// (dimuat tepat di bawah blok script ini) selesai memasang diri, kedua
+// fungsi itu "dibungkus" supaya otomatis menarik data terbaru dari
+// Supabase dulu sebelum mengembalikan kontrol ke sini.
+function startRingkasanInit() {
+    (async function () {
+        try { await loadSalesData(); } catch (e) { console.warn('[ringkasan] load/sync sales gagal:', e); }
+        await refreshRingkasan();
+        // Cash income tidak selalu ditunggu (di-await) oleh sync-cash-
+        // income-supabase.js sendiri supaya render awal tidak ketunda —
+        // begitu pull-nya selesai di belakang layar, hook renderPemasukan()
+        // di atas otomatis memanggil refreshRingkasan() lagi.
+        try { await loadCashData(); } catch (e) { console.warn('[ringkasan] load/sync cash income gagal:', e); }
+    })();
+}
+// Ditunda sampai DOMContentLoaded, dan sengaja didaftarkan SETELAH kedua
+// script sync (lihat urutan <script> di bawah) — supaya listener wireUp()
+// milik sync-supabase.js/sync-cash-income-supabase.js sudah lebih dulu
+// selesai membungkus loadSalesData/loadCashData sebelum baris ini jalan.
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    startRingkasanInit();
+} else {
+    document.addEventListener('DOMContentLoaded', startRingkasanInit);
+}
 </script>
+
+<!-- Sync ke Supabase (cloud) — INI SOLUSI UTAMANYA: dulu Ringkasan tidak
+     memasang script ini sama sekali, jadi cuma bisa lihat data yang
+     kebetulan sudah ada di IndexedDB lokal (baru terisi kalau Dashboard
+     Kerja pernah dibuka duluan di device yang sama). Sekarang Ringkasan
+     ikut menarik data langsung dari cloud sendiri, tidak perlu "menunggu"
+     Dashboard Kerja aktif lagi. Versi file (?v=) HARUS disamakan dengan
+     yang dipakai di dashboard-kerja.html supaya cache browser konsisten. -->
+<script src="sync-supabase.js?v=20260727"></script>
+<script src="sync-cash-income-supabase.js?v=20260727"></script>
 </body>
 </html>

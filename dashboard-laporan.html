@@ -77,6 +77,43 @@
         .filter-bar .info-right { font-size:9px; font-weight:600; color:#667eea; margin-left:auto; padding-left:10px; border-left:1px solid #e2e8f0; white-space:nowrap; flex:0 0 auto; }
         .filter-bar .action-inline { display:flex; flex-wrap:nowrap; gap:6px; align-items:center; margin-left:auto; flex:0 0 auto; padding-left:10px; }
         .filter-bar .action-inline .btn { white-space:nowrap; }
+
+        /* ===== KELOLA KOLOM (toggle kolom tabel Piutang Tempo / tab9) ===== */
+        .kolom-badge { background:rgba(102,126,234,0.15); color:#667eea; border-radius:10px; padding:1px 6px; font-size:8.5px; font-weight:700; min-width:14px; text-align:center; display:inline-block; line-height:1.5; margin-left:2px; }
+        .btn-outline .kolom-badge { background:#667eea; color:#fff; }
+        .kolom-dropdown-panel { padding:4px 0; max-height:320px; overflow-y:auto; min-width:190px; }
+        .kolom-dropdown-panel .kolom-item { display:flex; align-items:center; gap:8px; padding:6px 12px; font-size:10px; cursor:pointer; border-bottom:1px solid #f1f3f6; }
+        .kolom-dropdown-panel .kolom-item:hover { background:#f1f3f6; }
+        .kolom-dropdown-panel .kolom-item input { cursor:pointer; flex:0 0 auto; }
+        .kolom-dropdown-panel .kolom-item label { cursor:pointer; flex:1; margin:0; }
+        .kolom-dropdown-footer { display:flex; gap:6px; padding:8px 10px 6px 10px; border-top:1px solid #e5e9ef; }
+        .kolom-dropdown-footer button { flex:1; font-size:9.5px; padding:5px 0; border-radius:5px; cursor:pointer; font-weight:600; font-family:inherit; border:1px solid #d8dde5; background:#eef1f6; color:#475569; }
+        .kolom-dropdown-footer button:hover { background:#e5e9f0; }
+        .kolom-dropdown-footer button.kolom-btn-terapkan { background:#667eea; border-color:#667eea; color:#fff; }
+        .kolom-dropdown-footer button.kolom-btn-terapkan:hover { background:#5a67d8; }
+        html.gamas-dark-mode .kolom-dropdown-panel .kolom-item { border-bottom-color:#232d40 !important; color:#e8ecf3 !important; }
+        html.gamas-dark-mode .kolom-dropdown-panel .kolom-item:hover { background:#232d45 !important; }
+        html.gamas-dark-mode .kolom-dropdown-footer { border-top-color:#232d40 !important; }
+        html.gamas-dark-mode .kolom-dropdown-footer button { background:#1a2233 !important; border-color:#3a4358 !important; color:#c7cede !important; }
+        /* Sembunyikan kolom tabel Piutang Tempo (tab9) sesuai pilihan "Kelola Kolom" */
+        #piutangUangMasukTableWrap.pum-hide-c1 th:nth-child(1), #piutangUangMasukTableWrap.pum-hide-c1 td:nth-child(1) { display:none; }
+        #piutangUangMasukTableWrap.pum-hide-c2 th:nth-child(2), #piutangUangMasukTableWrap.pum-hide-c2 td:nth-child(2) { display:none; }
+        #piutangUangMasukTableWrap.pum-hide-c3 th:nth-child(3), #piutangUangMasukTableWrap.pum-hide-c3 td:nth-child(3) { display:none; }
+        #piutangUangMasukTableWrap.pum-hide-c4 th:nth-child(4), #piutangUangMasukTableWrap.pum-hide-c4 td:nth-child(4) { display:none; }
+        #piutangUangMasukTableWrap.pum-hide-c5 th:nth-child(5), #piutangUangMasukTableWrap.pum-hide-c5 td:nth-child(5) { display:none; }
+        #piutangUangMasukTableWrap.pum-hide-c6 th:nth-child(6), #piutangUangMasukTableWrap.pum-hide-c6 td:nth-child(6) { display:none; }
+        #piutangUangMasukTableWrap.pum-hide-c7 th:nth-child(7), #piutangUangMasukTableWrap.pum-hide-c7 td:nth-child(7) { display:none; }
+        #piutangUangMasukTableWrap.pum-hide-c8 th:nth-child(8), #piutangUangMasukTableWrap.pum-hide-c8 td:nth-child(8) { display:none; }
+        #piutangUangMasukTableWrap.pum-hide-c9 th:nth-child(9), #piutangUangMasukTableWrap.pum-hide-c9 td:nth-child(9) { display:none; }
+        #piutangUangMasukTableWrap.pum-hide-c10 th:nth-child(10), #piutangUangMasukTableWrap.pum-hide-c10 td:nth-child(10) { display:none; }
+        #piutangUangMasukTableWrap.pum-hide-c11 th:nth-child(11), #piutangUangMasukTableWrap.pum-hide-c11 td:nth-child(11) { display:none; }
+        #piutangUangMasukTableWrap.pum-hide-c12 th:nth-child(12), #piutangUangMasukTableWrap.pum-hide-c12 td:nth-child(12) { display:none; }
+        #piutangUangMasukTableWrap.pum-hide-c13 th:nth-child(13), #piutangUangMasukTableWrap.pum-hide-c13 td:nth-child(13) { display:none; }
+        #piutangUangMasukTableWrap.pum-hide-c14 th:nth-child(14), #piutangUangMasukTableWrap.pum-hide-c14 td:nth-child(14) { display:none; }
+        #piutangUangMasukTableWrap.pum-hide-c15 th:nth-child(15), #piutangUangMasukTableWrap.pum-hide-c15 td:nth-child(15) { display:none; }
+        #piutangUangMasukTableWrap.pum-hide-c16 th:nth-child(16), #piutangUangMasukTableWrap.pum-hide-c16 td:nth-child(16) { display:none; }
+        #piutangUangMasukTableWrap.pum-hide-c17 th:nth-child(17), #piutangUangMasukTableWrap.pum-hide-c17 td:nth-child(17) { display:none; }
+
         
         .btn { padding:6px 14px; border:none; border-radius:8px; font-weight:600; cursor:pointer; font-size:10px; transition:all 0.2s ease; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:#fff; box-shadow:0 2px 8px rgba(102,126,234,0.25); white-space:nowrap; height:28px; display:inline-flex; align-items:center; gap:4px; line-height:1; }
         .btn:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(102,126,234,0.35); }
@@ -2425,6 +2462,8 @@
             </div>
         </div>
         <div class="filter-bar">
+            <div class="field" style="justify-content:flex-end;"><label>&nbsp;</label><button class="btn btn-outline" id="pumKolomBtn" title="Pilih kolom yang ingin ditampilkan di tabel">🧮 Kolom <span class="kolom-badge" id="pumKolomBadge">8</span></button></div>
+            <div class="menu-dropdown" id="pumKolomDropdown"></div>
             <div class="field" style="min-width:150px;"><label>Cari Faktur/Customer</label><input type="text" id="piutangUangMasukSearch" placeholder="No faktur / nama toko..."></div>
             <div class="field"><label>Tanggal</label><input type="date" id="piutangUangMasukTanggal"></div>
             <div class="field"><label>Bulan</label><select id="piutangUangMasukBulan"><option value="">Semua</option></select></div>
@@ -6335,6 +6374,103 @@
         document.getElementById('badgePiutangUangMasuk').textContent=filtered.length;
     }
 
+    // ===== KELOLA KOLOM - PIUTANG TEMPO (TAB 9) =====
+    // Daftar kolom yang bisa disembunyikan/ditampilkan. "def" = tampil default agar
+    // tabel rapi saat pertama dibuka (tidak perlu geser/scroll horizontal).
+    const PUM_KOLOM_LIST = [
+        { col: 1, label: 'No.Faktur', def: true },
+        { col: 2, label: 'Tgl Transaksi', def: true },
+        { col: 3, label: 'Customer', def: true },
+        { col: 4, label: 'Alamat', def: false },
+        { col: 5, label: 'Sales', def: false },
+        { col: 6, label: 'Kategori', def: false },
+        { col: 7, label: 'Produk', def: false },
+        { col: 8, label: 'Jumlah', def: false },
+        { col: 9, label: 'Satuan', def: false },
+        { col: 10, label: 'Total Tagihan', def: true },
+        { col: 11, label: 'Sisa Tagihan', def: true },
+        { col: 12, label: 'Jatuh Tempo', def: true },
+        { col: 13, label: 'Status', def: true },
+        { col: 14, label: 'Tgl Bayar', def: false },
+        { col: 15, label: 'Total Dibayar', def: true },
+        { col: 16, label: 'Profit', def: false },
+        { col: 17, label: 'Keterangan', def: false },
+    ];
+    const PUM_KOLOM_LS_KEY = 'pum_kolom_visible_v1';
+
+    function pumLoadKolomState() {
+        try {
+            const raw = localStorage.getItem(PUM_KOLOM_LS_KEY);
+            if (raw) {
+                const saved = JSON.parse(raw);
+                if (saved && typeof saved === 'object') {
+                    PUM_KOLOM_LIST.forEach(function(k){ if (!(k.col in saved)) saved[k.col] = k.def; });
+                    return saved;
+                }
+            }
+        } catch (e) {}
+        const def = {};
+        PUM_KOLOM_LIST.forEach(function(k){ def[k.col] = k.def; });
+        return def;
+    }
+    let pumKolomState = pumLoadKolomState();
+
+    function pumSaveKolomState() {
+        try { localStorage.setItem(PUM_KOLOM_LS_KEY, JSON.stringify(pumKolomState)); } catch (e) {}
+    }
+
+    function pumApplyKolomVisibility() {
+        const wrap = document.getElementById('piutangUangMasukTableWrap');
+        if (!wrap) return;
+        PUM_KOLOM_LIST.forEach(function(k){
+            wrap.classList.toggle('pum-hide-c' + k.col, !pumKolomState[k.col]);
+        });
+        const visibleCount = PUM_KOLOM_LIST.filter(function(k){ return pumKolomState[k.col]; }).length;
+        const badge = document.getElementById('pumKolomBadge');
+        if (badge) badge.textContent = visibleCount;
+    }
+
+    function pumRenderKolomDropdown() {
+        const panel = document.getElementById('pumKolomDropdown');
+        if (!panel) return;
+        panel.innerHTML = '<div class="kolom-dropdown-panel">' +
+            PUM_KOLOM_LIST.map(function(k){
+                return '<div class="kolom-item">' +
+                    '<input type="checkbox" id="pumKolomChk' + k.col + '" data-col="' + k.col + '" ' + (pumKolomState[k.col] ? 'checked' : '') + '>' +
+                    '<label for="pumKolomChk' + k.col + '">' + k.label + '</label>' +
+                '</div>';
+            }).join('') +
+            '</div>' +
+            '<div class="kolom-dropdown-footer">' +
+                '<button type="button" id="pumKolomResetBtn">↺ Default</button>' +
+                '<button type="button" class="kolom-btn-terapkan" id="pumKolomAllBtn">Tampilkan Semua</button>' +
+            '</div>';
+        panel.querySelectorAll('input[type="checkbox"]').forEach(function(cb){
+            cb.addEventListener('change', function() {
+                pumKolomState[this.dataset.col] = this.checked;
+                pumSaveKolomState();
+                pumApplyKolomVisibility();
+            });
+        });
+        const resetBtn = document.getElementById('pumKolomResetBtn');
+        if (resetBtn) resetBtn.addEventListener('click', function() {
+            PUM_KOLOM_LIST.forEach(function(k){ pumKolomState[k.col] = k.def; });
+            pumSaveKolomState();
+            pumApplyKolomVisibility();
+            pumRenderKolomDropdown();
+        });
+        const allBtn = document.getElementById('pumKolomAllBtn');
+        if (allBtn) allBtn.addEventListener('click', function() {
+            PUM_KOLOM_LIST.forEach(function(k){ pumKolomState[k.col] = true; });
+            pumSaveKolomState();
+            pumApplyKolomVisibility();
+            pumRenderKolomDropdown();
+        });
+    }
+
+    pumRenderKolomDropdown();
+    pumApplyKolomVisibility();
+
     let _pumDetailCurrentCtx=null;
     function openPumDetail(id, source) {
         source = source || 'piutang';
@@ -6730,7 +6866,17 @@
         if(!btn||!dropdown) return;
         document.body.appendChild(dropdown);
         dropdown.style.position='fixed'; dropdown.style.margin='0';
-        function positionDropdown(){ const rect=btn.getBoundingClientRect(); dropdown.style.top=Math.round(rect.bottom+4)+'px'; dropdown.style.left='auto'; dropdown.style.right=Math.round(window.innerWidth-rect.right)+'px'; }
+        function positionDropdown(){
+            const rect=btn.getBoundingClientRect();
+            dropdown.style.top=Math.round(rect.bottom+4)+'px';
+            dropdown.style.right='auto';
+            dropdown.style.left=Math.round(rect.left)+'px';
+            const dw=dropdown.offsetWidth;
+            if(rect.left+dw>window.innerWidth-8){
+                dropdown.style.left='auto';
+                dropdown.style.right=Math.round(window.innerWidth-rect.right)+'px';
+            }
+        }
         btn.addEventListener('click',function(e){ e.stopPropagation(); const willOpen=!dropdown.classList.contains('active'); document.querySelectorAll('.menu-dropdown.active').forEach(function(d){ if(d!==dropdown) d.classList.remove('active'); }); if(willOpen){ positionDropdown(); dropdown.classList.add('active'); } else { dropdown.classList.remove('active'); } });
         dropdown.addEventListener('click',function(e){ e.stopPropagation(); });
         window.addEventListener('resize',function(){ if(dropdown.classList.contains('active')) positionDropdown(); });
@@ -6741,6 +6887,7 @@
     setupMenuDropdown('ptMenuBtn','ptMenuDropdown');
     setupMenuDropdown('harianMenuBtn','harianMenuDropdown');
     setupMenuDropdown('salesTabMenuBtn','salesTabMenuDropdown');
+    setupMenuDropdown('pumKolomBtn','pumKolomDropdown');
     document.addEventListener('click',function(){ document.querySelectorAll('.menu-dropdown.active').forEach(function(d){ d.classList.remove('active'); }); });
 
     // ================================================================

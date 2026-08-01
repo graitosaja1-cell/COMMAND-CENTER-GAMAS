@@ -1910,13 +1910,13 @@
             <svg class="tab-icon" viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><rect x="4" y="10" width="16" height="12" rx="1.5"></rect><path d="M8 14l3 3 5-5"></path></svg>
             Trash &amp; Save <span class="badge-tab" id="badgeTrash">0</span>
         </button>
-        <button class="tab-btn" data-tab="tab9" style="display:none">
+        <button class="tab-btn" data-tab="tab9">
             <svg class="tab-icon" viewBox="0 0 24 24"><rect x="2.5" y="5.5" width="19" height="13" rx="1.5"></rect><line x1="2.5" y1="9.5" x2="21.5" y2="9.5"></line><line x1="5.5" y1="14.5" x2="10.5" y2="14.5"></line></svg>
-            Piutang Tempo <span class="badge-tab" id="badgePiutangUangMasuk">0</span>
+            Piutang Tempo <span class="badge-tab" id="badgePiutangUangMasuk">&hellip;</span>
         </button>
-        <button class="tab-btn" data-tab="tab10" style="display:none">
+        <button class="tab-btn" data-tab="tab10">
             <svg class="tab-icon" viewBox="0 0 24 24"><rect x="2.5" y="5.5" width="19" height="13" rx="1.5"></rect><line x1="2.5" y1="9.5" x2="21.5" y2="9.5"></line><line x1="5.5" y1="14.5" x2="10.5" y2="14.5"></line></svg>
-            Cash Dropping <span class="badge-tab" id="badgeCashDroppingUangMasuk">0</span>
+            Cash Dropping <span class="badge-tab" id="badgeCashDroppingUangMasuk">&hellip;</span>
         </button>
         <button class="tab-btn" data-tab="tabSales">
             <svg class="tab-icon" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1.5"></circle><circle cx="19" cy="21" r="1.5"></circle><path d="M2 3h3l2.4 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L22 7H6"></path></svg>
@@ -7581,8 +7581,6 @@
             // ke idle lagi) supaya cards Ringkasan tidak kosong sesaat.
             refreshPiutangUangMasuk();
             initInputHarian();
-            document.querySelector('.tab-btn[data-tab="tab9"]').style.display='inline-flex';
-            document.querySelector('.tab-btn[data-tab="tab10"]').style.display='inline-flex';
             rkLapRender();
             switchTab('tabRingkasan');
             scheduleFitTableWraps();

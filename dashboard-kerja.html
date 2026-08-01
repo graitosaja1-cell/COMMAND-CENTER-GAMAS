@@ -207,101 +207,145 @@
            ini — bukan halaman terpisah lagi, supaya tidak pernah "kosong".)
            ================================================================ */
         #tab0 { padding: 0; }
+        /* Variabel warna Ringkasan — mode terang (default) di sini,
+           mode gelap di-override lewat html.gamas-dark-mode .rk-wrap di bawah,
+           supaya toggle mode gelap/terang di header BENAR-BENAR mempengaruhi tab ini. */
         .rk-wrap {
+            --rk-bg: #f1f5f9;
+            --rk-bg-grad1: rgba(8,145,178,0.06);
+            --rk-bg-grad2: rgba(147,51,234,0.05);
+            --rk-text: #0f172a;
+            --rk-text-dim: #64748b;
+            --rk-border: rgba(15,23,42,0.10);
+            --rk-border-soft: rgba(15,23,42,0.07);
+            --rk-panel: #ffffff;
+            --rk-panel-soft: rgba(255,255,255,0.9);
+            --rk-input-bg: #ffffff;
+            --rk-accent: #0891b2;
+            --rk-accent2: #9333ea;
+            --rk-accent-text: #0e7490;
+            --rk-hover: rgba(8,145,178,0.06);
+            --rk-shadow: 0 8px 30px rgba(15,23,42,0.08);
+
             position: relative;
-            background: #070c18;
+            background: var(--rk-bg);
             border-radius: 14px;
             overflow: hidden;
             padding: 16px 18px 24px;
-            color: #e8f4ff;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+            color: var(--rk-text);
+            box-shadow: var(--rk-shadow);
+            transition: background 0.2s, color 0.2s;
+        }
+        html.gamas-dark-mode .rk-wrap {
+            --rk-bg: #070c18;
+            --rk-bg-grad1: rgba(0,229,255,0.07);
+            --rk-bg-grad2: rgba(168,85,247,0.06);
+            --rk-text: #e8f4ff;
+            --rk-text-dim: #8ba3c7;
+            --rk-border: rgba(0,220,255,0.22);
+            --rk-border-soft: rgba(0,220,255,0.08);
+            --rk-panel: rgba(12,22,40,0.8);
+            --rk-panel-soft: rgba(5,15,30,0.85);
+            --rk-input-bg: rgba(5,15,30,0.85);
+            --rk-accent: #00e5ff;
+            --rk-accent2: #a855f7;
+            --rk-accent-text: #00e5ff;
+            --rk-hover: rgba(0,229,255,0.06);
+            --rk-shadow: 0 8px 30px rgba(0,0,0,0.25);
         }
         .rk-wrap::before {
             content: '';
             position: absolute;
             inset: 0;
             background:
-                radial-gradient(ellipse 80% 50% at 15% 10%, rgba(0,229,255,0.07), transparent),
-                radial-gradient(ellipse 60% 40% at 85% 60%, rgba(168,85,247,0.06), transparent);
+                radial-gradient(ellipse 80% 50% at 15% 10%, var(--rk-bg-grad1), transparent),
+                radial-gradient(ellipse 60% 40% at 85% 60%, var(--rk-bg-grad2), transparent);
             pointer-events: none;
         }
         .rk-wrap > * { position: relative; z-index: 1; }
         .rk-header {
             display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
-            padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1px solid rgba(0,220,255,0.18);
+            padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1px solid var(--rk-border);
         }
-        .rk-logo-area h1 { font-size: 15px; font-weight: 800; letter-spacing: 0.4px; color: #e8f4ff; }
-        .rk-logo-area p { font-size: 10px; color: #8ba3c7; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1px; }
+        .rk-logo-area h1 { font-size: 15px; font-weight: 800; letter-spacing: 0.4px; color: var(--rk-text); }
+        .rk-logo-area p { font-size: 10px; color: var(--rk-text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1px; }
         .rk-header-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
         .rk-meta-chip {
-            background: rgba(5,15,30,0.85); border: 1px solid rgba(0,220,255,0.22); padding: 4px 10px;
-            border-radius: 999px; font-size: 11px; font-weight: 500; display: flex; align-items: center; gap: 6px; color: #e8f4ff;
+            background: var(--rk-panel-soft); border: 1px solid var(--rk-border); padding: 4px 10px;
+            border-radius: 999px; font-size: 11px; font-weight: 500; display: flex; align-items: center; gap: 6px; color: var(--rk-text);
         }
-        .rk-meta-chip b { color: #00e5ff; font-weight: 700; }
+        .rk-meta-chip b { color: var(--rk-accent-text); font-weight: 700; }
         .rk-meta-chip select {
-            background: transparent; border: none; color: #00e5ff; font-weight: 700; font-size: 11px;
+            background: transparent; border: none; color: var(--rk-accent-text); font-weight: 700; font-size: 11px;
             font-family: inherit; cursor: pointer; outline: none;
         }
-        .rk-meta-chip select option { background: #0c1628; color: #e8f4ff; }
+        .rk-meta-chip select option { background: var(--rk-panel); color: var(--rk-text); }
         .rk-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 5px #22c55e; animation: rkPulse 2s infinite; }
         @keyframes rkPulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
 
         .rk-stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-bottom: 12px; }
         .rk-stat-card {
-            background: rgba(12,22,40,0.8); border: 1px solid rgba(0,220,255,0.22); border-radius: 9px;
+            background: var(--rk-panel); border: 1px solid var(--rk-border); border-radius: 9px;
             padding: 7px 12px; display: flex; align-items: baseline; justify-content: space-between; gap: 6px;
         }
-        .rk-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #8ba3c7; }
-        .rk-stat-value { font-size: 18px; font-weight: 700; color: #00e5ff; font-variant-numeric: tabular-nums; }
-        .rk-stat-sub { font-size: 10px; color: #8ba3c7; }
+        .rk-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--rk-text-dim); }
+        .rk-stat-value { font-size: 18px; font-weight: 700; color: var(--rk-accent-text); font-variant-numeric: tabular-nums; }
+        .rk-stat-sub { font-size: 10px; color: var(--rk-text-dim); }
 
         .rk-main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: stretch; margin-bottom: 12px; }
         @media (max-width: 960px) { .rk-main-grid { grid-template-columns: 1fr; } }
 
         .rk-section {
-            background: rgba(12,22,40,0.8); border: 1px solid rgba(0,220,255,0.22); border-radius: 12px;
+            background: var(--rk-panel); border: 1px solid var(--rk-border); border-radius: 12px;
             overflow: hidden; margin-bottom: 12px; display: flex; flex-direction: column;
         }
         .rk-main-grid .rk-section { margin-bottom: 0; }
         .rk-section-header {
             padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
-            border-bottom: 1px solid rgba(0,220,255,0.22);
-            background: linear-gradient(90deg, rgba(0,229,255,0.07), transparent);
+            border-bottom: 1px solid var(--rk-border);
+            background: linear-gradient(90deg, var(--rk-hover), transparent);
         }
-        .rk-section-title { font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; display: flex; align-items: center; gap: 7px; color: #e8f4ff; }
-        .rk-section-title::before { content:''; width:3px; height:13px; border-radius:2px; background: linear-gradient(180deg,#00e5ff,#a855f7); }
+        .rk-section-title { font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; display: flex; align-items: center; gap: 7px; color: var(--rk-text); }
+        .rk-section-title::before { content:''; width:3px; height:13px; border-radius:2px; background: linear-gradient(180deg,var(--rk-accent),var(--rk-accent2)); }
         .rk-badge { font-size: 9.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; letter-spacing: 0.03em; text-transform: uppercase; white-space: nowrap; }
-        .rk-badge-fitri { background: rgba(0,229,255,0.14); color: #00e5ff; border: 1px solid rgba(0,229,255,0.35); }
-        .rk-badge-rupa { background: rgba(168,85,247,0.14); color: #c084fc; border: 1px solid rgba(168,85,247,0.35); }
-        .rk-badge-piutang { background: rgba(236,72,153,0.12); color: #f472b6; border: 1px solid rgba(236,72,153,0.3); }
+        .rk-badge-fitri { background: rgba(8,145,178,0.14); color: var(--rk-accent-text); border: 1px solid rgba(8,145,178,0.35); }
+        .rk-badge-rupa { background: rgba(147,51,234,0.12); color: var(--rk-accent2); border: 1px solid rgba(147,51,234,0.32); }
+        .rk-badge-piutang { background: rgba(219,39,119,0.10); color: #db2777; border: 1px solid rgba(219,39,119,0.28); }
+        html.gamas-dark-mode .rk-badge-fitri { background: rgba(0,229,255,0.14); color: #00e5ff; border-color: rgba(0,229,255,0.35); }
+        html.gamas-dark-mode .rk-badge-rupa { background: rgba(168,85,247,0.14); color: #c084fc; border-color: rgba(168,85,247,0.35); }
+        html.gamas-dark-mode .rk-badge-piutang { background: rgba(236,72,153,0.12); color: #f472b6; border-color: rgba(236,72,153,0.3); }
 
-        .rk-controls { padding: 8px 12px; border-bottom: 1px solid rgba(0,220,255,0.15); }
+        .rk-controls { padding: 8px 12px; border-bottom: 1px solid var(--rk-border-soft); }
         .rk-controls input {
-            width: 100%; background: rgba(5,15,30,0.85); border: 1px solid rgba(0,220,255,0.22); border-radius: 8px;
-            padding: 6px 10px; color: #e8f4ff; font-family: inherit; font-size: 11px; outline: none;
+            width: 100%; background: var(--rk-input-bg); border: 1px solid var(--rk-border); border-radius: 8px;
+            padding: 6px 10px; color: var(--rk-text); font-family: inherit; font-size: 11px; outline: none;
         }
-        .rk-controls input::placeholder { color: #8ba3c7; }
+        .rk-controls input::placeholder { color: var(--rk-text-dim); }
 
         .rk-table-wrap { overflow-x: auto; padding: 4px; flex: 1; }
         .rk-table-wrap table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; }
         .rk-table-wrap thead th {
-            font-size: 9.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #00e5ff;
-            padding: 6px 8px; text-align: left; border-bottom: 1px solid rgba(0,220,255,0.22); white-space: nowrap;
-            background: rgba(7,12,24,0.5); position: sticky; top: 0;
+            font-size: 9.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--rk-accent-text);
+            padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--rk-border); white-space: nowrap;
+            background: var(--rk-bg); position: sticky; top: 0;
         }
-        .rk-table-wrap tbody td { padding: 5px 8px; border-bottom: 1px solid rgba(0,220,255,0.08); color: #e8f4ff; white-space: nowrap; }
-        .rk-table-wrap tbody tr:hover td { background: rgba(0,229,255,0.06); }
+        .rk-table-wrap tbody td { padding: 5px 8px; border-bottom: 1px solid var(--rk-border-soft); color: var(--rk-text); white-space: nowrap; }
+        .rk-table-wrap tbody tr:hover td { background: var(--rk-hover); }
         .rk-table-wrap tbody tr:last-child td { border-bottom: none; }
         .rk-table-wrap .rk-num { font-variant-numeric: tabular-nums; text-align: right; font-weight: 600; }
-        .rk-table-wrap .rk-total-row td { font-weight: 700; color: #00e5ff; background: rgba(0,229,255,0.08) !important; border-top: 1px solid rgba(0,220,255,0.22); }
+        .rk-table-wrap .rk-total-row td { font-weight: 700; color: var(--rk-accent-text); background: var(--rk-hover) !important; border-top: 1px solid var(--rk-border); }
         .rk-table-wrap .rk-product-name { font-weight: 600; }
-        .rk-empty { padding: 20px 14px; text-align: center; font-size: 11.5px; color: #8ba3c7; }
+        .rk-empty { padding: 20px 14px; text-align: center; font-size: 11.5px; color: var(--rk-text-dim); }
+
+        /* Rupa Rupa: hanya ~3 baris produk yang langsung terlihat, sisanya
+           tinggal digulir (scroll) ke bawah — daftar produknya tetap lengkap. */
+        #rkRupaScrollBox { max-height: 132px; overflow-y: auto; }
 
         .rk-empty-global { text-align: center; padding: 60px 20px; }
         .rk-empty-global .rk-empty-icon { font-size: 46px; margin-bottom: 10px; }
-        .rk-empty-global .rk-empty-title { font-size: 15px; font-weight: 700; color: #e8f4ff; margin-bottom: 4px; }
-        .rk-empty-global .rk-empty-sub { font-size: 12px; color: #8ba3c7; }
-        .rk-faktur-link { color: #00e5ff; font-weight: 600; cursor: pointer; text-decoration: underline; text-decoration-style: dotted; }
+        .rk-empty-global .rk-empty-title { font-size: 15px; font-weight: 700; color: var(--rk-text); margin-bottom: 4px; }
+        .rk-empty-global .rk-empty-sub { font-size: 12px; color: var(--rk-text-dim); }
+        .rk-faktur-link { color: var(--rk-accent-text); font-weight: 600; cursor: pointer; text-decoration: underline; text-decoration-style: dotted; }
         .rk-overdue { color: #f87171; font-weight: 700; }
 
         @media (max-width: 700px) {
@@ -4662,7 +4706,7 @@
                             <span class="rk-badge rk-badge-rupa">Semua Produk</span>
                         </div>
                         <div class="rk-controls"><input type="text" id="rkSearchRupa" placeholder="Cari produk..." autocomplete="off"></div>
-                        <div class="rk-table-wrap"><table id="rkTableRupa"><thead></thead><tbody></tbody></table></div>
+                        <div class="rk-table-wrap" id="rkRupaScrollBox"><table id="rkTableRupa"><thead></thead><tbody></tbody></table></div>
                         <div class="rk-empty" id="rkRupaEmpty" style="display:none;">Belum ada penjualan Rupa Rupa di periode ini.</div>
                     </section>
                 </div>
@@ -9865,8 +9909,8 @@
                 return { ...d, sisa, produkGabungan: Array.from(d.produkSet).filter(Boolean).join(', ') };
             }).filter(d => d.statusClass !== 'lunas' && d.sisa > 0.5);
 
-            const besar = [...piutangList].sort((a, b) => b.sisa - a.sisa).slice(0, 15);
-            const lama = [...piutangList].sort((a, b) => String(a.tanggal || '').localeCompare(String(b.tanggal || ''))).slice(0, 15);
+            const besar = [...piutangList].sort((a, b) => b.sisa - a.sisa).slice(0, 5);
+            const lama = [...piutangList].sort((a, b) => String(a.tanggal || '').localeCompare(String(b.tanggal || ''))).slice(0, 5);
 
             besarBody.innerHTML = besar.map(rkRenderPiutangRow).join('');
             lamaBody.innerHTML = lama.map(rkRenderPiutangRow).join('');

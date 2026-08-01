@@ -89,6 +89,58 @@
         html.gamas-dark-mode .rk-lap-periode label { color:#94a3b8; }
         html.gamas-dark-mode .rk-lap-periode select { color:#93c5fd; }
         html.gamas-dark-mode .rk-lap-section-title { color:#cbd5e1; }
+
+        /* ===== TAB RINGKASAN — gaya "laporan": kartu ditipiskan, hanya kartu total yang mencolok ===== */
+        #tabRingkasan .card {
+            background:#ffffff; border:1px solid #e6eaf2; border-left:3px solid #94a3b8;
+            border-radius:10px; box-shadow:0 1px 3px rgba(15,23,42,0.05);
+        }
+        #tabRingkasan .card:hover { transform:none; box-shadow:0 2px 8px rgba(15,23,42,0.08); }
+        #tabRingkasan .card .label { color:#64748b; }
+        #tabRingkasan .card .value { color:#1e293b; }
+        #tabRingkasan .card .value.orange { color:#d97706; }
+        #tabRingkasan .card .value.purple { color:#7c3aed; }
+
+        /* Aksen tipis per-bagian, biar tetap "senada" tapi ada pembeda ringan */
+        #tabRingkasan .cards-pemasukan .card { border-left-color:#818cf8; }
+        #tabRingkasan .cards-piutang .card { border-left-color:#f59e0b; }
+        #tabRingkasan .cards-cash .card { border-left-color:#10b981; }
+
+        /* Kartu total (Grand Total & Total Profit Real) — sengaja dibuat lebih mencolok */
+        #tabRingkasan .card.card-total {
+            background:linear-gradient(135deg,#6366f1 0%,#7c3aed 100%);
+            border:none; border-left:none;
+            box-shadow:0 4px 14px rgba(99,102,241,0.28);
+        }
+        #tabRingkasan .card.card-total:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(99,102,241,0.35); }
+        #tabRingkasan .card.card-total .label { color:rgba(255,255,255,0.88); }
+        #tabRingkasan .card.card-total .value { color:#ffffff; }
+
+        /* Banner "Total Profit" atas — ditipiskan & warnanya diselaraskan dengan kartu total (indigo/ungu) */
+        .rk-lap-highlight {
+            background:linear-gradient(135deg,#eef1ff 0%,#f5f2ff 100%);
+            border:1px solid #e0e0fb; border-left:4px solid #6366f1;
+            border-radius:12px; padding:14px 20px;
+            box-shadow:0 2px 8px rgba(99,102,241,0.08); margin-bottom:20px; color:#1e293b;
+        }
+        .rk-lap-highlight-label { color:#4c51bf; }
+        .rk-lap-highlight-value { color:#4338ca; font-size:28px; }
+        .rk-lap-highlight-breakdown { color:#475569; }
+        .rk-lap-highlight-breakdown b { color:#4338ca; }
+
+        html.gamas-dark-mode #tabRingkasan .card { background:#161d2b; border-color:#232d40; }
+        html.gamas-dark-mode #tabRingkasan .card .label { color:#94a3b8; }
+        html.gamas-dark-mode #tabRingkasan .card .value { color:#e2e8f0; }
+        html.gamas-dark-mode #tabRingkasan .card .value.orange { color:#ffb84d; }
+        html.gamas-dark-mode #tabRingkasan .card .value.purple { color:#c4b5fd; }
+        html.gamas-dark-mode #tabRingkasan .card.card-total { background:linear-gradient(135deg,#4f46e5 0%,#6d28d9 100%); }
+        html.gamas-dark-mode #tabRingkasan .card.card-total .label { color:rgba(255,255,255,0.85); }
+        html.gamas-dark-mode #tabRingkasan .card.card-total .value { color:#ffffff; }
+        html.gamas-dark-mode .rk-lap-highlight { background:linear-gradient(135deg,#1e1b4b 0%,#241f5c 100%); border-color:#3730a3; color:#e2e8f0; }
+        html.gamas-dark-mode .rk-lap-highlight-label { color:#c4b5fd; }
+        html.gamas-dark-mode .rk-lap-highlight-value { color:#e0e7ff; }
+        html.gamas-dark-mode .rk-lap-highlight-breakdown { color:#c3cddc; }
+        html.gamas-dark-mode .rk-lap-highlight-breakdown b { color:#e0e7ff; }
         
         .filter-bar { display:flex; flex-wrap:nowrap; align-items:flex-end; gap:6px 10px; padding:12px 16px; background:linear-gradient(to right,#f8fafc,#f0f4ff); border:1px solid #e8ecf4; border-radius:12px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.04); overflow-x:auto; }
         .filter-bar .field { display:flex; flex-direction:column; gap:4px; flex:0 0 auto; min-width:60px; }
@@ -1783,29 +1835,29 @@
         </div>
 
         <div class="rk-lap-section-title">⬇️ Data Uang Masuk</div>
-        <div class="cards">
+        <div class="cards cards-pemasukan">
             <div class="card"><span class="label">Total Cash</span><span class="value" id="rkLapCashTotalCash">Rp 0</span></div>
             <div class="card"><span class="label">Total Transfer</span><span class="value" id="rkLapCashTotalTransfer">Rp 0</span></div>
             <div class="card"><span class="label">Uang Masuk Minyak</span><span class="value orange" id="rkLapCashMinyak">Rp 0</span></div>
             <div class="card"><span class="label">Uang Masuk Rupa Rupa</span><span class="value purple" id="rkLapCashRupa">Rp 0</span></div>
-            <div class="card"><span class="label">Grand Total</span><span class="value" id="rkLapCashGrand">Rp 0</span></div>
+            <div class="card card-total"><span class="label">Grand Total</span><span class="value" id="rkLapCashGrand">Rp 0</span></div>
         </div>
 
         <div class="rk-lap-section-title">🧾 Piutang Tempo</div>
-        <div class="cards">
+        <div class="cards cards-piutang">
             <div class="card"><span class="label">Jumlah Faktur</span><span class="value" id="rkLapPtCount">0 faktur</span></div>
             <div class="card"><span class="label">Nilai Faktur Piutang Tempo</span><span class="value" id="rkLapPtTagihan">Rp 0</span></div>
             <div class="card"><span class="label">Total Uang Masuk Piutang Tempo</span><span class="value" id="rkLapPtDibayar">Rp 0</span></div>
-            <div class="card"><span class="label">🔶 Total Profit Real</span><span class="value" id="rkLapPtProfit">Rp 0</span></div>
+            <div class="card card-total"><span class="label">🔶 Total Profit Real</span><span class="value" id="rkLapPtProfit">Rp 0</span></div>
         </div>
 
         <div class="rk-lap-section-title">📋 Cash Dropping</div>
-        <div class="cards">
+        <div class="cards cards-cash">
             <div class="card"><span class="label">Jumlah Faktur</span><span class="value" id="rkLapCddCount">0 faktur</span></div>
             <div class="card"><span class="label">Total Nominal</span><span class="value" id="rkLapCddNominal">Rp 0</span></div>
             <div class="card"><span class="label">Total Cash</span><span class="value" id="rkLapCddCash">Rp 0</span></div>
             <div class="card"><span class="label">Total Transfer</span><span class="value" id="rkLapCddTransfer">Rp 0</span></div>
-            <div class="card"><span class="label">💰 Total Profit Real</span><span class="value" id="rkLapCddProfit">Rp 0</span></div>
+            <div class="card card-total"><span class="label">💰 Total Profit Real</span><span class="value" id="rkLapCddProfit">Rp 0</span></div>
         </div>
 
         <div class="rk-lap-empty" id="rkLapEmpty" style="display:none;">📂 Belum ada data untuk periode ini di salah satu tab (Data Uang Masuk / Piutang Tempo / Cash Dropping).</div>

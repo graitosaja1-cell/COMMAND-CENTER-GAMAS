@@ -859,6 +859,149 @@
         .filter-bar .action-inline .btn {
             white-space: nowrap;
         }
+        /* ==== FILTER BAR SLIM (ringkas + Filter Lanjutan) ==== */
+        .filter-bar.slim,
+        .cash-filter-bar.slim {
+            flex-direction: column;
+            align-items: stretch;
+            flex-wrap: nowrap;
+            padding: 8px 12px;
+            overflow: visible;
+        }
+        .filter-row-main {
+            display: flex;
+            align-items: center;
+            flex-wrap: nowrap;
+            gap: 8px;
+            width: 100%;
+        }
+        .filter-row-main .fc-search {
+            flex: 1 1 220px;
+            min-width: 130px;
+        }
+        .filter-row-main .fc-search input {
+            width: 100%;
+            height: 32px;
+            padding: 0 10px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 7px;
+            font-size: 13px;
+            font-family: inherit;
+            background: #ffffff;
+            transition: all 0.2s ease;
+        }
+        .filter-row-main .fc-search input:hover,
+        .filter-row-main .fc-search input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .filter-row-main .fc-periode {
+            flex: 0 0 auto;
+            min-width: 150px;
+        }
+        .filter-row-main .fc-periode select,
+        .filter-row-main .fc-periode .pt-bulan-btn {
+            width: 100%;
+            height: 32px;
+            padding: 0 10px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 7px;
+            font-size: 13px;
+            font-family: inherit;
+            background: #ffffff;
+        }
+        .filter-row-main .fc-reset {
+            flex: 0 0 auto;
+            height: 32px;
+            padding: 0 12px;
+            font-size: 12.5px;
+            border-radius: 7px;
+            background: #eef1f6;
+            border: 1.5px solid #d8dde5;
+            color: #475569;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+        .filter-row-main .fc-reset:hover {
+            background: #e5e9f0;
+            border-color: #c7cdd7;
+        }
+        .filter-row-main .fc-adv-toggle {
+            flex: 0 0 auto;
+            height: 32px;
+            padding: 0 12px;
+            font-size: 12.5px;
+            border-radius: 7px;
+            background: #ffffff;
+            border: 1.5px solid #d1d5db;
+            color: #475569;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+        .filter-row-main .fc-adv-toggle:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        .filter-row-main .fc-adv-toggle .arrow {
+            transition: transform 0.2s ease;
+            font-size: 11px;
+            display: inline-block;
+        }
+        .filter-row-main .fc-adv-toggle.open .arrow {
+            transform: rotate(90deg);
+        }
+        .filter-row-main .fc-right {
+            flex: 0 0 auto;
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .filter-adv-panel {
+            display: none;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            align-items: flex-end;
+            padding-top: 10px;
+            margin-top: 10px;
+            border-top: 1px dashed #e2e8f0;
+            overflow-x: auto;
+        }
+        .filter-adv-panel.show {
+            display: flex;
+        }
+        html.gamas-dark-mode .filter-row-main .fc-search input,
+        html.gamas-dark-mode .filter-row-main .fc-periode select,
+        html.gamas-dark-mode .filter-row-main .fc-periode .pt-bulan-btn,
+        html.gamas-dark-mode .filter-row-main .fc-adv-toggle {
+            background: #161d2b !important;
+            border-color: #3a4358 !important;
+            color: #e8ecf3 !important;
+        }
+        html.gamas-dark-mode .filter-row-main .fc-reset {
+            background: #1c2436 !important;
+            border-color: #3a4358 !important;
+            color: #c7cede !important;
+        }
+        html.gamas-dark-mode .filter-adv-panel {
+            border-top-color: #3a4358 !important;
+        }
+        @media (max-width: 780px) {
+            .filter-row-main {
+                flex-wrap: wrap;
+            }
+            .filter-row-main .fc-right {
+                margin-left: 0;
+                flex-wrap: wrap;
+            }
+        }
         .table-wrap {
             overflow: auto;
             border: 1px solid #d1d5db;
@@ -4245,46 +4388,53 @@
                 <button type="button" class="tab1-view-btn" id="tab1ViewKartuBtn" data-view="card">🗂️ Kartu</button>
             </div>
         </div>
-        <div class="filter-bar">
-            <div class="field"><label>Cari Faktur / Toko</label><input type="text" id="fFakturSales" placeholder="No Faktur atau nama toko..."></div>
-            <div class="field"><label>Sales</label><select id="fSalesSales"><option value="">Semua</option></select></div>
-            <div class="field"><label>Tanggal</label><input type="date" id="fTanggalSalesSingle"></div>
-            <input type="date" id="fTanggalSalesFrom" style="display:none;">
-            <input type="date" id="fTanggalSalesTo" style="display:none;">
-            <div class="field"><label>Periode</label><select id="fBulanSales"><option value="">Semua</option></select></div>
-            <div class="field"><label>Kategori</label><select id="fKategoriSales"><option value="">Semua</option><option value="Fitri">Fitri</option><option value="Rupa Rupa">Rupa Rupa</option></select></div>
-            <select id="fPembayaranSales" style="display:none;"><option value="">Semua</option><option value="Cash">Cash</option><option value="Tempo">Tempo</option></select>
-            <div class="field" style="justify-content:flex-end;"><label>&nbsp;</label><button class="btn btn-reset" id="btnResetSales">↺ Reset</button></div>
-            <span class="info-right" id="salesRangeLabel" style="display:none;">Belum ada data</span>
-            <span class="sales-edit-hint">klik No Faktur untuk Edit Data Penjualan</span>
-            <div class="action-inline" style="position: relative;">
-                <button class="menu-toggle-btn" id="salesMenuBtn">⚙️ Menu <span style="font-size:8px;">▼</span></button>
-                <div class="menu-dropdown" id="salesMenuDropdown">
-                    <div class="menu-item" id="btnAddSalesContainer" style="display:none;">
-                        <button class="btn" id="btnAddSales" style="flex:1;margin:0;">+ Tambah</button>
-                    </div>
-                    <div class="menu-item">
-                        <label class="btn btn-outline" style="cursor:pointer;flex:1;margin:0;justify-content:center;">📂 Import <input type="file" id="fileImportSales" accept=".xlsx,.xls" style="display:none;"></label>
-                    </div>
-                    <div class="menu-item">
-                        <button class="btn btn-outline" id="btnExportSales" style="flex:1;margin:0;">📥 Download</button>
-                    </div>
-                    <div class="menu-item">
-                        <button class="btn btn-outline" id="btnBersihkanHantu" style="flex:1;margin:0;border-color:#0d6efd;color:#0d6efd;" title="Hapus pasangan baris minus/plus akibat edit faktur (baris hantu), tandai sisanya untuk diperiksa manual">🧹 Bersihkan Baris Hantu</button>
-                    </div>
-                    <div class="menu-item">
-                        <button class="btn btn-outline" id="btnBersihkanDuplikatMenu" style="flex:1;margin:0;border-color:#7c3aed;color:#7c3aed;" title="Hapus baris duplikat persis (isi sama plek-ketiplek dengan baris lain), 1 baris/kelompok dipertahankan">📋 Bersihkan Duplikat</button>
-                    </div>
-                    <div class="menu-item" id="btnPiutangModeContainer" style="display:none;">
-                        <button class="btn btn-orange" id="btnPiutangMode" style="flex:1;margin:0;">📋 Piutang</button>
-                    </div>
-                    <div class="menu-item">
-                        <button class="btn btn-outline" id="btnTrashSales" style="flex:1;margin:0;border-color:#b45309;color:#b45309;">🗑️ Pindah ke Sampah <span id="salesSelectedCount" style="display:none;">(0)</span></button>
-                    </div>
-                    <div class="menu-item">
-                        <button class="btn btn-danger" id="btnClearSales" style="flex:1;margin:0;">🗑️ Hapus</button>
+        <div class="filter-bar slim">
+            <div class="filter-row-main">
+                <div class="fc-search"><input type="text" id="fFakturSales" placeholder="No Faktur atau nama toko..."></div>
+                <div class="fc-periode"><select id="fBulanSales"><option value="">Semua Periode</option></select></div>
+                <button class="fc-reset" id="btnResetSales">↺ Reset</button>
+                <button type="button" class="fc-adv-toggle" id="salesAdvToggle">Filter Lanjutan <span class="arrow">→</span></button>
+                <div class="fc-right">
+                    <span class="info-right" id="salesRangeLabel" style="display:none;">Belum ada data</span>
+                    <span class="sales-edit-hint">klik No Faktur untuk Edit Data Penjualan</span>
+                    <div class="action-inline" style="position: relative; margin-left:0; padding-left:0;">
+                        <button class="menu-toggle-btn" id="salesMenuBtn">⚙️ Menu <span style="font-size:8px;">▼</span></button>
+                        <div class="menu-dropdown" id="salesMenuDropdown">
+                            <div class="menu-item" id="btnAddSalesContainer" style="display:none;">
+                                <button class="btn" id="btnAddSales" style="flex:1;margin:0;">+ Tambah</button>
+                            </div>
+                            <div class="menu-item">
+                                <label class="btn btn-outline" style="cursor:pointer;flex:1;margin:0;justify-content:center;">📂 Import <input type="file" id="fileImportSales" accept=".xlsx,.xls" style="display:none;"></label>
+                            </div>
+                            <div class="menu-item">
+                                <button class="btn btn-outline" id="btnExportSales" style="flex:1;margin:0;">📥 Download</button>
+                            </div>
+                            <div class="menu-item">
+                                <button class="btn btn-outline" id="btnBersihkanHantu" style="flex:1;margin:0;border-color:#0d6efd;color:#0d6efd;" title="Hapus pasangan baris minus/plus akibat edit faktur (baris hantu), tandai sisanya untuk diperiksa manual">🧹 Bersihkan Baris Hantu</button>
+                            </div>
+                            <div class="menu-item">
+                                <button class="btn btn-outline" id="btnBersihkanDuplikatMenu" style="flex:1;margin:0;border-color:#7c3aed;color:#7c3aed;" title="Hapus baris duplikat persis (isi sama plek-ketiplek dengan baris lain), 1 baris/kelompok dipertahankan">📋 Bersihkan Duplikat</button>
+                            </div>
+                            <div class="menu-item" id="btnPiutangModeContainer" style="display:none;">
+                                <button class="btn btn-orange" id="btnPiutangMode" style="flex:1;margin:0;">📋 Piutang</button>
+                            </div>
+                            <div class="menu-item">
+                                <button class="btn btn-outline" id="btnTrashSales" style="flex:1;margin:0;border-color:#b45309;color:#b45309;">🗑️ Pindah ke Sampah <span id="salesSelectedCount" style="display:none;">(0)</span></button>
+                            </div>
+                            <div class="menu-item">
+                                <button class="btn btn-danger" id="btnClearSales" style="flex:1;margin:0;">🗑️ Hapus</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
+            <div class="filter-adv-panel" id="salesAdvPanel">
+                <div class="field"><label>Sales</label><select id="fSalesSales"><option value="">Semua</option></select></div>
+                <div class="field"><label>Tanggal</label><input type="date" id="fTanggalSalesSingle"></div>
+                <input type="date" id="fTanggalSalesFrom" style="display:none;">
+                <input type="date" id="fTanggalSalesTo" style="display:none;">
+                <div class="field"><label>Kategori</label><select id="fKategoriSales"><option value="">Semua</option><option value="Fitri">Fitri</option><option value="Rupa Rupa">Rupa Rupa</option></select></div>
+                <select id="fPembayaranSales" style="display:none;"><option value="">Semua</option><option value="Cash">Cash</option><option value="Tempo">Tempo</option></select>
             </div>
         </div>
         <div class="sales-anomali-banner" id="salesAnomaliBanner">
@@ -4400,19 +4550,26 @@
             </div>
         </div>
         <div class="pt-source-status" id="cashSourceStatus">0 transaksi cash · 0 faktur dipilih</div>
-        <div class="cash-filter-bar">
-            <div class="field" style="min-width:130px;"><label>Cari Faktur</label><input type="text" id="cekFilterFaktur" placeholder="No faktur..."></div>
-            <div class="field"><label>Tanggal</label><input type="date" id="cekFilterTanggal"></div>
-            <div class="field"><label>Bulan</label><select id="cekFilterBulan"><option value="">Semua Bulan</option><option value="2026-07">Juli 2026</option></select></div>
-            <div class="field"><label>Sales</label><select id="cekFilterSales"><option value="">Semua Sales</option></select></div>
-            <div class="field"><label>Kategori</label><select id="cekFilterKategori"><option value="">Semua</option><option value="Fitri">Fitri</option><option value="Rupa Rupa">Rupa Rupa</option></select></div>
-            <div class="field" style="min-width:120px;"><label>Status</label><select id="cekFilterKet"><option value="">Semua</option><option value="cocok">Lunas</option><option value="tidak">Belum Lunas</option></select></div>
-            <div class="field" style="justify-content:flex-end;"><label>&nbsp;</label><button class="btn btn-reset" id="cekBtnReset">↺ Reset</button></div>
-            <span class="info-right" id="cashInfoRight" style="display:none;">0 data</span>
-            <div class="actions">
-                <span class="data-baru-notif" id="cashDataBaruNotif" style="display:none;" title="Klik Muat Ulang untuk memperbarui tabel">🆕 Data baru masuk</span>
-                <button class="btn" id="cekBtnRefresh">🔄 Muat Ulang</button>
-                <button class="btn btn-outline" id="btnExportCekCash" title="Download data Cek Cash yang sedang tampil (sesuai filter aktif) sebagai file Excel">📥 Download Excel</button>
+        <div class="cash-filter-bar slim">
+            <div class="filter-row-main">
+                <div class="fc-search"><input type="text" id="cekFilterFaktur" placeholder="No faktur atau nama toko..."></div>
+                <div class="fc-periode"><select id="cekFilterBulan"><option value="">Semua Bulan</option><option value="2026-07">Juli 2026</option></select></div>
+                <button class="fc-reset" id="cekBtnReset">↺ Reset</button>
+                <button type="button" class="fc-adv-toggle" id="cashAdvToggle">Filter Lanjutan <span class="arrow">→</span></button>
+                <div class="fc-right">
+                    <span class="info-right" id="cashInfoRight" style="display:none;">0 data</span>
+                    <div class="actions" style="margin:0;">
+                        <span class="data-baru-notif" id="cashDataBaruNotif" style="display:none;" title="Klik Muat Ulang untuk memperbarui tabel">🆕 Data baru masuk</span>
+                        <button class="btn" id="cekBtnRefresh">🔄 Muat Ulang</button>
+                        <button class="btn btn-outline" id="btnExportCekCash" title="Download data Cek Cash yang sedang tampil (sesuai filter aktif) sebagai file Excel">📥 Download Excel</button>
+                    </div>
+                </div>
+            </div>
+            <div class="filter-adv-panel" id="cashAdvPanel">
+                <div class="field"><label>Tanggal</label><input type="date" id="cekFilterTanggal"></div>
+                <div class="field"><label>Sales</label><select id="cekFilterSales"><option value="">Semua Sales</option></select></div>
+                <div class="field"><label>Kategori</label><select id="cekFilterKategori"><option value="">Semua</option><option value="Fitri">Fitri</option><option value="Rupa Rupa">Rupa Rupa</option></select></div>
+                <div class="field" style="min-width:120px;"><label>Status</label><select id="cekFilterKet"><option value="">Semua</option><option value="cocok">Lunas</option><option value="tidak">Belum Lunas</option></select></div>
             </div>
         </div>
 
@@ -4461,30 +4618,37 @@
             </div>
         </div>
         <div class="pt-source-status" id="ptSourceStatus">0 transaksi penjualan · 0 faktur dipilih</div>
-        <div class="filter-bar">
-            <div class="field" style="min-width:150px;"><label>Cari Faktur/Customer</label><input type="text" id="ptSearch" placeholder="No faktur / nama toko..."></div>
-            <div class="field"><label>Tanggal</label><input type="date" id="ptTanggal"></div>
-            <div class="field pt-bulan-field" style="min-width:170px; position:relative;"><label>Bulan</label><button type="button" id="ptBulanBtn" class="pt-bulan-btn">Semua</button><div id="ptBulanPanel" class="pt-bulan-panel"></div></div>
-            <div class="field"><label>Sales</label><select id="ptSales"><option value="">Semua</option></select></div>
-            <div class="field"><label>Kategori</label><select id="ptKategori"><option value="">Semua</option><option value="fitri">Minyak Fitri</option><option value="rupa">Rupa Rupa</option></select></div>
-            <div class="field" style="min-width:170px;"><label>Status</label><select id="ptStatus"><option value="">Semua</option><option value="lunas">Sudah Lunas</option><option value="belum_gabungan">Belum Lunas (Semua)</option><option value="titip">🟠 Titip</option></select></div>
-            <div class="field" style="justify-content:flex-end;"><label>&nbsp;</label><button class="btn btn-reset" id="ptBtnReset">↺ Reset</button></div>
-            <div class="action-inline">
-                <span class="data-baru-notif" id="ptDataBaruNotif" style="display:none;" title="Klik Muat Ulang untuk memperbarui tabel">🆕 Data baru masuk</span>
-                <div style="position: relative;">
-                    <button class="menu-toggle-btn" id="ptMenuBtn">⚙️ Menu <span style="font-size:8px;">▼</span></button>
-                    <div class="menu-dropdown" id="ptMenuDropdown">
-                        <div class="menu-item">
-                            <button class="btn" id="ptBtnRefresh" style="flex:1;margin:0;">🔄 Muat Ulang</button>
-                        </div>
-                        <div class="menu-item">
-                            <button class="btn" id="ptBtnInputManual" style="flex:1;margin:0;">✍️ Input Manual</button>
-                        </div>
-                        <div class="menu-item">
-                            <button class="btn btn-outline" id="ptBtnExportExcel" style="flex:1;margin:0;" title="Download data Cek Piutang yang sedang tampil (sesuai filter aktif) sebagai file Excel">📥 Download Excel</button>
+        <div class="filter-bar slim">
+            <div class="filter-row-main">
+                <div class="fc-search"><input type="text" id="ptSearch" placeholder="No faktur atau nama toko..."></div>
+                <div class="fc-periode pt-bulan-field" style="position:relative;"><button type="button" id="ptBulanBtn" class="pt-bulan-btn">Periode: Semua</button><div id="ptBulanPanel" class="pt-bulan-panel"></div></div>
+                <button class="fc-reset" id="ptBtnReset">↺ Reset</button>
+                <button type="button" class="fc-adv-toggle" id="ptAdvToggle">Filter Lanjutan <span class="arrow">→</span></button>
+                <div class="fc-right">
+                    <div class="action-inline" style="margin-left:0; padding-left:0;">
+                        <span class="data-baru-notif" id="ptDataBaruNotif" style="display:none;" title="Klik Muat Ulang untuk memperbarui tabel">🆕 Data baru masuk</span>
+                        <div style="position: relative;">
+                            <button class="menu-toggle-btn" id="ptMenuBtn">⚙️ Menu <span style="font-size:8px;">▼</span></button>
+                            <div class="menu-dropdown" id="ptMenuDropdown">
+                                <div class="menu-item">
+                                    <button class="btn" id="ptBtnRefresh" style="flex:1;margin:0;">🔄 Muat Ulang</button>
+                                </div>
+                                <div class="menu-item">
+                                    <button class="btn" id="ptBtnInputManual" style="flex:1;margin:0;">✍️ Input Manual</button>
+                                </div>
+                                <div class="menu-item">
+                                    <button class="btn btn-outline" id="ptBtnExportExcel" style="flex:1;margin:0;" title="Download data Cek Piutang yang sedang tampil (sesuai filter aktif) sebagai file Excel">📥 Download Excel</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="filter-adv-panel" id="ptAdvPanel">
+                <div class="field"><label>Tanggal</label><input type="date" id="ptTanggal"></div>
+                <div class="field"><label>Sales</label><select id="ptSales"><option value="">Semua</option></select></div>
+                <div class="field"><label>Kategori</label><select id="ptKategori"><option value="">Semua</option><option value="fitri">Minyak Fitri</option><option value="rupa">Rupa Rupa</option></select></div>
+                <div class="field" style="min-width:170px;"><label>Status</label><select id="ptStatus"><option value="">Semua</option><option value="lunas">Sudah Lunas</option><option value="belum_gabungan">Belum Lunas (Semua)</option><option value="titip">🟠 Titip</option></select></div>
             </div>
         </div>
         <div class="table-wrap" style="height: 485px; max-height: 485px;" id="tab4TableWrap">
@@ -5905,6 +6069,29 @@
         document.addEventListener('DOMContentLoaded', function() {
             updateStickyFilterOffset();
             setTimeout(updateStickyFilterOffset, 300);
+        });
+
+        // ================================================================
+        // FILTER LANJUTAN — toggle panel filter tambahan (ringkas/simple)
+        // untuk tab Bank Data Penjualan, Cek Cash, dan Cek Piutang.
+        // ================================================================
+        function setupFilterAdvToggle(toggleId, panelId) {
+            const toggleBtn = document.getElementById(toggleId);
+            const panel = document.getElementById(panelId);
+            if (!toggleBtn || !panel) return;
+            toggleBtn.addEventListener('click', function() {
+                const isOpen = panel.classList.toggle('show');
+                toggleBtn.classList.toggle('open', isOpen);
+                toggleBtn.innerHTML = isOpen
+                    ? 'Sembunyikan Filter <span class="arrow">→</span>'
+                    : 'Filter Lanjutan <span class="arrow">→</span>';
+                setTimeout(updateStickyFilterOffset, 50);
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            setupFilterAdvToggle('salesAdvToggle', 'salesAdvPanel');
+            setupFilterAdvToggle('cashAdvToggle', 'cashAdvPanel');
+            setupFilterAdvToggle('ptAdvToggle', 'ptAdvPanel');
         });
 
 

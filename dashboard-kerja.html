@@ -14178,6 +14178,48 @@
             return `${y}-${m}-${dd}`;
         }
 
+        // Konversi sel tanggal dari baris Excel Pengeluaran menjadi serial Excel (angka).
+        // MENERIMA lebih dari sekadar serial number mentah, supaya file yang tanggalnya
+        // ter-export/ter-format sebagai TEKS (mis. "01/08/2026", "2026-08-01", "1 Agustus 2026")
+        // tidak lagi diam-diam gagal terbaca (sebelumnya hanya angka serial yang dikenali).
+        function pgSelToExcelSerial(tglCell) {
+            if (typeof tglCell === 'number' && tglCell > 25569 && tglCell < 60000) return tglCell;
+            if (tglCell instanceof Date && !isNaN(tglCell.getTime())) {
+                return (tglCell.getTime() / 86400000) + 25569;
+            }
+            if (typeof tglCell === 'string') {
+                const s = tglCell.trim();
+                if (!s) return null;
+                // Format "YYYY-MM-DD" atau "YYYY/MM/DD"
+                let m = s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+                if (m) {
+                    const y = +m[1], mo = +m[2], da = +m[3];
+                    const serial = Math.round((Date.UTC(y, mo - 1, da) / 86400000) + 25569);
+                    if (serial > 25569 && serial < 60000) return serial;
+                }
+                // Format "DD-MM-YYYY", "DD/MM/YYYY", atau "DD.MM.YYYY"
+                m = s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})/);
+                if (m) {
+                    let da = +m[1], mo = +m[2], y = +m[3];
+                    if (y < 100) y += 2000;
+                    const serial = Math.round((Date.UTC(y, mo - 1, da) / 86400000) + 25569);
+                    if (serial > 25569 && serial < 60000) return serial;
+                }
+                // Format "1 Agustus 2026" / "1 Januari 2026" (nama bulan Indonesia)
+                const bulanIndo = {
+                    'januari': 0, 'februari': 1, 'maret': 2, 'april': 3, 'mei': 4, 'juni': 5,
+                    'juli': 6, 'agustus': 7, 'september': 8, 'oktober': 9, 'november': 10, 'desember': 11
+                };
+                m = s.toLowerCase().match(/^(\d{1,2})\s+([a-z]+)\s+(\d{4})/);
+                if (m && bulanIndo.hasOwnProperty(m[2])) {
+                    const da = +m[1], mo = bulanIndo[m[2]], y = +m[3];
+                    const serial = Math.round((Date.UTC(y, mo, da) / 86400000) + 25569);
+                    if (serial > 25569 && serial < 60000) return serial;
+                }
+            }
+            return null;
+        }
+
         function parsePengeluaranDariRows(rows) {
             const hasil = [];
             let current = null;
@@ -14196,14 +14238,9 @@
                 // Tanpa cek ini, baris ringkasan total bulan bisa "bocor" menimpa totalPengeluaran hari terakhir.
                 if (typeof tglCell === 'string' && tglCell.trim().toUpperCase() === 'TOTAL') break;
 
-                // tglCell sekarang berupa NUMBER (serial Excel mentah), bukan Date object,
-                // karena cellDates:true sudah dimatikan di pgProcessExcelFile.
-                let tgl = null;
-                if (typeof tglCell === 'number' && tglCell > 25569 && tglCell < 60000) tgl = tglCell;
-                else if (tglCell instanceof Date && !isNaN(tglCell.getTime())) {
-                    // fallback jaga-jaga kalau suatu saat ada Date object masuk lagi
-                    tgl = (tglCell.getTime() / 86400000) + 25569;
-                }
+                // tglCell bisa berupa serial Excel mentah (number), Date object, ATAU teks
+                // (mis. hasil paste manual/export beda format) — semua dicoba lewat pgSelToExcelSerial.
+                const tgl = pgSelToExcelSerial(tglCell);
 
                 if (tgl) {
                     if (current) hasil.push(current);
@@ -14244,7 +14281,14 @@
                 allRecords.forEach(record => {
                     if (record.bulan && Array.isArray(record.data)) pengeluaranDataMap[record.bulan] = record.data;
                 });
-                if (!pengeluaranBulan) pengeluaranBulan = APP_DEFAULT_BULAN || '2026-07';
+                if (!pengeluaranBulan) {
+                    if (APP_DEFAULT_BULAN) {
+                        pengeluaranBulan = APP_DEFAULT_BULAN;
+                    } else {
+                        const nowPg = new Date();
+                        pengeluaranBulan = nowPg.getFullYear() + '-' + String(nowPg.getMonth() + 1).padStart(2, '0');
+                    }
+                }
                 if (!pengeluaranDataMap[pengeluaranBulan]) pengeluaranDataMap[pengeluaranBulan] = [];
             } catch (e) {
                 console.warn('Error loading pengeluaran data:', e);
@@ -14892,9 +14936,17 @@
                 await loadCashNotes();
                 await loadCetakTagihanMap();
 
-                // Filter periode bulan selalu dibuka di Juli 2026 setiap kali web dibuka/di-refresh,
-                // tidak mengikuti tanggal sistem/perangkat.
-                const defaultBulan = '2026-07';
+                // Filter periode bulan dibuka otomatis di bulan TERBARU: diambil dari mana yang
+                // lebih baru antara tanggal sistem/perangkat saat ini dan bulan terakhir yang ada
+                // di data (Bank Data Penjualan). Jadi tidak perlu diubah manual tiap bulan lagi.
+                const nowForBulan = new Date();
+                let defaultBulan = nowForBulan.getFullYear() + '-' + String(nowForBulan.getMonth() + 1).padStart(2, '0');
+                const salesPeriodsAwal = new Set();
+                salesData.forEach(r => { if (r.Tanggal) salesPeriodsAwal.add(String(r.Tanggal).slice(0, 7)); });
+                if (salesPeriodsAwal.size) {
+                    const latestSalesBulan = Array.from(salesPeriodsAwal).sort().pop();
+                    if (latestSalesBulan > defaultBulan) defaultBulan = latestSalesBulan;
+                }
                 APP_DEFAULT_BULAN = defaultBulan;
 
                 rebuildSalesFilterOptions();
@@ -14905,7 +14957,7 @@
                     if (opt.value === defaultBulan) { opt.selected = true;
                         found = true; break; }
                 }
-                if (!found) bulanSelect.value = '2026-07';
+                if (!found) bulanSelect.value = defaultBulan;
                 cashBulan = bulanSelect.value;
 
                 await loadCashData();

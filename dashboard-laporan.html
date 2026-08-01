@@ -6015,7 +6015,28 @@
     let cashDroppingUangMasukPage=1;
     const UANG_MASUK_ROWS_PER_PAGE=25;
 
+    // ================================================================
+    // PERBAIKAN PERFORMA (jeda saat buka tab Piutang Tempo/Cash Dropping):
+    // loadPiutangUangMasukFromCashData() melakukan pencocokan (matching)
+    // & fuzzy-search (Levenshtein) yang berat terhadap SELURUH Bank Data
+    // Penjualan. Sebelumnya proses ini diulang dari NOL setiap kali user
+    // sekadar pindah/kembali ke tab9 atau tab10, walau data sama sekali
+    // tidak berubah sejak terakhir dihitung.
+    //
+    // pumCacheDirty menandai apakah data sumber (Bank Data Penjualan /
+    // Data Uang Masuk) berubah sejak terakhir dihitung:
+    // - true  => wajib dihitung ulang (data baru/berubah)
+    // - false => hasil sebelumnya masih valid, tidak perlu dihitung ulang
+    // Semua tempat yang MEMANG mengubah data (import, simpan, hapus,
+    // restore backup) tetap memaksa hitung ulang lewat refreshPiutangUangMasuk()
+    // (fungsi itu selalu set pumCacheDirty=true lebih dulu, lihat di bawah).
+    // Untuk kasus pindah tab TANPA ada perubahan data, dipakai
+    // refreshPiutangUangMasukTabSwitch() yang tidak memaksa hitung ulang.
+    // ================================================================
+    let pumCacheDirty=true;
+
     function loadPiutangUangMasukFromCashData() {
+        if(!pumCacheDirty) return; // data sumber belum berubah -> pakai hasil cache, skip proses berat
         piutangUangMasukData=[]; cashDroppingUangMasukData=[];
         const todayPtUM=new Date(); todayPtUM.setHours(0,0,0,0);
 
@@ -6381,6 +6402,7 @@
         }
         piutangUangMasukData.sort((a,b)=>pumSortDate(a)-pumSortDate(b));
         cashDroppingUangMasukData.sort((a,b)=>pumSortDate(a)-pumSortDate(b));
+        pumCacheDirty=false; // hasil baru saja dihitung ulang -> tandai cache sudah fresh/valid
     }
 
     function updateUangMasukFilterOptions() {
@@ -7121,10 +7143,30 @@
     }
 
     function refreshPiutangUangMasuk() {
+        // Dipanggil dari tempat-tempat yang MEMANG mengubah data (import, simpan,
+        // hapus, restore backup, klik tombol Refresh manual) -> selalu paksa
+        // hitung ulang dari nol. Perilaku ini SENGAJA dipertahankan sama persis
+        // seperti sebelumnya untuk semua pemanggil lama, tidak ada yang diubah.
+        pumCacheDirty=true;
         loadPiutangUangMasukFromCashData();
         updateUangMasukFilterOptions();
         piutangUangMasukPage=1;
         cashDroppingUangMasukPage=1;
+        renderPiutangUangMasuk();
+        renderCashDroppingUangMasuk();
+        if (document.getElementById('tabRingkasan') && document.getElementById('tabRingkasan').classList.contains('active')) rkLapRender();
+    }
+
+    // Versi ringan khusus untuk perpindahan TAB (klik tab Piutang Tempo / Cash
+    // Dropping) tanpa ada perubahan data apa pun. Kalau cache masih fresh
+    // (pumCacheDirty=false), loadPiutangUangMasukFromCashData() akan langsung
+    // skip proses matching/fuzzy-search yang berat, sehingga pindah tab jadi
+    // instan. Kalau memang ada perubahan data dari tempat lain, cache akan
+    // otomatis ditandai dirty lagi lewat refreshPiutangUangMasuk(), jadi data
+    // yang ditampilkan tetap selalu benar & terbaru.
+    function refreshPiutangUangMasukTabSwitch() {
+        loadPiutangUangMasukFromCashData();
+        updateUangMasukFilterOptions();
         renderPiutangUangMasuk();
         renderCashDroppingUangMasuk();
         if (document.getElementById('tabRingkasan') && document.getElementById('tabRingkasan').classList.contains('active')) rkLapRender();
@@ -7398,8 +7440,8 @@
         if(tabName==='tab4'){ ptRebuildFilterOptions(); ptRenderTempoTable(); }
         if(tabName==='tab6'){ renderTagihanDariPiutang(); renderRiwayatCetak(); }
         if(tabName==='tab8'){ renderRingkasanSaveAll(); }
-        if(tabName==='tab9'){ refreshPiutangUangMasuk(); }
-        if(tabName==='tab10'){ refreshPiutangUangMasuk(); }
+        if(tabName==='tab9'){ refreshPiutangUangMasukTabSwitch(); }
+        if(tabName==='tab10'){ refreshPiutangUangMasukTabSwitch(); }
         if(tabName==='tabRingkasan'){ rkLapRender(); }
     }
 

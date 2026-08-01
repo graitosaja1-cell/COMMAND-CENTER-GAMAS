@@ -14356,8 +14356,16 @@
             function positionDropdown() {
                 const rect = btn.getBoundingClientRect();
                 dropdown.style.top = Math.round(rect.bottom + 4) + 'px';
-                dropdown.style.left = 'auto';
-                dropdown.style.right = Math.round(window.innerWidth - rect.right) + 'px';
+                // Ukur lebar dropdown dulu (sementara left-align) untuk cek apakah muat di layar.
+                dropdown.style.right = 'auto';
+                dropdown.style.left = Math.round(rect.left) + 'px';
+                const dw = dropdown.offsetWidth;
+                if (rect.left + dw > window.innerWidth - 8) {
+                    // Kalau align-kiri bikin dropdown kepotong di kanan layar, align-kanan saja
+                    // (menempel ke sisi kanan tombol), seperti menu lain.
+                    dropdown.style.left = 'auto';
+                    dropdown.style.right = Math.round(window.innerWidth - rect.right) + 'px';
+                }
             }
 
             btn.addEventListener('click', function(e) {

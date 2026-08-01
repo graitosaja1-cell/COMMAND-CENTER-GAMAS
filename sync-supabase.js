@@ -218,61 +218,55 @@
     // ================================================================
     // PULL: tarik HANYA baris yang berubah di cloud sejak sync terakhir
     // ================================================================
+    // ⚡ OPTIMASI (01/08/2026): dulu setiap halaman (1000 baris) ditarik
+    // SATU-SATU, tunggu selesai baru minta halaman berikutnya. Kalau ini
+    // sync pertama kali di device (lastPull kosong / cache browser
+    // dibersihkan / mode Incognito), dan datanya ada ribuan baris, proses
+    // ini jadi lambat karena harus bolak-balik ke server berkali-kali
+    // secara berurutan.
+    //
+    // Sekarang: halaman PERTAMA tetap ditarik dulu (sekaligus minta total
+    // jumlah baris lewat header "count=exact"), supaya data langsung
+    // tampil secepat mungkin. Kalau ternyata ada halaman berikutnya,
+    // semuanya ditarik SEKALIGUS secara paralel (Promise.all), bukan
+    // antre satu-satu -- jauh lebih cepat kalau datanya banyak.
+    //
+    // Kalau server/browser tidak mengirim info total (header Content-Range
+    // tidak tersedia), otomatis jatuh kembali ke cara lama (satu-satu),
+    // supaya tetap aman jalan di kondisi apa pun.
     async function pullSalesFromCloud() {
         if (!Array.isArray(salesData)) return { pulled: 0 };
         const lastPull = (await metaGet('lastPull')) || '1970-01-01T00:00:00Z';
 
-        // Catatan: kalau tabel `sales` di Supabase pernah kena bug duplikasi
-        // versi lama, jumlah baris sejak 1970 bisa sangat besar untuk device
-        // baru (lastPull kosong). Supaya UI tidak "Tidak ada data" berlama-
-        // lama sampai SEMUA halaman selesai ditarik, kita:
-        //   1) render tabel setelah SETIAP halaman (bukan cuma di akhir), dan
-        //   2) checkpoint lastPull per halaman ke pageMaxSeen -- kalau
-        //      koneksi putus di tengah, pull berikutnya lanjut dari sana,
-        //      tidak mengulang dari 1970 lagi.
-        let offset = 0;
         let maxSeen = lastPull;
         let pulled = 0;
         const byId = new Map(salesData.map(r => [rowSyncId(r), r]));
         await loadPushSnapshot();
 
-        for (;;) {
-            const url = REST + '/sales?select=*&updated_at=gt.' + encodeURIComponent(lastPull) +
-                '&order=updated_at.asc,sync_id.asc&limit=' + PAGE_SIZE + '&offset=' + offset;
-            let resp;
-            try {
-                resp = await fetch(url, { headers: supaHeaders() });
-            } catch (e) {
-                // Gagal jaringan di tengah halaman ke-N: simpan progres yang
-                // sudah didapat sejauh ini, jangan lempar sampai membatalkan
-                // semuanya (biar tidak mulai dari 1970 lagi di percobaan berikutnya).
-                // PENTING: checkpoint lastPull HANYA boleh maju kalau data yang
-                // sudah ditarik juga BENAR-BENAR sudah tersimpan ke lokal --
-                // kalau tidak, data itu akan "hilang" (checkpoint bilang sudah
-                // diambil, padahal belum tersimpan permanen).
-                if (maxSeen !== lastPull) {
-                    if (typeof saveSalesData === 'function') {
-                        try { await saveSalesData(); } catch (e2) { console.warn('[sync-supabase] gagal simpan data parsial ke lokal:', e2); }
-                    }
-                    await metaSet('lastPull', maxSeen);
-                }
-                await persistPushSnapshot();
-                throw e;
-            }
+        const baseUrl = REST + '/sales?select=*&updated_at=gt.' + encodeURIComponent(lastPull) +
+            '&order=updated_at.asc,sync_id.asc';
+
+        // Ambil 1 halaman data + (kalau tersedia) info total baris yang cocok
+        // filter, lewat header "Content-Range" (contoh: "0-999/4521").
+        async function fetchPage(offset) {
+            const url = baseUrl + '&limit=' + PAGE_SIZE + '&offset=' + offset;
+            const resp = await fetch(url, { headers: supaHeaders({ 'Prefer': 'count=exact' }) });
             if (!resp.ok) {
                 const t = await resp.text().catch(() => '');
-                if (maxSeen !== lastPull) {
-                    if (typeof saveSalesData === 'function') {
-                        try { await saveSalesData(); } catch (e2) { console.warn('[sync-supabase] gagal simpan data parsial ke lokal:', e2); }
-                    }
-                    await metaSet('lastPull', maxSeen);
-                }
-                await persistPushSnapshot();
                 throw new Error('Pull dari cloud gagal (' + resp.status + '): ' + t);
             }
             const rows = await resp.json();
-            if (!rows.length) break;
+            let total = null;
+            const cr = resp.headers.get('content-range');
+            if (cr) {
+                const m = cr.match(/\/(\d+|\*)$/);
+                if (m && m[1] !== '*') total = parseInt(m[1], 10);
+            }
+            return { rows, total };
+        }
 
+        // Terapkan 1 batch baris hasil fetch ke salesData lokal (in-memory).
+        function applyRows(rows) {
             rows.forEach(c => {
                 if (c.updated_at && c.updated_at > maxSeen) maxSeen = c.updated_at;
                 const existing = byId.get(c.sync_id);
@@ -294,29 +288,78 @@
                 }
                 pulled++;
             });
+        }
 
-            // Render progresif: begitu 1 halaman (maks 1000 baris) selesai
-            // diproses, langsung tampilkan ke tabel supaya user tidak melihat
-            // "Tidak ada data" selagi masih menarik halaman-halaman berikutnya.
-            if (typeof renderSales === 'function') {
-                try { renderSales(); } catch (e) { /* abaikan error render sementara */ }
-            }
-            // Cek ulang banner anomali juga tiap halaman, supaya kalau data yang
-            // baru ditarik dari cloud ternyata mengandung baris hantu/anomali,
-            // banner-nya langsung muncul tanpa perlu refresh manual.
-            if (typeof checkAndShowSalesAnomaliBanner === 'function') {
-                try { checkAndShowSalesAnomaliBanner(); } catch (e) { /* abaikan error sementara */ }
-            }
-            // PENTING: simpan ke lokal per halaman juga (bukan cuma di akhir),
-            // supaya kalau tab ditutup/koneksi putus di tengah, data yang
-            // sudah masuk tidak hilang begitu saja.
+        // Simpan progres ke lokal + refresh tampilan, dipanggil tiap kali ada
+        // batch baris baru yang berhasil diterapkan (baik di jalur paralel
+        // maupun jalur fallback satu-satu).
+        async function checkpointProgress(totalKnown) {
             if (typeof saveSalesData === 'function') {
                 try { await saveSalesData(); } catch (e) { console.warn('[sync-supabase] gagal simpan progres ke lokal:', e); }
             }
-            setBadge('syncing', '🔄 Sinkronisasi... (' + pulled + ' baris)');
+            if (typeof renderSales === 'function') {
+                try { renderSales(); } catch (e) { /* abaikan error render sementara */ }
+            }
+            if (typeof checkAndShowSalesAnomaliBanner === 'function') {
+                try { checkAndShowSalesAnomaliBanner(); } catch (e) { /* abaikan error sementara */ }
+            }
+            const suffix = totalKnown ? ('/' + totalKnown) : '';
+            setBadge('syncing', '🔄 Sinkronisasi... (' + pulled + suffix + ' baris)');
+        }
 
-            if (rows.length < PAGE_SIZE) break;
-            offset += PAGE_SIZE;
+        try {
+            // Halaman pertama: sekaligus jadi "pengintai" apakah datanya besar.
+            const first = await fetchPage(0);
+            applyRows(first.rows);
+            await checkpointProgress(first.total);
+
+            const gotFullFirstPage = first.rows.length === PAGE_SIZE;
+
+            if (first.total !== null && first.total > PAGE_SIZE) {
+                // ⚡ Tahu total pastinya -> tarik SISA halaman sekaligus (paralel).
+                const totalPages = Math.ceil(first.total / PAGE_SIZE);
+                const pagePromises = [];
+                for (let p = 1; p < totalPages; p++) pagePromises.push(fetchPage(p * PAGE_SIZE));
+
+                const settled = await Promise.allSettled(pagePromises);
+                let firstError = null;
+                settled.forEach(s => {
+                    if (s.status === 'fulfilled') applyRows(s.value.rows);
+                    else if (!firstError) firstError = s.reason;
+                });
+                await checkpointProgress(first.total);
+                // Kalau ada halaman yang gagal: simpan dulu apa yang SUDAH berhasil
+                // (baris di atas sudah melakukannya), baru lempar error-nya. lastPull
+                // di bawah cuma akan maju sampai maxSeen dari baris yang benar-benar
+                // berhasil diterapkan, jadi tidak ada data yang "hilang" — paling
+                // cuma perlu ditarik ulang lagi di percobaan sync berikutnya.
+                if (firstError) throw firstError;
+            } else if (first.total === null && gotFullFirstPage) {
+                // Fallback aman: server tidak kasih tahu total (mis. header
+                // Content-Range tidak tersedia) -> tarik satu-satu seperti semula.
+                let offset = PAGE_SIZE;
+                for (;;) {
+                    const page = await fetchPage(offset);
+                    if (!page.rows.length) break;
+                    applyRows(page.rows);
+                    await checkpointProgress(null);
+                    if (page.rows.length < PAGE_SIZE) break;
+                    offset += PAGE_SIZE;
+                }
+            }
+        } catch (e) {
+            // Gagal (jaringan/response error) di tengah proses: simpan progres
+            // yang sudah PASTI berhasil diterapkan supaya percobaan berikutnya
+            // tidak perlu mengulang dari awal (checkpoint hanya maju sejauh data
+            // yang benar-benar sudah tersimpan ke lokal).
+            if (maxSeen !== lastPull) {
+                if (typeof saveSalesData === 'function') {
+                    try { await saveSalesData(); } catch (e2) { console.warn('[sync-supabase] gagal simpan data parsial ke lokal:', e2); }
+                }
+                await metaSet('lastPull', maxSeen);
+            }
+            await persistPushSnapshot();
+            throw e;
         }
 
         if (maxSeen !== lastPull) await metaSet('lastPull', maxSeen);

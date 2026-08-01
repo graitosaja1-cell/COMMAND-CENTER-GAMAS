@@ -41,13 +41,13 @@
         .tab-icon { width:15px; height:15px; flex:0 0 auto; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; opacity:0.75; }
         .tab-btn:hover .tab-icon { opacity:0.9; }
         .tab-btn.active .tab-icon { opacity:1; }
-        .tab-btn[data-tab="tab1"].active, .tab-btn[data-tab="tab2"].active, .tab-btn[data-tab="tab3"].active,
+        .tab-btn[data-tab="tabRingkasan"].active, .tab-btn[data-tab="tab1"].active, .tab-btn[data-tab="tab2"].active, .tab-btn[data-tab="tab3"].active,
         .tab-btn[data-tab="tab4"].active, .tab-btn[data-tab="tab6"].active, .tab-btn[data-tab="tab7"].active,
         .tab-btn[data-tab="tab8"].active, .tab-btn[data-tab="tab9"].active, .tab-btn[data-tab="tab10"].active,
         .tab-btn[data-tab="tabSales"].active {
             color:#fff; border-color:transparent; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); box-shadow:0 3px 10px rgba(102,126,234,0.35);
         }
-        .tab-btn[data-tab="tab1"].active .tab-icon, .tab-btn[data-tab="tab2"].active .tab-icon,
+        .tab-btn[data-tab="tabRingkasan"].active .tab-icon, .tab-btn[data-tab="tab1"].active .tab-icon, .tab-btn[data-tab="tab2"].active .tab-icon,
         .tab-btn[data-tab="tab3"].active .tab-icon, .tab-btn[data-tab="tab4"].active .tab-icon,
         .tab-btn[data-tab="tab6"].active .tab-icon, .tab-btn[data-tab="tab7"].active .tab-icon,
         .tab-btn[data-tab="tab8"].active .tab-icon, .tab-btn[data-tab="tab9"].active .tab-icon,
@@ -67,6 +67,28 @@
         .card .value { font-size:16px; font-weight:700; color:#ffffff; white-space:nowrap; }
         .card .value.orange { color:#f59e0b; }
         .card .value.purple { color:#a78bfa; }
+
+        /* ===== TAB RINGKASAN ===== */
+        .rk-lap-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px; }
+        .rk-lap-title { font-size:15px; font-weight:800; color:#1e293b; margin-right:auto; }
+        .rk-lap-periode { display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:6px 12px; }
+        .rk-lap-periode label { font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.3px; }
+        .rk-lap-periode select { border:none; outline:none; font-size:12px; font-weight:700; color:#4c51bf; background:transparent; cursor:pointer; }
+        .rk-lap-section-title { font-size:12px; font-weight:800; letter-spacing:0.3px; color:#475569; margin:4px 0 8px; padding-left:2px; display:flex; align-items:center; gap:6px; }
+        .rk-lap-highlight {
+            background:linear-gradient(135deg,#0ea472 0%,#0d8a5f 100%); border-radius:14px; padding:16px 20px;
+            box-shadow:0 6px 20px rgba(13,138,95,0.28); margin-bottom:20px; color:#fff;
+        }
+        .rk-lap-highlight-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:rgba(255,255,255,0.92); margin-bottom:4px; }
+        .rk-lap-highlight-value { font-size:30px; font-weight:800; line-height:1.2; }
+        .rk-lap-highlight-breakdown { display:flex; gap:18px; flex-wrap:wrap; margin-top:8px; font-size:11.5px; color:rgba(255,255,255,0.92); }
+        .rk-lap-highlight-breakdown b { color:#fff; font-weight:700; }
+        .rk-lap-empty { text-align:center; padding:30px 14px; color:#94a3b8; font-size:12px; }
+        html.gamas-dark-mode .rk-lap-title { color:#e2e8f0; }
+        html.gamas-dark-mode .rk-lap-periode { background:#1e293b; border-color:#334155; }
+        html.gamas-dark-mode .rk-lap-periode label { color:#94a3b8; }
+        html.gamas-dark-mode .rk-lap-periode select { color:#93c5fd; }
+        html.gamas-dark-mode .rk-lap-section-title { color:#cbd5e1; }
         
         .filter-bar { display:flex; flex-wrap:nowrap; align-items:flex-end; gap:6px 10px; padding:12px 16px; background:linear-gradient(to right,#f8fafc,#f0f4ff); border:1px solid #e8ecf4; border-radius:12px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.04); overflow-x:auto; }
         .filter-bar .field { display:flex; flex-direction:column; gap:4px; flex:0 0 auto; min-width:60px; }
@@ -1692,11 +1714,15 @@
     </header>
     
     <div class="tabs" id="tabHeaders">
+        <button class="tab-btn active" data-tab="tabRingkasan">
+            <svg class="tab-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></svg>
+            Ringkasan
+        </button>
         <button class="tab-btn" data-tab="tab1" style="display:none">
             <svg class="tab-icon" viewBox="0 0 24 24"><polygon points="12 2.5 21 8 3 8"></polygon><line x1="4" y1="8" x2="4" y2="19"></line><line x1="9" y1="8" x2="9" y2="19"></line><line x1="15" y1="8" x2="15" y2="19"></line><line x1="20" y1="8" x2="20" y2="19"></line><line x1="2.5" y1="21" x2="21.5" y2="21"></line></svg>
             Bank Data Penjualan <span class="badge-tab" id="badgeSales">0</span>
         </button>
-        <button class="tab-btn active" data-tab="tab2">
+        <button class="tab-btn" data-tab="tab2">
             <svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 3v10"></path><path d="M8 9l4 4 4-4"></path><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"></path></svg>
             Data Uang Masuk <span class="badge-tab" id="badgeCash">0</span>
         </button>
@@ -1735,6 +1761,55 @@
     </div>
 
     <div id="storageStatusBar" style="display:none;padding:6px 14px;font-size:10px;font-weight:600;text-align:center;cursor:pointer;"></div>
+
+    <!-- ======= TAB RINGKASAN — gabungan Data Uang Masuk + Piutang Tempo + Cash Dropping ======= -->
+    <div class="tab-content active" id="tabRingkasan">
+        <div class="rk-lap-toolbar">
+            <div class="rk-lap-title">📊 Ringkasan Bulanan</div>
+            <div class="rk-lap-periode">
+                <label for="rkLapBulan">Periode</label>
+                <select id="rkLapBulan"></select>
+            </div>
+            <button type="button" class="btn btn-outline" id="rkLapBtnRefresh">🔄 Muat Ulang</button>
+        </div>
+
+        <div class="rk-lap-highlight" id="rkLapProfitCard">
+            <div class="rk-lap-highlight-label">💰 Total Profit <span id="rkLapProfitBulanLabel">Bulan Ini</span> <span style="font-weight:500;opacity:0.85;">(Cash Dropping + Piutang Tempo)</span></div>
+            <div class="rk-lap-highlight-value" id="rkLapProfitTotal">Rp 0</div>
+            <div class="rk-lap-highlight-breakdown">
+                <span>Cash Dropping: <b id="rkLapProfitCdd">Rp 0</b></span>
+                <span>Piutang Tempo: <b id="rkLapProfitPt">Rp 0</b></span>
+            </div>
+        </div>
+
+        <div class="rk-lap-section-title">⬇️ Data Uang Masuk</div>
+        <div class="cards">
+            <div class="card"><span class="label">Total Cash</span><span class="value" id="rkLapCashTotalCash">Rp 0</span></div>
+            <div class="card"><span class="label">Total Transfer</span><span class="value" id="rkLapCashTotalTransfer">Rp 0</span></div>
+            <div class="card"><span class="label">Uang Masuk Minyak</span><span class="value orange" id="rkLapCashMinyak">Rp 0</span></div>
+            <div class="card"><span class="label">Uang Masuk Rupa Rupa</span><span class="value purple" id="rkLapCashRupa">Rp 0</span></div>
+            <div class="card"><span class="label">Grand Total</span><span class="value" id="rkLapCashGrand">Rp 0</span></div>
+        </div>
+
+        <div class="rk-lap-section-title">🧾 Piutang Tempo</div>
+        <div class="cards">
+            <div class="card"><span class="label">Jumlah Faktur</span><span class="value" id="rkLapPtCount">0 faktur</span></div>
+            <div class="card"><span class="label">Nilai Faktur Piutang Tempo</span><span class="value" id="rkLapPtTagihan">Rp 0</span></div>
+            <div class="card"><span class="label">Total Uang Masuk Piutang Tempo</span><span class="value" id="rkLapPtDibayar">Rp 0</span></div>
+            <div class="card"><span class="label">🔶 Total Profit Real</span><span class="value" id="rkLapPtProfit">Rp 0</span></div>
+        </div>
+
+        <div class="rk-lap-section-title">📋 Cash Dropping</div>
+        <div class="cards">
+            <div class="card"><span class="label">Jumlah Faktur</span><span class="value" id="rkLapCddCount">0 faktur</span></div>
+            <div class="card"><span class="label">Total Nominal</span><span class="value" id="rkLapCddNominal">Rp 0</span></div>
+            <div class="card"><span class="label">Total Cash</span><span class="value" id="rkLapCddCash">Rp 0</span></div>
+            <div class="card"><span class="label">Total Transfer</span><span class="value" id="rkLapCddTransfer">Rp 0</span></div>
+            <div class="card"><span class="label">💰 Total Profit Real</span><span class="value" id="rkLapCddProfit">Rp 0</span></div>
+        </div>
+
+        <div class="rk-lap-empty" id="rkLapEmpty" style="display:none;">📂 Belum ada data untuk periode ini di salah satu tab (Data Uang Masuk / Piutang Tempo / Cash Dropping).</div>
+    </div>
 
     <!-- ======= TAB 1 – BANK DATA PENJUALAN ======= -->
     <div class="tab-content" id="tab1">
@@ -1788,7 +1863,7 @@
     </div>
 
     <!-- ======= TAB 2 – DATA UANG MASUK ======= -->
-    <div class="tab-content active" id="tab2">
+    <div class="tab-content" id="tab2">
         <div class="cards" id="pemasukanCards">
             <div class="card"><span class="label">TOTAL CASH</span><span class="value" id="pemTotalCash">Rp 0</span></div>
             <div class="card"><span class="label">TOTAL TRANSFER</span><span class="value" id="pemTotalTransfer">Rp 0</span></div>
@@ -6798,7 +6873,98 @@
         cashDroppingUangMasukPage=1;
         renderPiutangUangMasuk();
         renderCashDroppingUangMasuk();
+        if (document.getElementById('tabRingkasan') && document.getElementById('tabRingkasan').classList.contains('active')) rkLapRender();
     }
+
+    // ================================================================
+    // TAB RINGKASAN — gabungan cards Data Uang Masuk + Piutang Tempo +
+    // Cash Dropping untuk 1 periode (bulan) yang sama, termasuk Total
+    // Profit gabungan (Cash Dropping + Piutang Tempo) yang sebelumnya
+    // tidak pernah dijumlahkan jadi satu angka di tab manapun.
+    // ================================================================
+    function rkLapBuildBulanOptions() {
+        const set = new Set();
+        Object.keys(cashDataMap).forEach(b => { if ((cashDataMap[b]||[]).length) set.add(b); });
+        (piutangUangMasukData||[]).forEach(d => { if (d._bulan) set.add(d._bulan); });
+        (cashDroppingUangMasukData||[]).forEach(d => { if (d._bulan) set.add(d._bulan); });
+        return Array.from(set).sort();
+    }
+
+    function rkLapRender() {
+        const sel = document.getElementById('rkLapBulan');
+        if (!sel) return;
+        const bulanList = rkLapBuildBulanOptions();
+        const prevVal = sel.value;
+        sel.innerHTML = bulanList.map(b => `<option value="${b}">${fmtBulanTahun(b)}</option>`).join('') || '<option value="">Tidak ada data</option>';
+        if (prevVal && bulanList.includes(prevVal)) {
+            sel.value = prevVal;
+        } else if (typeof APP_DEFAULT_BULAN !== 'undefined' && APP_DEFAULT_BULAN && bulanList.includes(APP_DEFAULT_BULAN)) {
+            sel.value = APP_DEFAULT_BULAN;
+        } else if (bulanList.length) {
+            sel.value = bulanList[bulanList.length - 1];
+        }
+        const bulan = sel.value;
+
+        document.getElementById('rkLapEmpty').style.display = bulanList.length ? 'none' : 'block';
+
+        // ----- Data Uang Masuk (sama seperti renderPemasukanCards, tapi untuk
+        // bulan yang dipilih di Ringkasan, terlepas dari bulan aktif di Tab 2) -----
+        const cashDays = (cashDataMap && cashDataMap[bulan]) ? cashDataMap[bulan] : [];
+        let cash = 0, transfer = 0, grand = 0, minyak = 0, rupa = 0;
+        cashDays.forEach(item => {
+            cash += item.totalCash || 0; transfer += item.totalTransfer || 0; grand += item.grandTotal || 0;
+            (item.piutangDetail || []).forEach(d => { minyak += (d.minyakCash || 0) + (d.minyakTransfer || 0); rupa += (d.rupaCash || 0) + (d.rupaTransfer || 0); });
+            (item.cashDroppingDetail || []).forEach(d => { minyak += (d.minyakCash || 0) + (d.minyakTransfer || 0); rupa += (d.rupaCash || 0) + (d.rupaTransfer || 0); });
+        });
+        document.getElementById('rkLapCashTotalCash').textContent = fmtRp(cash);
+        document.getElementById('rkLapCashTotalTransfer').textContent = fmtRp(transfer);
+        document.getElementById('rkLapCashMinyak').textContent = fmtRp(minyak);
+        document.getElementById('rkLapCashRupa').textContent = fmtRp(rupa);
+        document.getElementById('rkLapCashGrand').textContent = fmtRp(grand);
+
+        // ----- Piutang Tempo (sama seperti pumRenderSummaryCards, difilter ke bulan ini) -----
+        const ptRows = (piutangUangMasukData || []).filter(d => d._bulan === bulan);
+        let ptTagihan = 0, ptDibayar = 0, ptProfit = 0;
+        ptRows.forEach(d => {
+            ptTagihan += parseNumber(d.tagihan) || 0;
+            ptDibayar += parseNumber(d.totalBayar) || 0;
+            if (d.profit !== '' && d.profit != null) ptProfit += clampProfit(d.profit);
+        });
+        document.getElementById('rkLapPtCount').textContent = ptRows.length + ' faktur';
+        document.getElementById('rkLapPtTagihan').textContent = fmtRp(ptTagihan);
+        document.getElementById('rkLapPtDibayar').textContent = fmtRp(ptDibayar);
+        document.getElementById('rkLapPtProfit').textContent = fmtRp(ptProfit);
+
+        // ----- Cash Dropping (sama seperti cddRenderSummaryCards, difilter ke bulan ini) -----
+        const cddRows = (cashDroppingUangMasukData || []).filter(d => d._bulan === bulan);
+        let cddNominal = 0, cddCash = 0, cddTransfer = 0, cddProfit = 0;
+        cddRows.forEach(d => {
+            cddNominal += parseNumber(d.tagihan) || 0;
+            cddCash += parseNumber(d.bayarCash) || 0;
+            cddTransfer += parseNumber(d.bayarTransfer) || 0;
+            if (d.profit !== '' && d.profit != null) cddProfit += clampProfit(d.profit);
+        });
+        document.getElementById('rkLapCddCount').textContent = cddRows.length + ' faktur';
+        document.getElementById('rkLapCddNominal').textContent = fmtRp(cddNominal);
+        document.getElementById('rkLapCddCash').textContent = fmtRp(cddCash);
+        document.getElementById('rkLapCddTransfer').textContent = fmtRp(cddTransfer);
+        document.getElementById('rkLapCddProfit').textContent = fmtRp(cddProfit);
+
+        // ----- Total Profit gabungan bulan ini: Cash Dropping + Piutang Tempo -----
+        const totalProfitBulan = ptProfit + cddProfit;
+        document.getElementById('rkLapProfitTotal').textContent = fmtRp(totalProfitBulan);
+        document.getElementById('rkLapProfitCdd').textContent = fmtRp(cddProfit);
+        document.getElementById('rkLapProfitPt').textContent = fmtRp(ptProfit);
+        document.getElementById('rkLapProfitBulanLabel').textContent = bulan ? fmtBulanTahun(bulan) : '';
+    }
+
+    document.getElementById('rkLapBulan').addEventListener('change', rkLapRender);
+    document.getElementById('rkLapBtnRefresh').addEventListener('click', function () {
+        refreshPiutangUangMasuk();
+        rkLapRender();
+        showToast('🔄 Ringkasan dimuat ulang.', 'success');
+    });
+
 
     // Event listeners Tab 9
     document.getElementById('piutangUangMasukBtnRefresh').addEventListener('click', function(){ refreshPiutangUangMasuk(); showToast('🔄 Data Piutang Tempo & Cash Dropping dimuat ulang.','success'); });
@@ -6847,6 +7013,7 @@
         if(tabName==='tab8'){ renderRingkasanSaveAll(); }
         if(tabName==='tab9'){ refreshPiutangUangMasuk(); }
         if(tabName==='tab10'){ refreshPiutangUangMasuk(); }
+        if(tabName==='tabRingkasan'){ rkLapRender(); }
     }
 
     document.querySelectorAll('.tab-btn[data-tab]').forEach(function(btn){ btn.addEventListener('click',function(e){ e.preventDefault(); const tabName=this.getAttribute('data-tab'); switchTab(tabName); }); });
@@ -6967,18 +7134,15 @@
             // Cuma update badge (ringan) di startup untuk Tab 8 — tabel Trash &
             // Save yang berat baru dirender saat user benar-benar buka tabnya.
             await updateRingkasanBadges();
-            // Tab 9 & 10 (Piutang Tempo / Cash Dropping) belum jadi tab aktif saat
-            // startup (default ke Tab 2), jadi datanya ditunda ke saat browser idle
-            // supaya tidak menunda render Tab 2 yang sedang ditunggu user.
-            if (typeof requestIdleCallback === 'function') {
-                requestIdleCallback(() => { refreshPiutangUangMasuk(); });
-            } else {
-                setTimeout(() => { refreshPiutangUangMasuk(); }, 0);
-            }
+            // Ringkasan sekarang jadi tab pendaratan (default) dan butuh data Piutang
+            // Tempo & Cash Dropping juga, jadi datanya dimuat langsung (tidak ditunda
+            // ke idle lagi) supaya cards Ringkasan tidak kosong sesaat.
+            refreshPiutangUangMasuk();
             initInputHarian();
             document.querySelector('.tab-btn[data-tab="tab9"]').style.display='inline-flex';
             document.querySelector('.tab-btn[data-tab="tab10"]').style.display='inline-flex';
-            switchTab('tab2');
+            rkLapRender();
+            switchTab('tabRingkasan');
             scheduleFitTableWraps();
             console.log('✅ GAMAS 2026 FINAL — Semua tab berfungsi.');
         } catch(err){ console.error('Gagal inisialisasi database/aplikasi:',err); showToast('❌ Gagal membuka database: '+err.message+' — lihat peringatan di atas.','warning'); const bar=document.getElementById('storageStatusBar'); if(bar&&location.protocol!=='file:'){ bar.style.display='block'; bar.style.background='#fee2e2'; bar.style.color='#991b1b'; bar.style.borderBottom='2px solid #dc2626'; bar.innerHTML='🚫 Database gagal dibuka ('+err.message+'). Coba muat ulang halaman; jika terus terjadi, buka lewat http:// bukan file://.'; } }

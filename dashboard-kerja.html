@@ -200,8 +200,118 @@
         .tab-btn.active .tab-icon {
             opacity: 1;
         }
+        /* ================================================================
+           TAB 0 - RINGKASAN (panel gelap bergaya "command center", diadaptasi
+           dari desain laporan-penjualan-futuristik, tapi datanya diambil
+           LANGSUNG dari salesData & data piutang yang sudah ada di dashboard
+           ini — bukan halaman terpisah lagi, supaya tidak pernah "kosong".)
+           ================================================================ */
+        #tab0 { padding: 0; }
+        .rk-wrap {
+            position: relative;
+            background: #070c18;
+            border-radius: 14px;
+            overflow: hidden;
+            padding: 16px 18px 24px;
+            color: #e8f4ff;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+        }
+        .rk-wrap::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 15% 10%, rgba(0,229,255,0.07), transparent),
+                radial-gradient(ellipse 60% 40% at 85% 60%, rgba(168,85,247,0.06), transparent);
+            pointer-events: none;
+        }
+        .rk-wrap > * { position: relative; z-index: 1; }
+        .rk-header {
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+            padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1px solid rgba(0,220,255,0.18);
+        }
+        .rk-logo-area h1 { font-size: 15px; font-weight: 800; letter-spacing: 0.4px; color: #e8f4ff; }
+        .rk-logo-area p { font-size: 10px; color: #8ba3c7; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1px; }
+        .rk-header-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .rk-meta-chip {
+            background: rgba(5,15,30,0.85); border: 1px solid rgba(0,220,255,0.22); padding: 4px 10px;
+            border-radius: 999px; font-size: 11px; font-weight: 500; display: flex; align-items: center; gap: 6px; color: #e8f4ff;
+        }
+        .rk-meta-chip b { color: #00e5ff; font-weight: 700; }
+        .rk-meta-chip select {
+            background: transparent; border: none; color: #00e5ff; font-weight: 700; font-size: 11px;
+            font-family: inherit; cursor: pointer; outline: none;
+        }
+        .rk-meta-chip select option { background: #0c1628; color: #e8f4ff; }
+        .rk-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 5px #22c55e; animation: rkPulse 2s infinite; }
+        @keyframes rkPulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+        .rk-stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-bottom: 12px; }
+        .rk-stat-card {
+            background: rgba(12,22,40,0.8); border: 1px solid rgba(0,220,255,0.22); border-radius: 9px;
+            padding: 7px 12px; display: flex; align-items: baseline; justify-content: space-between; gap: 6px;
+        }
+        .rk-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #8ba3c7; }
+        .rk-stat-value { font-size: 18px; font-weight: 700; color: #00e5ff; font-variant-numeric: tabular-nums; }
+        .rk-stat-sub { font-size: 10px; color: #8ba3c7; }
+
+        .rk-main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: stretch; margin-bottom: 12px; }
+        @media (max-width: 960px) { .rk-main-grid { grid-template-columns: 1fr; } }
+
+        .rk-section {
+            background: rgba(12,22,40,0.8); border: 1px solid rgba(0,220,255,0.22); border-radius: 12px;
+            overflow: hidden; margin-bottom: 12px; display: flex; flex-direction: column;
+        }
+        .rk-main-grid .rk-section { margin-bottom: 0; }
+        .rk-section-header {
+            padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            border-bottom: 1px solid rgba(0,220,255,0.22);
+            background: linear-gradient(90deg, rgba(0,229,255,0.07), transparent);
+        }
+        .rk-section-title { font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; display: flex; align-items: center; gap: 7px; color: #e8f4ff; }
+        .rk-section-title::before { content:''; width:3px; height:13px; border-radius:2px; background: linear-gradient(180deg,#00e5ff,#a855f7); }
+        .rk-badge { font-size: 9.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; letter-spacing: 0.03em; text-transform: uppercase; white-space: nowrap; }
+        .rk-badge-fitri { background: rgba(0,229,255,0.14); color: #00e5ff; border: 1px solid rgba(0,229,255,0.35); }
+        .rk-badge-rupa { background: rgba(168,85,247,0.14); color: #c084fc; border: 1px solid rgba(168,85,247,0.35); }
+        .rk-badge-piutang { background: rgba(236,72,153,0.12); color: #f472b6; border: 1px solid rgba(236,72,153,0.3); }
+
+        .rk-controls { padding: 8px 12px; border-bottom: 1px solid rgba(0,220,255,0.15); }
+        .rk-controls input {
+            width: 100%; background: rgba(5,15,30,0.85); border: 1px solid rgba(0,220,255,0.22); border-radius: 8px;
+            padding: 6px 10px; color: #e8f4ff; font-family: inherit; font-size: 11px; outline: none;
+        }
+        .rk-controls input::placeholder { color: #8ba3c7; }
+
+        .rk-table-wrap { overflow-x: auto; padding: 4px; flex: 1; }
+        .rk-table-wrap table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; }
+        .rk-table-wrap thead th {
+            font-size: 9.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #00e5ff;
+            padding: 6px 8px; text-align: left; border-bottom: 1px solid rgba(0,220,255,0.22); white-space: nowrap;
+            background: rgba(7,12,24,0.5); position: sticky; top: 0;
+        }
+        .rk-table-wrap tbody td { padding: 5px 8px; border-bottom: 1px solid rgba(0,220,255,0.08); color: #e8f4ff; white-space: nowrap; }
+        .rk-table-wrap tbody tr:hover td { background: rgba(0,229,255,0.06); }
+        .rk-table-wrap tbody tr:last-child td { border-bottom: none; }
+        .rk-table-wrap .rk-num { font-variant-numeric: tabular-nums; text-align: right; font-weight: 600; }
+        .rk-table-wrap .rk-total-row td { font-weight: 700; color: #00e5ff; background: rgba(0,229,255,0.08) !important; border-top: 1px solid rgba(0,220,255,0.22); }
+        .rk-table-wrap .rk-product-name { font-weight: 600; }
+        .rk-empty { padding: 20px 14px; text-align: center; font-size: 11.5px; color: #8ba3c7; }
+
+        .rk-empty-global { text-align: center; padding: 60px 20px; }
+        .rk-empty-global .rk-empty-icon { font-size: 46px; margin-bottom: 10px; }
+        .rk-empty-global .rk-empty-title { font-size: 15px; font-weight: 700; color: #e8f4ff; margin-bottom: 4px; }
+        .rk-empty-global .rk-empty-sub { font-size: 12px; color: #8ba3c7; }
+        .rk-faktur-link { color: #00e5ff; font-weight: 600; cursor: pointer; text-decoration: underline; text-decoration-style: dotted; }
+        .rk-overdue { color: #f87171; font-weight: 700; }
+
+        @media (max-width: 700px) {
+            .rk-wrap { padding: 12px 10px 18px; }
+            .rk-header { flex-direction: column; align-items: flex-start; }
+        }
+
         /* Semua tab aktif memakai gradient ungu-biru yang sama seperti header tabel,
            supaya tampilan tab & tabel senada. */
+        .tab-btn[data-tab="tab0"].active,
         .tab-btn[data-tab="tab1"].active,
         .tab-btn[data-tab="tab2"].active,
         .tab-btn[data-tab="tab3"].active,
@@ -215,6 +325,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             box-shadow: 0 3px 10px rgba(102, 126, 234, 0.35);
         }
+        .tab-btn[data-tab="tab0"].active .tab-icon,
         .tab-btn[data-tab="tab1"].active .tab-icon,
         .tab-btn[data-tab="tab2"].active .tab-icon,
         .tab-btn[data-tab="tab3"].active .tab-icon,
@@ -225,6 +336,7 @@
         .tab-btn[data-tab="tab10"].active .tab-icon {
             color: #fff;
         }
+        .tab-btn[data-tab="tab0"].active .badge-tab,
         .tab-btn[data-tab="tab1"].active .badge-tab,
         .tab-btn[data-tab="tab2"].active .badge-tab,
         .tab-btn[data-tab="tab3"].active .badge-tab,
@@ -4464,7 +4576,11 @@
         </div>
     </header>
     <div class="tabs" id="tabHeaders">
-        <button class="tab-btn active" data-tab="tab1">
+        <button class="tab-btn active" data-tab="tab0">
+            <svg class="tab-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></svg>
+            Ringkasan
+        </button>
+        <button class="tab-btn" data-tab="tab1">
             <svg class="tab-icon" viewBox="0 0 24 24"><polygon points="12 2.5 21 8 3 8"></polygon><line x1="4" y1="8" x2="4" y2="19"></line><line x1="9" y1="8" x2="9" y2="19"></line><line x1="15" y1="8" x2="15" y2="19"></line><line x1="20" y1="8" x2="20" y2="19"></line><line x1="2.5" y1="21" x2="21.5" y2="21"></line></svg>
             Bank Data Penjualan <span class="badge-tab" id="badgeSales">0</span>
         </button>
@@ -4506,8 +4622,84 @@
         <button id="btnTransferBankDataAbaikan" class="btn btn-outline" style="padding:4px 12px;font-size:11px;">✕ Abaikan</button>
     </div>
 
+    <!-- ======= TAB 0 - RINGKASAN ======= -->
+    <div class="tab-content active" id="tab0">
+        <div class="rk-wrap">
+            <div class="rk-header">
+                <div class="rk-logo-area">
+                    <h1>Ringkasan</h1>
+                    <p>Dashboard &middot; Kerja</p>
+                </div>
+                <div class="rk-header-meta">
+                    <div class="rk-meta-chip">Tanggal <b id="rkTanggalHariIni">-</b></div>
+                    <div class="rk-meta-chip">Periode <select id="rkPeriodeSelect"></select></div>
+                    <div class="rk-meta-chip"><span class="rk-status-dot"></span> Live</div>
+                </div>
+            </div>
+
+            <div id="rkEmptyGlobal" class="rk-empty-global" style="display:none;">
+                <div class="rk-empty-icon">📂</div>
+                <div class="rk-empty-title">Belum ada data penjualan tersimpan</div>
+                <div class="rk-empty-sub">Silakan mulai input data lewat tab Bank Data Penjualan.</div>
+            </div>
+
+            <div id="rkContent">
+                <div class="rk-stats-bar" id="rkStatsBar"></div>
+
+                <div class="rk-main-grid">
+                    <section class="rk-section">
+                        <div class="rk-section-header">
+                            <div class="rk-section-title">Penjualan Fitri</div>
+                            <span class="rk-badge rk-badge-fitri">Produk Andalan</span>
+                        </div>
+                        <div class="rk-table-wrap"><table id="rkTableFitri"><thead></thead><tbody></tbody></table></div>
+                        <div class="rk-empty" id="rkFitriEmpty" style="display:none;">Belum ada penjualan Minyak Fitri di periode ini.</div>
+                    </section>
+
+                    <section class="rk-section">
+                        <div class="rk-section-header">
+                            <div class="rk-section-title">Rupa Rupa</div>
+                            <span class="rk-badge rk-badge-rupa">Semua Produk</span>
+                        </div>
+                        <div class="rk-controls"><input type="text" id="rkSearchRupa" placeholder="Cari produk..." autocomplete="off"></div>
+                        <div class="rk-table-wrap"><table id="rkTableRupa"><thead></thead><tbody></tbody></table></div>
+                        <div class="rk-empty" id="rkRupaEmpty" style="display:none;">Belum ada penjualan Rupa Rupa di periode ini.</div>
+                    </section>
+                </div>
+
+                <section class="rk-section">
+                    <div class="rk-section-header">
+                        <div class="rk-section-title">Piutang Terbesar</div>
+                        <span class="rk-badge rk-badge-piutang">Receivable</span>
+                    </div>
+                    <div class="rk-table-wrap">
+                        <table>
+                            <thead><tr><th>Faktur</th><th>Customer</th><th>Alamat</th><th>Produk</th><th class="rk-num">Nominal</th><th>Tgl Faktur</th><th>Jatuh Tempo</th><th>Sales</th></tr></thead>
+                            <tbody id="rkPiutangBesarBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="rk-empty" id="rkPiutangBesarEmpty" style="display:none;">Belum ada data piutang.</div>
+                </section>
+
+                <section class="rk-section">
+                    <div class="rk-section-header">
+                        <div class="rk-section-title">Piutang Terlama</div>
+                        <span class="rk-badge rk-badge-piutang">Aging</span>
+                    </div>
+                    <div class="rk-table-wrap">
+                        <table>
+                            <thead><tr><th>Faktur</th><th>Customer</th><th>Alamat</th><th>Produk</th><th class="rk-num">Nominal</th><th>Tgl Faktur</th><th>Jatuh Tempo</th><th>Sales</th></tr></thead>
+                            <tbody id="rkPiutangLamaBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="rk-empty" id="rkPiutangLamaEmpty" style="display:none;">Belum ada data piutang.</div>
+                </section>
+            </div>
+        </div>
+    </div>
+
     <!-- ======= TAB 1 – BANK DATA PENJUALAN ======= -->
-    <div class="tab-content active" id="tab1">
+    <div class="tab-content" id="tab1">
         <div class="tab1-app-toolbar">
             <div class="tab1-chip-row" id="tab1ChipRow">
                 <button type="button" class="tab1-chip active" data-chip="semua">Semua <span class="chip-count" id="chipCountSemua">0</span></button>
@@ -9497,6 +9689,197 @@
 
         function ptDaysBetween(a, b) { return Math.round((a - b) / (1000 * 60 * 60 * 24)); }
 
+        // ================================================================
+        // TAB 0 - RINGKASAN
+        // Semua angka di sini dihitung LANGSUNG dari salesData (Bank Data
+        // Penjualan) & data piutang yang sama dipakai tab Cek Piutang —
+        // tidak ada sumber data terpisah lagi, jadi tidak akan "kosong"
+        // selama Bank Data Penjualan sudah terisi.
+        // ================================================================
+        let rkSearchRupaTerm = '';
+
+        function rkPeriodKey(iso) { return periodKey(iso); }
+
+        function rkPopulatePeriodeSelect() {
+            const sel = document.getElementById('rkPeriodeSelect');
+            if (!sel) return;
+            const prev = sel.value;
+            const periodSet = new Set();
+            salesData.forEach(r => { const p = rkPeriodKey(r.Tanggal); if (p) periodSet.add(p); });
+            const periods = Array.from(periodSet).sort().reverse();
+            if (periods.length === 0) {
+                const now = new Date();
+                periods.push(now.toISOString().slice(0, 7));
+            }
+            sel.innerHTML = periods.map(p => `<option value="${p}">${fmtBulanTahun(p)}</option>`).join('');
+            if (prev && periods.includes(prev)) {
+                sel.value = prev;
+            } else {
+                sel.value = periods[0];
+            }
+        }
+
+        function rkBuildSalesTable(rows, salesList) {
+            // rows: array of {produk, bySales: {namaSales: qty}, total}
+            // Mengembalikan {theadHtml, tbodyHtml}
+            const theadHtml = '<tr><th>Produk</th>' +
+                salesList.map(s => `<th class="rk-num">${escapeHtml(s)}</th>`).join('') +
+                '<th class="rk-num">Total</th></tr>';
+            let tbodyHtml = '';
+            const totalPerSales = {};
+            salesList.forEach(s => totalPerSales[s] = 0);
+            let grandTotal = 0;
+            rows.forEach(row => {
+                tbodyHtml += '<tr><td class="rk-product-name">' + escapeHtml(row.produk) + '</td>' +
+                    salesList.map(s => {
+                        const v = row.bySales[s] || 0;
+                        totalPerSales[s] += v;
+                        return `<td class="rk-num">${v || '-'}</td>`;
+                    }).join('') +
+                    `<td class="rk-num">${row.total}</td></tr>`;
+                grandTotal += row.total;
+            });
+            tbodyHtml += '<tr class="rk-total-row"><td>TOTAL</td>' +
+                salesList.map(s => `<td class="rk-num">${totalPerSales[s]}</td>`).join('') +
+                `<td class="rk-num">${grandTotal}</td></tr>`;
+            return { theadHtml, tbodyHtml, grandTotal, totalPerSales };
+        }
+
+        function rkRenderPiutangRow(d) {
+            const overdueTxt = (d.statusClass === 'overdue' && d.overdueDays != null) ?
+                ` <span class="rk-overdue">(${d.overdueDays} hr)</span>` : '';
+            return `<tr>
+                <td>${escapeHtml(d.noFaktur || '-')}</td>
+                <td>${escapeHtml(d.customer || '-')}</td>
+                <td>${escapeHtml(d.alamat || '-')}</td>
+                <td>${escapeHtml(d.produkGabungan || '-')}</td>
+                <td class="rk-num">${fmtRp(d.sisa)}</td>
+                <td>${fmtTanggal(d.tanggal) || '-'}</td>
+                <td>${d.jt || '-'}${overdueTxt}</td>
+                <td>${escapeHtml(d.sales || '-')}</td>
+            </tr>`;
+        }
+
+        function rkRender() {
+            if (!document.getElementById('tab0')) return;
+            const emptyGlobal = document.getElementById('rkEmptyGlobal');
+            const content = document.getElementById('rkContent');
+            if (salesData.length === 0) {
+                if (emptyGlobal) emptyGlobal.style.display = 'block';
+                if (content) content.style.display = 'none';
+                return;
+            }
+            if (emptyGlobal) emptyGlobal.style.display = 'none';
+            if (content) content.style.display = 'block';
+
+            document.getElementById('rkTanggalHariIni').textContent = fmtTanggal(new Date().toISOString().slice(0, 10));
+            rkPopulatePeriodeSelect();
+            const periode = document.getElementById('rkPeriodeSelect').value;
+
+            const rowsPeriode = salesData.filter(r => rkPeriodKey(r.Tanggal) === periode);
+            const fitriRows = rowsPeriode.filter(r => ptIsFitri(r.Produk));
+            const rupaRows = rowsPeriode.filter(r => !ptIsFitri(r.Produk));
+
+            const salesList = Array.from(new Set(rowsPeriode.map(r => (r.Sales || '').trim()).filter(Boolean))).sort();
+
+            // ----- Penjualan FITRI -----
+            const fitriMap = {};
+            fitriRows.forEach(r => {
+                const produk = (r.Produk || '-').trim();
+                const s = (r.Sales || '').trim();
+                const qty = parseNumber(r.Jumlah) || 0;
+                if (!fitriMap[produk]) fitriMap[produk] = { produk, bySales: {}, total: 0 };
+                fitriMap[produk].bySales[s] = (fitriMap[produk].bySales[s] || 0) + qty;
+                fitriMap[produk].total += qty;
+            });
+            const fitriRowsArr = Object.values(fitriMap).sort((a, b) => b.total - a.total);
+            const fitriTable = rkBuildSalesTable(fitriRowsArr, salesList);
+            document.querySelector('#rkTableFitri thead').innerHTML = fitriTable.theadHtml;
+            document.querySelector('#rkTableFitri tbody').innerHTML = fitriTable.tbodyHtml;
+            document.getElementById('rkFitriEmpty').style.display = fitriRowsArr.length ? 'none' : 'block';
+            document.getElementById('rkTableFitri').style.display = fitriRowsArr.length ? '' : 'none';
+
+            // ----- Stat cards (Total FITRI + per sales) -----
+            const statsBar = document.getElementById('rkStatsBar');
+            let statsHtml = `<div class="rk-stat-card"><div><div class="rk-stat-label">Total Fitri</div><div class="rk-stat-value">${fitriTable.grandTotal}</div></div><div class="rk-stat-sub">Unit</div></div>`;
+            salesList.forEach(s => {
+                statsHtml += `<div class="rk-stat-card"><div><div class="rk-stat-label">${escapeHtml(s)}</div><div class="rk-stat-value">${fitriTable.totalPerSales[s] || 0}</div></div><div class="rk-stat-sub">Unit</div></div>`;
+            });
+            statsBar.innerHTML = statsHtml;
+
+            // ----- Rupa Rupa -----
+            const rupaMap = {};
+            rupaRows.forEach(r => {
+                const produk = (r.Produk || '-').trim();
+                const s = (r.Sales || '').trim();
+                const qty = parseNumber(r.Jumlah) || 0;
+                if (!rupaMap[produk]) rupaMap[produk] = { produk, bySales: {}, total: 0 };
+                rupaMap[produk].bySales[s] = (rupaMap[produk].bySales[s] || 0) + qty;
+                rupaMap[produk].total += qty;
+            });
+            let rupaRowsArr = Object.values(rupaMap).sort((a, b) => b.total - a.total);
+            if (rkSearchRupaTerm) {
+                const q = rkSearchRupaTerm.toLowerCase();
+                rupaRowsArr = rupaRowsArr.filter(r => r.produk.toLowerCase().includes(q));
+            }
+            const rupaTable = rkBuildSalesTable(rupaRowsArr, salesList);
+            document.querySelector('#rkTableRupa thead').innerHTML = rupaTable.theadHtml;
+            document.querySelector('#rkTableRupa tbody').innerHTML = rupaTable.tbodyHtml;
+            document.getElementById('rkRupaEmpty').style.display = rupaRowsArr.length ? 'none' : 'block';
+            document.getElementById('rkTableRupa').style.display = rupaRowsArr.length ? '' : 'none';
+
+            // ----- Piutang Terbesar & Piutang Terlama (snapshot terkini, tidak terikat periode) -----
+            rkRenderPiutang();
+        }
+
+        function rkRenderPiutang() {
+            const besarBody = document.getElementById('rkPiutangBesarBody');
+            const lamaBody = document.getElementById('rkPiutangLamaBody');
+            const besarEmpty = document.getElementById('rkPiutangBesarEmpty');
+            const lamaEmpty = document.getElementById('rkPiutangLamaEmpty');
+            if (!besarBody || !lamaBody) return;
+            if (!window._ptDataLoaded) {
+                // Data piutang belum dimuat sama sekali — biarkan kosong dulu,
+                // switchTab('tab0') akan memuatnya lalu panggil ulang fungsi ini.
+                besarBody.innerHTML = '';
+                lamaBody.innerHTML = '';
+                besarEmpty.style.display = 'block';
+                lamaEmpty.style.display = 'block';
+                return;
+            }
+            let tempoRows;
+            try { tempoRows = ptBuildTempoRows(); } catch (e) { tempoRows = []; }
+            // Gabungkan per No.Faktur (1 faktur bisa punya beberapa baris produk,
+            // tapi totalFaktur/totalBayar-nya sudah sama di semua barisnya).
+            const byFaktur = {};
+            tempoRows.forEach(r => {
+                const key = normFaktur(r.noFaktur);
+                if (!key) return;
+                if (!byFaktur[key]) {
+                    byFaktur[key] = { ...r, produkSet: new Set() };
+                }
+                byFaktur[key].produkSet.add((r.produkNama || r.produk || '').trim());
+            });
+            const piutangList = Object.values(byFaktur).map(d => {
+                const sisa = Math.max(0, (d.totalFaktur || 0) - (d.totalBayar || 0));
+                return { ...d, sisa, produkGabungan: Array.from(d.produkSet).filter(Boolean).join(', ') };
+            }).filter(d => d.statusClass !== 'lunas' && d.sisa > 0.5);
+
+            const besar = [...piutangList].sort((a, b) => b.sisa - a.sisa).slice(0, 15);
+            const lama = [...piutangList].sort((a, b) => String(a.tanggal || '').localeCompare(String(b.tanggal || ''))).slice(0, 15);
+
+            besarBody.innerHTML = besar.map(rkRenderPiutangRow).join('');
+            lamaBody.innerHTML = lama.map(rkRenderPiutangRow).join('');
+            besarEmpty.style.display = besar.length ? 'none' : 'block';
+            lamaEmpty.style.display = lama.length ? 'none' : 'block';
+        }
+
+        document.getElementById('rkPeriodeSelect').addEventListener('change', rkRender);
+        document.getElementById('rkSearchRupa').addEventListener('input', function() {
+            rkSearchRupaTerm = this.value.trim();
+            rkRender();
+        });
+
         function ptIsFitri(produk) { return (produk || '').toLowerCase().includes('fitri'); }
 
         function ptFlattenPiutang() {
@@ -14284,6 +14667,14 @@
                 d.classList.remove('active');
             });
             scheduleFitTableWraps();
+            if (tabName === 'tab0') {
+                if (!window._ptDataLoaded) {
+                    await loadAllCashDataBeforePtRefresh();
+                    await ptRefresh(false);
+                    window._ptDataLoaded = true;
+                }
+                rkRender();
+            }
             if (tabName === 'tab3') {
                 if (!window._cekDataLoaded) {
                     await renderCek();
@@ -14454,7 +14845,7 @@
                 // dibuka user (lihat switchTab -> renderRingkasanSaveAll()).
                 await updateRingkasanBadges();
 
-                switchTab('tab1');
+                switchTab('tab0');
                 scheduleFitTableWraps();
                 checkPendingTransferBankData();
                 
@@ -14666,6 +15057,7 @@ html.gamas-dark-mode .tab-btn {
     color: #a8b3c4 !important;
 }
 
+html.gamas-dark-mode .tab-btn[data-tab="tab0"].active,
 html.gamas-dark-mode .tab-btn[data-tab="tab1"].active,
 html.gamas-dark-mode .tab-btn[data-tab="tab2"].active,
 html.gamas-dark-mode .tab-btn[data-tab="tab3"].active,

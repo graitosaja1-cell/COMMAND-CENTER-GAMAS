@@ -321,6 +321,14 @@
             padding: 6px 10px; color: var(--rk-text); font-family: inherit; font-size: 11px; outline: none;
         }
         .rk-controls input::placeholder { color: var(--rk-text-dim); }
+        .rk-controls-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .rk-controls-row input { flex: 1 1 160px; min-width: 0; }
+        .rk-controls-row select { flex: 1 1 140px; min-width: 140px; max-width: 100%; }
+        .rk-controls-row select {
+            background: var(--rk-input-bg); border: 1px solid var(--rk-border);
+            border-radius: 8px; padding: 6px 10px; color: var(--rk-text); font-family: inherit; font-size: 11px; outline: none; cursor: pointer;
+        }
+        .rk-controls-row select option { background: var(--rk-panel); color: var(--rk-text); }
 
         .rk-table-wrap { overflow-x: auto; padding: 4px; flex: 1; }
         .rk-table-wrap table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; }
@@ -4705,7 +4713,10 @@
                             <div class="rk-section-title">Rupa Rupa</div>
                             <span class="rk-badge rk-badge-rupa">Semua Produk</span>
                         </div>
-                        <div class="rk-controls"><input type="text" id="rkSearchRupa" placeholder="Cari produk..." autocomplete="off"></div>
+                        <div class="rk-controls rk-controls-row">
+                            <input type="text" id="rkSearchRupa" placeholder="Cari produk..." autocomplete="off">
+                            <select id="rkPilihProdukRupa"><option value="">— Pilih Produk —</option></select>
+                        </div>
                         <div class="rk-table-wrap" id="rkRupaScrollBox"><table id="rkTableRupa"><thead></thead><tbody></tbody></table></div>
                         <div class="rk-empty" id="rkRupaEmpty" style="display:none;">Belum ada penjualan Rupa Rupa di periode ini.</div>
                     </section>
@@ -9862,6 +9873,22 @@
                 rupaMap[produk].total += qty;
             });
             let rupaRowsArr = Object.values(rupaMap).sort((a, b) => b.total - a.total);
+
+            // ----- Dropdown "Pilih Produk" — daftar SEMUA produk Rupa Rupa di periode
+            // ini (tidak ikut terpotong oleh filter cari), diurutkan A-Z. -----
+            const rupaSelectEl = document.getElementById('rkPilihProdukRupa');
+            if (rupaSelectEl) {
+                const namaProdukList = Object.keys(rupaMap).sort((a, b) => a.localeCompare(b));
+                const optionsHtml = '<option value="">— Pilih Produk —</option>' +
+                    namaProdukList.map(nm => `<option value="${escapeHtml(nm)}">${escapeHtml(nm)}</option>`).join('');
+                if (rupaSelectEl.dataset.optCount != namaProdukList.length || rupaSelectEl.innerHTML === '') {
+                    rupaSelectEl.innerHTML = optionsHtml;
+                    rupaSelectEl.dataset.optCount = namaProdukList.length;
+                }
+                // Sinkronkan pilihan dropdown dengan isi kolom cari saat ini
+                rupaSelectEl.value = namaProdukList.includes(rkSearchRupaTerm) ? rkSearchRupaTerm : '';
+            }
+
             if (rkSearchRupaTerm) {
                 const q = rkSearchRupaTerm.toLowerCase();
                 rupaRowsArr = rupaRowsArr.filter(r => r.produk.toLowerCase().includes(q));
@@ -9921,6 +9948,11 @@
         document.getElementById('rkPeriodeSelect').addEventListener('change', rkRender);
         document.getElementById('rkSearchRupa').addEventListener('input', function() {
             rkSearchRupaTerm = this.value.trim();
+            rkRender();
+        });
+        document.getElementById('rkPilihProdukRupa').addEventListener('change', function() {
+            rkSearchRupaTerm = this.value;
+            document.getElementById('rkSearchRupa').value = this.value;
             rkRender();
         });
 

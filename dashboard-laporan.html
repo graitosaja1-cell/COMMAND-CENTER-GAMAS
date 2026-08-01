@@ -1019,58 +1019,64 @@
 /* ── Kartu ringkasan cepat per Sales: Minyak Fitri (Qty+Nominal), Rupa Rupa (Nominal saja) ── */
 #tabSales .ps-cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-            gap: 10px;
-            margin-bottom: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
         }
 #tabSales .ps-card {
             border: 1px solid #e2e8f0;
-            border-radius: 10px;
+            border-radius: 14px;
             overflow: hidden;
             background: #fff;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            box-shadow: 0 4px 14px rgba(30,41,59,0.07);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+#tabSales .ps-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(30,41,59,0.12);
         }
 #tabSales .ps-card-name {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #fff;
             font-weight: 700;
-            font-size: 12px;
-            padding: 8px 12px;
-            letter-spacing: 0.3px;
+            font-size: 15px;
+            padding: 16px 16px;
+            letter-spacing: 0.4px;
         }
 #tabSales .ps-card-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 7px 12px;
+            padding: 14px 16px;
             border-top: 1px solid #f1f5f9;
-            gap: 8px;
+            gap: 10px;
         }
 #tabSales .ps-card-label {
-            font-size: 10px;
+            font-size: 12px;
             color: #64748b;
             font-weight: 600;
             white-space: nowrap;
         }
 #tabSales .ps-card-metrics {
             display: flex;
-            align-items: baseline;
-            gap: 8px;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
         }
 #tabSales .ps-card-qty {
-            font-size: 11px;
+            font-size: 12.5px;
             font-weight: 700;
             color: #334155;
             white-space: nowrap;
         }
 #tabSales .ps-card-qty small {
-            font-size: 9px;
+            font-size: 10px;
             font-weight: 600;
             color: #94a3b8;
         }
 #tabSales .ps-card-nominal {
-            font-size: 12px;
-            font-weight: 700;
+            font-size: 16px;
+            font-weight: 800;
             color: #059669;
             font-family: 'Segoe UI', monospace;
             white-space: nowrap;
@@ -1080,7 +1086,7 @@
         }
 @media (max-width: 600px) {
 #tabSales .ps-cards-grid {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             }
         }
 /* ── Grand Total: digabung sebaris dengan filter bar, rata kanan ── */
@@ -2880,17 +2886,16 @@
                 <button class="active" data-tab="summary">📊 Per Sales</button>
             </div>
             <div class="header-right">
-                <div class="upload-area">
-                    <label for="fileInput">📁 Pilih File</label>
-                    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
-                    <div class="file-info">
-                        <span class="file-name" id="fileName">Belum ada file</span>
-                        <span class="badge-count" id="rowCount">0 / 0 baris</span>
-                    </div>
+                <div class="file-info">
+                    <span class="file-name" id="fileName">Belum ada file</span>
+                    <span class="badge-count" id="rowCount">0 / 0 baris</span>
                 </div>
                 <div class="action-inline" style="position: relative;">
                     <button class="menu-toggle-btn" id="salesTabMenuBtn">⚙️ Menu <span style="font-size:8px;">▼</span></button>
                     <div class="menu-dropdown" id="salesTabMenuDropdown">
+                        <div class="menu-item" title="Upload file Excel/CSV data penjualan baru">
+                            <label for="fileInput" style="cursor:pointer;">📁 Pilih File <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" /></label>
+                        </div>
                         <div class="menu-item">
                             <button type="button" class="btn btn-danger" id="btnHapusSalesTab" title="Hapus semua data di tab Sales ini (kalau ada yang salah upload)" style="flex:1;margin:0;">🗑️ Hapus Data</button>
                         </div>
@@ -2915,16 +2920,6 @@
             </div>
 
             <select id="filterPeriode" class="psfb-select" title="Periode"><option value="">Semua Bulan</option></select>
-
-            <select id="filterSalesDropdown" class="psfb-select" title="Sales"><option value="">Semua Sales</option></select>
-
-            <div class="psfb-select-wrap" id="filterPembayaranGroup">
-                <select id="filterPembayaran" class="psfb-select" title="Pembayaran">
-                    <option value="">Semua Bayar</option>
-                    <option value="Cash">Cash</option>
-                    <option value="Tempo">Tempo</option>
-                </select>
-            </div>
 
             <button type="button" class="psfb-btn psfb-btn-primary" id="btnFilterLanjutan">
                 <i class="bi bi-sliders"></i> Filter Lanjutan
@@ -2964,6 +2959,18 @@
                     <button type="button" class="psfb-drawer-close" id="btnCloseDrawer">&times;</button>
                 </div>
                 <div class="psfb-drawer-body">
+                    <div class="psfb-field">
+                        <label for="filterSalesDropdown">Sales</label>
+                        <select id="filterSalesDropdown"><option value="">Semua Sales</option></select>
+                    </div>
+                    <div class="psfb-field" id="filterPembayaranGroup">
+                        <label for="filterPembayaran">Pembayaran</label>
+                        <select id="filterPembayaran">
+                            <option value="">Semua Bayar</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Tempo">Tempo</option>
+                        </select>
+                    </div>
                     <div class="psfb-field">
                         <label for="filterTglDay">Tanggal (Hari)</label>
                         <select id="filterTglDay"><option value="">Semua Hari</option></select>
@@ -3811,6 +3818,8 @@
                 }
 
                 let advCount = 0;
+                if (filterSalesDropdown.value) advCount++;
+                if (filterPembayaran.value) advCount++;
                 if (filterTglDay.value) advCount++;
                 if (filterProduk.value) advCount++;
                 if (filterKategori.value) advCount++;
@@ -4075,7 +4084,7 @@
 
                 const pembayaranGroup = document.getElementById('filterPembayaranGroup');
                 if (tab === 'summary') {
-                    pembayaranGroup.style.display = 'flex';
+                    pembayaranGroup.style.display = 'block';
                 } else {
                     pembayaranGroup.style.display = 'none';
                 }
@@ -4300,7 +4309,7 @@
             }
 
             // Tampilkan/sembunyikan filter Pembayaran sesuai sub-tab default (Per Sales / Data)
-            document.getElementById('filterPembayaranGroup').style.display = (currentTab === 'summary') ? 'flex' : 'none';
+            document.getElementById('filterPembayaranGroup').style.display = (currentTab === 'summary') ? 'block' : 'none';
 
             // Render chip filter aktif + badge Filter Lanjutan sesuai kondisi awal
             renderFilterChips();
@@ -7490,6 +7499,19 @@
             const bulanSelect=document.getElementById('bulanPemasukan');
             let found=false; for(let opt of bulanSelect.options){ if(opt.value===defaultBulan){ opt.selected=true; found=true; break; } } if(!found) bulanSelect.value='2026-07'; cashBulan=bulanSelect.value;
             await loadCashData();
+
+            // FIX: kalau bulan default (Juli) ternyata belum/tidak ada datanya, tapi ada
+            // bulan LAIN yang datanya sudah diupload (mis. Agustus), otomatis pindah ke
+            // bulan TERBARU yang datanya tersedia — supaya saat aplikasi pertama dibuka
+            // tidak "nyangkut" di Juli walau user sudah upload bulan yang lebih baru.
+            {
+                const bulanOptionValues=Array.from(bulanSelect.options).map(o=>o.value);
+                const bulanDenganData=bulanOptionValues.filter(b=>cashDataMap[b] && cashDataMap[b].length).sort();
+                if(bulanDenganData.length && !(cashDataMap[cashBulan] && cashDataMap[cashBulan].length)){
+                    const bulanTerbaru=bulanDenganData[bulanDenganData.length-1];
+                    bulanSelect.value=bulanTerbaru; cashBulan=bulanTerbaru; APP_DEFAULT_BULAN=bulanTerbaru;
+                }
+            }
             
             // FIX: Cleanup duplicate cashIncome documents on startup
             console.log('[STARTUP] Cleaning up duplicate cashIncome documents...');

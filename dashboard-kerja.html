@@ -1002,6 +1002,137 @@
                 flex-wrap: wrap;
             }
         }
+
+        /* ===== KELOLA KOLOM (toggle kolom tabel Cek Piutang) ===== */
+        .filter-row-main .fc-kolom-toggle {
+            flex: 0 0 auto;
+            height: 32px;
+            padding: 0 10px;
+            font-size: 12.5px;
+            border-radius: 7px;
+            background: #ffffff;
+            border: 1.5px solid #d1d5db;
+            color: #475569;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .filter-row-main .fc-kolom-toggle:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        .filter-row-main .fc-kolom-toggle .kolom-badge {
+            background: #667eea;
+            color: #fff;
+            border-radius: 10px;
+            padding: 1px 7px;
+            font-size: 10.5px;
+            font-weight: 700;
+            min-width: 15px;
+            text-align: center;
+            display: inline-block;
+            line-height: 1.5;
+        }
+        html.gamas-dark-mode .filter-row-main .fc-kolom-toggle {
+            background: #161d2b !important;
+            border-color: #3a4358 !important;
+            color: #e8ecf3 !important;
+        }
+        .kolom-dropdown-panel {
+            padding: 4px 0;
+            max-height: 320px;
+            overflow-y: auto;
+            min-width: 200px;
+        }
+        .kolom-dropdown-panel .kolom-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            font-size: 11px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f3f6;
+        }
+        .kolom-dropdown-panel .kolom-item:hover {
+            background: #f1f3f6;
+        }
+        .kolom-dropdown-panel .kolom-item input {
+            cursor: pointer;
+            flex: 0 0 auto;
+        }
+        .kolom-dropdown-panel .kolom-item label {
+            cursor: pointer;
+            flex: 1;
+            margin: 0;
+        }
+        .kolom-dropdown-footer {
+            display: flex;
+            gap: 6px;
+            padding: 8px 10px 6px 10px;
+            border-top: 1px solid #e5e9ef;
+        }
+        .kolom-dropdown-footer button {
+            flex: 1;
+            font-size: 10.5px;
+            padding: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: inherit;
+        }
+        .kolom-btn-reset {
+            background: #eef1f6;
+            border: 1px solid #d8dde5;
+            color: #475569;
+        }
+        .kolom-btn-reset:hover {
+            background: #e5e9f0;
+        }
+        .kolom-btn-terapkan {
+            background: #667eea;
+            border: 1px solid #667eea;
+            color: #fff;
+        }
+        .kolom-btn-terapkan:hover {
+            background: #5a67d8;
+        }
+        html.gamas-dark-mode .kolom-dropdown-panel .kolom-item {
+            border-bottom-color: #2a3448 !important;
+            color: #e8ecf3 !important;
+        }
+        html.gamas-dark-mode .kolom-dropdown-panel .kolom-item:hover {
+            background: #1c2436 !important;
+        }
+        html.gamas-dark-mode .kolom-dropdown-footer {
+            border-top-color: #2a3448 !important;
+        }
+        html.gamas-dark-mode .kolom-btn-reset {
+            background: #1c2436 !important;
+            border-color: #3a4358 !important;
+            color: #c7cede !important;
+        }
+        /* Sembunyikan kolom tabel Cek Piutang sesuai pilihan "Kelola Kolom" */
+        #tab4TableWrap.pt-hide-c2 th:nth-child(2), #tab4TableWrap.pt-hide-c2 td:nth-child(2) { display: none; }
+        #tab4TableWrap.pt-hide-c3 th:nth-child(3), #tab4TableWrap.pt-hide-c3 td:nth-child(3) { display: none; }
+        #tab4TableWrap.pt-hide-c4 th:nth-child(4), #tab4TableWrap.pt-hide-c4 td:nth-child(4) { display: none; }
+        #tab4TableWrap.pt-hide-c5 th:nth-child(5), #tab4TableWrap.pt-hide-c5 td:nth-child(5) { display: none; }
+        #tab4TableWrap.pt-hide-c6 th:nth-child(6), #tab4TableWrap.pt-hide-c6 td:nth-child(6) { display: none; }
+        #tab4TableWrap.pt-hide-c7 th:nth-child(7), #tab4TableWrap.pt-hide-c7 td:nth-child(7) { display: none; }
+        #tab4TableWrap.pt-hide-c8 th:nth-child(8), #tab4TableWrap.pt-hide-c8 td:nth-child(8) { display: none; }
+        #tab4TableWrap.pt-hide-c9 th:nth-child(9), #tab4TableWrap.pt-hide-c9 td:nth-child(9) { display: none; }
+        #tab4TableWrap.pt-hide-c10 th:nth-child(10), #tab4TableWrap.pt-hide-c10 td:nth-child(10) { display: none; }
+        #tab4TableWrap.pt-hide-c11 th:nth-child(11), #tab4TableWrap.pt-hide-c11 td:nth-child(11) { display: none; }
+        #tab4TableWrap.pt-hide-c12 th:nth-child(12), #tab4TableWrap.pt-hide-c12 td:nth-child(12) { display: none; }
+        #tab4TableWrap.pt-hide-c13 th:nth-child(13), #tab4TableWrap.pt-hide-c13 td:nth-child(13) { display: none; }
+        #tab4TableWrap.pt-hide-c14 th:nth-child(14), #tab4TableWrap.pt-hide-c14 td:nth-child(14) { display: none; }
+        #tab4TableWrap.pt-hide-c15 th:nth-child(15), #tab4TableWrap.pt-hide-c15 td:nth-child(15) { display: none; }
+        #tab4TableWrap.pt-hide-c16 th:nth-child(16), #tab4TableWrap.pt-hide-c16 td:nth-child(16) { display: none; }
+
         .table-wrap {
             overflow: auto;
             border: 1px solid #d1d5db;
@@ -4620,6 +4751,8 @@
         <div class="pt-source-status" id="ptSourceStatus">0 transaksi penjualan · 0 faktur dipilih</div>
         <div class="filter-bar slim">
             <div class="filter-row-main">
+                <button type="button" class="fc-kolom-toggle" id="ptKolomBtn" title="Pilih kolom yang ingin ditampilkan di tabel">🧮 Kelola Kolom <span class="kolom-badge" id="ptKolomBadge">8</span> <span style="font-size:8px;">▼</span></button>
+                <div class="menu-dropdown" id="ptKolomDropdown"></div>
                 <div class="fc-search"><input type="text" id="ptSearch" placeholder="No faktur atau nama toko..."></div>
                 <div class="fc-periode pt-bulan-field" style="position:relative;"><button type="button" id="ptBulanBtn" class="pt-bulan-btn">Periode: Semua</button><div id="ptBulanPanel" class="pt-bulan-panel"></div></div>
                 <button class="fc-reset" id="ptBtnReset">↺ Reset</button>
@@ -9746,6 +9879,104 @@
             updatePiutangSelectedInfo();
         }
 
+        // ===== KELOLA KOLOM - CEK PIUTANG (TAB 4) =====
+        // Daftar kolom yang bisa disembunyikan/ditampilkan (kolom checkbox di posisi 1 selalu tampil).
+        // "col" = posisi nth-child asli di tabel. "def" = tampil secara default agar tabel
+        // rapi saat pertama dibuka (tidak perlu geser/scroll horizontal).
+        const PT_KOLOM_LIST = [
+            { col: 2, label: 'No.Faktur', def: true },
+            { col: 3, label: 'Tgl Transaksi', def: true },
+            { col: 4, label: 'Customer', def: true },
+            { col: 5, label: 'Alamat', def: false },
+            { col: 6, label: 'Sales', def: false },
+            { col: 7, label: 'Kategori', def: false },
+            { col: 8, label: 'Produk', def: true },
+            { col: 9, label: 'Total Tagihan', def: true },
+            { col: 10, label: 'Total Dibayar', def: false },
+            { col: 11, label: 'Sisa Tagihan', def: true },
+            { col: 12, label: 'Jatuh Tempo', def: true },
+            { col: 13, label: 'Status', def: true },
+            { col: 14, label: 'Tgl Bayar', def: false },
+            { col: 15, label: 'Tgl Cetak Tgh', def: false },
+            { col: 16, label: 'Keterangan', def: false },
+        ];
+        const PT_KOLOM_LS_KEY = 'pt_kolom_visible_v1';
+
+        function ptLoadKolomState() {
+            try {
+                const raw = localStorage.getItem(PT_KOLOM_LS_KEY);
+                if (raw) {
+                    const saved = JSON.parse(raw);
+                    if (saved && typeof saved === 'object') {
+                        // Lengkapi kalau ada kolom baru yang belum tersimpan di localStorage lama
+                        PT_KOLOM_LIST.forEach(k => { if (!(k.col in saved)) saved[k.col] = k.def; });
+                        return saved;
+                    }
+                }
+            } catch (e) {}
+            const def = {};
+            PT_KOLOM_LIST.forEach(k => { def[k.col] = k.def; });
+            return def;
+        }
+        let ptKolomState = ptLoadKolomState();
+
+        function ptSaveKolomState() {
+            try { localStorage.setItem(PT_KOLOM_LS_KEY, JSON.stringify(ptKolomState)); } catch (e) {}
+        }
+
+        function ptApplyKolomVisibility() {
+            const wrap = document.getElementById('tab4TableWrap');
+            if (!wrap) return;
+            PT_KOLOM_LIST.forEach(k => {
+                wrap.classList.toggle('pt-hide-c' + k.col, !ptKolomState[k.col]);
+            });
+            const visibleCount = PT_KOLOM_LIST.filter(k => ptKolomState[k.col]).length;
+            const badge = document.getElementById('ptKolomBadge');
+            if (badge) badge.textContent = visibleCount;
+        }
+
+        function ptRenderKolomDropdown() {
+            const panel = document.getElementById('ptKolomDropdown');
+            if (!panel) return;
+            panel.innerHTML = `
+                <div class="kolom-dropdown-panel">
+                    ${PT_KOLOM_LIST.map(k => `
+                        <div class="kolom-item">
+                            <input type="checkbox" id="ptKolomChk${k.col}" data-col="${k.col}" ${ptKolomState[k.col] ? 'checked' : ''}>
+                            <label for="ptKolomChk${k.col}">${k.label}</label>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="kolom-dropdown-footer">
+                    <button type="button" class="kolom-btn-reset" id="ptKolomResetBtn">↺ Default</button>
+                    <button type="button" class="kolom-btn-terapkan" id="ptKolomAllBtn">Tampilkan Semua</button>
+                </div>`;
+            panel.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    ptKolomState[this.dataset.col] = this.checked;
+                    ptSaveKolomState();
+                    ptApplyKolomVisibility();
+                });
+            });
+            const resetBtn = document.getElementById('ptKolomResetBtn');
+            if (resetBtn) resetBtn.addEventListener('click', function() {
+                PT_KOLOM_LIST.forEach(k => { ptKolomState[k.col] = k.def; });
+                ptSaveKolomState();
+                ptApplyKolomVisibility();
+                ptRenderKolomDropdown();
+            });
+            const allBtn = document.getElementById('ptKolomAllBtn');
+            if (allBtn) allBtn.addEventListener('click', function() {
+                PT_KOLOM_LIST.forEach(k => { ptKolomState[k.col] = true; });
+                ptSaveKolomState();
+                ptApplyKolomVisibility();
+                ptRenderKolomDropdown();
+            });
+        }
+
+        ptRenderKolomDropdown();
+        ptApplyKolomVisibility();
+
         // Chip Semua/Lunas/Belum Lunas/Titip (tab Cek Piutang) — dihitung dari rows yang sudah
         // kena filter lain (search/tanggal/bulan/sales/kategori) TAPI TANPA filter Status, supaya
         // angkanya tetap menunjukkan total apa adanya persis seperti chip di tab Cek Cash.
@@ -14158,6 +14389,7 @@
         setupMenuDropdown('salesMenuBtn', 'salesMenuDropdown');
         setupMenuDropdown('pemasukanMenuBtn', 'pemasukanMenuDropdown');
         setupMenuDropdown('ptMenuBtn', 'ptMenuDropdown');
+        setupMenuDropdown('ptKolomBtn', 'ptKolomDropdown');
         setupMenuDropdown('harianMenuBtn', 'harianMenuDropdown');
         setupMenuDropdown('pgMenuBtn', 'pgMenuDropdown');
 

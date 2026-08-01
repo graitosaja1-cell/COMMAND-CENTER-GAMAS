@@ -141,7 +141,109 @@
         html.gamas-dark-mode .rk-lap-highlight-value { color:#e0e7ff; }
         html.gamas-dark-mode .rk-lap-highlight-breakdown { color:#c3cddc; }
         html.gamas-dark-mode .rk-lap-highlight-breakdown b { color:#e0e7ff; }
-        
+
+        /* ===== RINGKASAN v2 — full-bleed laporan bulanan ===== */
+        #tabRingkasan { max-width:none !important; width:100%; padding-left:14px; padding-right:14px; }
+        .rk2-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
+        .rk2-header-left { display:flex; align-items:center; gap:10px; }
+        .rk2-header-icon { width:34px; height:34px; border-radius:9px; background:linear-gradient(135deg,#eef1ff,#e4e9ff); display:flex; align-items:center; justify-content:center; font-size:17px; flex:0 0 auto; }
+        .rk2-header-title { font-size:16px; font-weight:800; color:#1e293b; line-height:1.25; }
+        .rk2-header-sub { font-size:10.5px; color:#94a3b8; font-weight:600; margin-top:1px; }
+        .rk2-header-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+        .rk2-pill { display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:700; padding:6px 12px; border-radius:20px; white-space:nowrap; }
+        .rk2-pill-periode { background:#eef2ff; color:#4338ca; border:1px solid #e0e0fb; }
+        .rk2-pill-status { background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; }
+        .rk2-pill-status.running { background:#dbeafe; color:#1d4ed8; border-color:#bfdbfe; }
+        select.rk2-bulan-select { border:none; background:transparent; font:inherit; font-weight:700; color:#4338ca; cursor:pointer; outline:none; }
+
+        .rk2-banner-profit { background:linear-gradient(135deg,#1e3a5f 0%,#16243c 100%); border-radius:14px; padding:16px 20px; color:#fff; box-shadow:0 8px 22px rgba(15,35,60,0.28); margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; }
+        .rk2-banner-profit-label { font-size:10px; font-weight:800; letter-spacing:0.5px; color:#9db4d4; text-transform:uppercase; margin-bottom:4px; }
+        .rk2-banner-profit-value { font-size:26px; font-weight:800; color:#fff; line-height:1.15; }
+        .rk2-banner-profit-breakdown { display:flex; gap:22px; flex-wrap:wrap; }
+        .rk2-bp-item { text-align:left; }
+        .rk2-bp-item .rk2-bp-label { font-size:9.5px; font-weight:700; color:#9db4d4; text-transform:uppercase; letter-spacing:0.3px; margin-bottom:2px; }
+        .rk2-bp-item .rk2-bp-value { font-size:12.5px; font-weight:800; }
+        .rk2-bp-item .rk2-bp-value.orange { color:#fbbf24; }
+        .rk2-bp-item .rk2-bp-value.green { color:#4ade80; }
+        .rk2-bp-item .rk2-bp-pct { font-size:9.5px; font-weight:700; opacity:0.75; margin-left:3px; }
+
+        .rk2-banner-grand { background:#fff; border:1px solid #e6eaf2; border-radius:14px; padding:14px 20px; box-shadow:0 1px 4px rgba(15,23,42,0.05); margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; }
+        .rk2-banner-grand-left { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+        .rk2-banner-grand-label { display:flex; align-items:center; gap:6px; font-size:10.5px; font-weight:800; color:#15803d; text-transform:uppercase; letter-spacing:0.3px; }
+        .rk2-banner-grand-value { font-size:22px; font-weight:800; color:#0f172a; }
+        .rk2-banner-grand-right { display:flex; gap:22px; flex-wrap:wrap; }
+        .rk2-gr-item { font-size:11.5px; color:#475569; font-weight:600; display:flex; align-items:center; gap:5px; }
+        .rk2-gr-item b { color:#0f172a; font-weight:800; }
+
+        .rk2-row { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px; align-items:stretch; }
+        .rk2-card { background:#fff; border:1px solid #e6eaf2; border-radius:14px; box-shadow:0 1px 4px rgba(15,23,42,0.05); padding:14px 16px; }
+        .rk2-card-title { font-size:11px; font-weight:800; color:#334155; text-transform:uppercase; letter-spacing:0.3px; display:flex; align-items:center; gap:6px; margin-bottom:12px; }
+        .rk2-badge { margin-left:auto; font-size:9.5px; font-weight:800; padding:3px 9px; border-radius:12px; background:#eef2ff; color:#4338ca; }
+
+        .rk2-sumber { flex:0 0 260px; min-width:230px; }
+        .rk2-donut-wrap { display:flex; align-items:center; gap:14px; }
+        .rk2-donut { flex:0 0 auto; }
+        .rk2-donut-pct { font-size:15px; font-weight:800; fill:#1e293b; }
+        .rk2-legend { display:flex; flex-direction:column; gap:8px; flex:1; }
+        .rk2-legend-item { display:flex; align-items:center; gap:7px; font-size:11px; color:#475569; font-weight:600; }
+        .rk2-legend-dot { width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
+        .rk2-legend-item b { color:#1e293b; margin-left:auto; font-weight:800; }
+        .rk2-dominasi { margin-top:10px; padding-top:10px; border-top:1px dashed #e2e8f0; font-size:10.5px; color:#64748b; font-weight:600; }
+        .rk2-dominasi b { color:#1e293b; }
+
+        .rk2-detail { flex:1 1 340px; min-width:300px; }
+        .rk2-detail.piutang { border-top:3px solid #f59e0b; }
+        .rk2-detail.cash { border-top:3px solid #10b981; }
+        .rk2-kv { display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid #f1f5f9; font-size:11.5px; }
+        .rk2-kv:last-of-type { border-bottom:none; }
+        .rk2-kv .rk2-kv-label { color:#64748b; font-weight:600; }
+        .rk2-kv .rk2-kv-value { font-weight:800; color:#1e293b; }
+        .rk2-kv .rk2-kv-value.green { color:#0d8a5f; }
+        .rk2-kv .rk2-kv-value.orange { color:#d97706; font-size:13px; }
+        .rk2-kv .rk2-kv-value.red { color:#dc2626; }
+
+        .rk2-note-box { margin-top:10px; border-radius:10px; padding:10px 12px; font-size:10.5px; line-height:1.6; }
+        .rk2-note-box.blue { background:#eff6ff; border:1px solid #dbeafe; }
+        .rk2-note-box.orange { background:#fffbeb; border:1px solid #fef3c7; }
+        .rk2-note-line { display:flex; align-items:flex-start; gap:6px; color:#334155; font-weight:600; }
+        .rk2-note-line + .rk2-note-line { margin-top:5px; }
+        .rk2-note-line .ico { flex:0 0 auto; }
+        .rk2-note-line b { font-weight:800; }
+
+        .rk2-recon { background:#f8fafc; border:1px solid #e6eaf2; border-radius:14px; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:12px; }
+        .rk2-recon-left { flex:1; min-width:260px; }
+        .rk2-recon-title { font-size:11.5px; font-weight:800; color:#334155; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+        .rk2-recon-line { display:flex; align-items:flex-start; gap:6px; font-size:11px; color:#334155; font-weight:600; margin-bottom:5px; }
+        .rk2-recon-line:last-child { margin-bottom:0; }
+        .rk2-recon-btn { background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; font-weight:800; font-size:10.5px; padding:8px 16px; border-radius:20px; white-space:nowrap; }
+
+        .rk2-footer { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:10.5px; color:#94a3b8; font-weight:600; padding:4px 2px 0; }
+        .rk2-footer b { color:#475569; }
+
+        html.gamas-dark-mode .rk2-header-title { color:#e2e8f0; }
+        html.gamas-dark-mode .rk2-header-icon { background:linear-gradient(135deg,#1e2740,#232d45); }
+        html.gamas-dark-mode .rk2-pill-periode { background:#1e2740; color:#a5b4fc; border-color:#2c3652; }
+        html.gamas-dark-mode .rk2-banner-grand { background:#161d2b; border-color:#232d40; }
+        html.gamas-dark-mode .rk2-banner-grand-value { color:#e2e8f0; }
+        html.gamas-dark-mode .rk2-gr-item { color:#94a3b8; }
+        html.gamas-dark-mode .rk2-gr-item b { color:#e2e8f0; }
+        html.gamas-dark-mode .rk2-card { background:#161d2b; border-color:#232d40; }
+        html.gamas-dark-mode .rk2-card-title { color:#cbd5e1; }
+        html.gamas-dark-mode .rk2-legend-item { color:#94a3b8; }
+        html.gamas-dark-mode .rk2-legend-item b { color:#e2e8f0; }
+        html.gamas-dark-mode .rk2-kv-label { color:#94a3b8; }
+        html.gamas-dark-mode .rk2-kv-value { color:#e2e8f0 !important; }
+        html.gamas-dark-mode .rk2-note-box.blue { background:#0f1d33; border-color:#1e3a5f; }
+        html.gamas-dark-mode .rk2-note-box.orange { background:#2a2210; border-color:#4a3b12; }
+        html.gamas-dark-mode .rk2-note-line { color:#cbd5e1; }
+        html.gamas-dark-mode .rk2-recon { background:#161d2b; border-color:#232d40; }
+        html.gamas-dark-mode .rk2-recon-title { color:#cbd5e1; }
+        html.gamas-dark-mode .rk2-recon-line { color:#cbd5e1; }
+        html.gamas-dark-mode .rk2-footer { color:#64748b; }
+        html.gamas-dark-mode .rk2-footer b { color:#cbd5e1; }
+        html.gamas-dark-mode .rk2-dominasi { color:#94a3b8; border-color:#232d40; }
+        html.gamas-dark-mode .rk2-dominasi b { color:#e2e8f0; }
+
         .filter-bar { display:flex; flex-wrap:nowrap; align-items:flex-end; gap:6px 10px; padding:12px 16px; background:linear-gradient(to right,#f8fafc,#f0f4ff); border:1px solid #e8ecf4; border-radius:12px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.04); overflow-x:auto; }
         .filter-bar .field { display:flex; flex-direction:column; gap:4px; flex:0 0 auto; min-width:60px; }
         .filter-bar .field label { font-size:7px; font-weight:700; color:#667eea; text-transform:uppercase; letter-spacing:0.3px; }
@@ -1816,51 +1918,112 @@
 
     <!-- ======= TAB RINGKASAN — gabungan Data Uang Masuk + Piutang Tempo + Cash Dropping ======= -->
     <div class="tab-content active" id="tabRingkasan">
-        <div class="rk-lap-toolbar">
-            <div class="rk-lap-title">📊 Ringkasan Bulanan</div>
-            <div class="rk-lap-periode">
-                <label for="rkLapBulan">Periode</label>
-                <select id="rkLapBulan"></select>
+        <div class="rk2-header">
+            <div class="rk2-header-left">
+                <div class="rk2-header-icon">📊</div>
+                <div>
+                    <div class="rk2-header-title">Laporan Ringkasan Bulanan</div>
+                    <div class="rk2-header-sub">Periode Operasional · <span id="rk2SubBulan">-</span></div>
+                </div>
             </div>
-            <button type="button" class="btn btn-outline" id="rkLapBtnRefresh">🔄 Muat Ulang</button>
-        </div>
-
-        <div class="rk-lap-highlight" id="rkLapProfitCard">
-            <div class="rk-lap-highlight-label">💰 Total Profit <span id="rkLapProfitBulanLabel">Bulan Ini</span> <span style="font-weight:500;opacity:0.85;">(Cash Dropping + Piutang Tempo)</span></div>
-            <div class="rk-lap-highlight-value" id="rkLapProfitTotal">Rp 0</div>
-            <div class="rk-lap-highlight-breakdown">
-                <span>Cash Dropping: <b id="rkLapProfitCdd">Rp 0</b></span>
-                <span>Piutang Tempo: <b id="rkLapProfitPt">Rp 0</b></span>
+            <div class="rk2-header-right">
+                <label class="rk2-pill rk2-pill-periode" for="rkLapBulan">📅 <select id="rkLapBulan" class="rk2-bulan-select"></select></label>
+                <span class="rk2-pill rk2-pill-status" id="rk2StatusPill">✅ Selesai (Final)</span>
             </div>
         </div>
 
-        <div class="rk-lap-section-title">⬇️ Data Uang Masuk</div>
-        <div class="cards cards-pemasukan">
-            <div class="card"><span class="label">Total Cash</span><span class="value" id="rkLapCashTotalCash">Rp 0</span></div>
-            <div class="card"><span class="label">Total Transfer</span><span class="value" id="rkLapCashTotalTransfer">Rp 0</span></div>
-            <div class="card"><span class="label">Uang Masuk Minyak</span><span class="value orange" id="rkLapCashMinyak">Rp 0</span></div>
-            <div class="card"><span class="label">Uang Masuk Rupa Rupa</span><span class="value purple" id="rkLapCashRupa">Rp 0</span></div>
-            <div class="card card-total"><span class="label">Grand Total</span><span class="value" id="rkLapCashGrand">Rp 0</span></div>
+        <!-- BANNER: Total Profit Bersih -->
+        <div class="rk2-banner-profit" id="rkLapProfitCard">
+            <div>
+                <div class="rk2-banner-profit-label">Total Profit Bersih</div>
+                <div class="rk2-banner-profit-value" id="rkLapProfitTotal">Rp 0</div>
+            </div>
+            <div class="rk2-banner-profit-breakdown">
+                <div class="rk2-bp-item">
+                    <div class="rk2-bp-label">Piutang Tempo</div>
+                    <div class="rk2-bp-value orange"><span id="rkLapProfitPt">Rp 0</span><span class="rk2-bp-pct" id="rk2PtPct">(0%)</span></div>
+                </div>
+                <div class="rk2-bp-item">
+                    <div class="rk2-bp-label">Cash Dropping</div>
+                    <div class="rk2-bp-value green"><span id="rkLapProfitCdd">Rp 0</span><span class="rk2-bp-pct" id="rk2CddPct">(0%)</span></div>
+                </div>
+            </div>
         </div>
 
-        <div class="rk-lap-section-title">🧾 Piutang Tempo</div>
-        <div class="cards cards-piutang">
-            <div class="card"><span class="label">Jumlah Faktur</span><span class="value" id="rkLapPtCount">0 faktur</span></div>
-            <div class="card"><span class="label">Nilai Faktur Piutang Tempo</span><span class="value" id="rkLapPtTagihan">Rp 0</span></div>
-            <div class="card"><span class="label">Total Uang Masuk Piutang Tempo</span><span class="value" id="rkLapPtDibayar">Rp 0</span></div>
-            <div class="card card-total"><span class="label">🔶 Total Profit Real</span><span class="value" id="rkLapPtProfit">Rp 0</span></div>
+        <!-- BANNER: Grand Total Uang Masuk -->
+        <div class="rk2-banner-grand">
+            <div class="rk2-banner-grand-left">
+                <div>
+                    <div class="rk2-banner-grand-label">🟢 Grand Total Uang Masuk</div>
+                    <div class="rk2-banner-grand-value" id="rkLapCashGrand">Rp 0</div>
+                </div>
+            </div>
+            <div class="rk2-banner-grand-right">
+                <div class="rk2-gr-item">💳 Tunai <b id="rkLapCashTotalCash">Rp 0</b></div>
+                <div class="rk2-gr-item">🏦 Transfer <b id="rkLapCashTotalTransfer">Rp 0</b></div>
+            </div>
         </div>
 
-        <div class="rk-lap-section-title">📋 Cash Dropping</div>
-        <div class="cards cards-cash">
-            <div class="card"><span class="label">Jumlah Faktur</span><span class="value" id="rkLapCddCount">0 faktur</span></div>
-            <div class="card"><span class="label">Total Nominal</span><span class="value" id="rkLapCddNominal">Rp 0</span></div>
-            <div class="card"><span class="label">Total Cash</span><span class="value" id="rkLapCddCash">Rp 0</span></div>
-            <div class="card"><span class="label">Total Transfer</span><span class="value" id="rkLapCddTransfer">Rp 0</span></div>
-            <div class="card card-total"><span class="label">💰 Total Profit Real</span><span class="value" id="rkLapCddProfit">Rp 0</span></div>
+        <div class="rk2-row">
+            <!-- Sumber Pendapatan (donut) -->
+            <div class="rk2-card rk2-sumber">
+                <div class="rk2-card-title">📈 Sumber Pendapatan</div>
+                <div class="rk2-donut-wrap">
+                    <svg class="rk2-donut" id="rk2DonutSvg" width="88" height="88" viewBox="0 0 88 88"></svg>
+                    <div class="rk2-legend">
+                        <div class="rk2-legend-item"><span class="rk2-legend-dot" style="background:#2563eb;"></span>Minyak: <b id="rkLapCashMinyak">Rp 0</b></div>
+                        <div class="rk2-legend-item"><span class="rk2-legend-dot" style="background:#bfdbfe;"></span>Rupa-rupa: <b id="rkLapCashRupa">Rp 0</b></div>
+                    </div>
+                </div>
+                <div class="rk2-dominasi">🔵 Dominasi sektor <b id="rk2Dominasi">Minyak 0%</b></div>
+            </div>
+
+            <!-- Piutang Tempo -->
+            <div class="rk2-card rk2-detail piutang">
+                <div class="rk2-card-title">🧾 Piutang Tempo <span class="rk2-badge" id="rkLapPtCount">0 FAKTUR</span></div>
+                <div class="rk2-kv"><span class="rk2-kv-label">Nilai Faktur</span><span class="rk2-kv-value" id="rkLapPtTagihan">Rp 0</span></div>
+                <div class="rk2-kv"><span class="rk2-kv-label">Uang Masuk</span><span class="rk2-kv-value green" id="rkLapPtDibayar">Rp 0</span></div>
+                <div class="rk2-kv"><span class="rk2-kv-label">Profit Real</span><span class="rk2-kv-value orange" id="rkLapPtProfit">Rp 0</span></div>
+                <div class="rk2-kv"><span class="rk2-kv-label">Outstanding</span><span class="rk2-kv-value red" id="rk2PtOutstanding">Rp 0</span></div>
+                <div class="rk2-note-box blue">
+                    <div class="rk2-note-line"><span class="ico">✅</span><span>Rasio Kolektibilitas: <b id="rk2PtRasio">0%</b></span></div>
+                    <div class="rk2-note-line"><span class="ico">✅</span><span>Margin Profit: <b id="rk2PtMargin">0%</b> dari nilai faktur.</span></div>
+                    <div class="rk2-note-line"><span class="ico">⚠️</span><span>Piutang tertunda mencapai <b id="rk2PtOutstandingJt">Rp 0</b> — prioritas penagihan <b id="rk2NextMonth">bulan depan</b>.</span></div>
+                </div>
+            </div>
+
+            <!-- Cash Dropping -->
+            <div class="rk2-card rk2-detail cash">
+                <div class="rk2-card-title">📋 Cash Dropping <span class="rk2-badge" id="rkLapCddCount">0 FAKTUR</span></div>
+                <div class="rk2-kv"><span class="rk2-kv-label">Total Nominal</span><span class="rk2-kv-value" id="rkLapCddNominal">Rp 0</span></div>
+                <div class="rk2-kv"><span class="rk2-kv-label">Uang Masuk (Cash)</span><span class="rk2-kv-value green" id="rkLapCddCash">Rp 0</span></div>
+                <div class="rk2-kv"><span class="rk2-kv-label">Uang Masuk (Transfer)</span><span class="rk2-kv-value green" id="rkLapCddTransfer">Rp 0</span></div>
+                <div class="rk2-kv"><span class="rk2-kv-label">Profit Real</span><span class="rk2-kv-value orange" id="rkLapCddProfit">Rp 0</span></div>
+                <div class="rk2-note-box orange">
+                    <div class="rk2-note-line"><span class="ico">✅</span><span>Rasio Kolektibilitas: <b id="rk2CddRasio">0%</b></span></div>
+                    <div class="rk2-note-line"><span class="ico">✅</span><span>Margin Profit: <b id="rk2CddMargin">0%</b> dari nominal faktur.</span></div>
+                    <div class="rk2-note-line"><span class="ico">⚠️</span><span>Selisih <b id="rk2CddSelisih">Rp 0</b> antara nominal vs uang masuk. (Cek potongan admin/kesalahan input)</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rekonsiliasi & Catatan Kritis -->
+        <div class="rk2-recon">
+            <div class="rk2-recon-left">
+                <div class="rk2-recon-title">🔄 Rekonsiliasi &amp; Catatan Kritis</div>
+                <div class="rk2-recon-line"><span>✅</span><span>Total Profit = Piutang (<b id="rk2ReconPt">Rp 0</b>) + Cash Drop (<b id="rk2ReconCdd">Rp 0</b>) = <b id="rk2ReconTotal">Rp 0</b> (sesuai).</span></div>
+                <div class="rk2-recon-line"><span>⚠️</span><span>Selisih Cash Dropping sebesar <b id="rk2ReconSelisih">Rp 0</b> perlu ditelusuri (biaya admin / potongan).</span></div>
+                <div class="rk2-recon-line"><span>🔴</span><span>Outstanding Piutang <b id="rk2ReconOutstanding">Rp 0</b> (<b id="rk2ReconOutstandingPct">0%</b>) — tim penagihan difokuskan di awal <b id="rk2ReconNextMonth">bulan depan</b>.</span></div>
+            </div>
+            <button type="button" class="rk2-recon-btn">✅ Rekonsiliasi Selesai</button>
         </div>
 
         <div class="rk-lap-empty" id="rkLapEmpty" style="display:none;">📂 Belum ada data untuk periode ini di salah satu tab (Data Uang Masuk / Piutang Tempo / Cash Dropping).</div>
+
+        <div class="rk2-footer">
+            <span>📅 Periode: <b id="rk2FooterPeriode">-</b> &nbsp;·&nbsp; Terakhir diperbarui: <b id="rk2FooterUpdated">-</b></span>
+            <button type="button" class="btn btn-outline" id="rkLapBtnRefresh">🔄 Muat Ulang</button>
+        </div>
     </div>
 
     <!-- ======= TAB 1 – BANK DATA PENJUALAN ======= -->
@@ -6942,6 +7105,34 @@
         return Array.from(set).sort();
     }
 
+    function fmtPersen(n) {
+        if (!isFinite(n)) n = 0;
+        return n.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+    }
+    function rk2SetText(id, txt) { const el = document.getElementById(id); if (el) el.textContent = txt; }
+    function rk2NamaBulanBerikutnya(ym) {
+        const m = String(ym || '').match(/^(\d{4})-(\d{1,2})$/);
+        if (!m) return 'bulan depan';
+        let y = parseInt(m[1], 10), mo = parseInt(m[2], 10);
+        mo += 1; if (mo > 12) { mo = 1; y += 1; }
+        return NAMA_BULAN_ID[mo - 1] || 'bulan depan';
+    }
+    function rk2DrawDonut(pctA, colorA, colorB) {
+        const svg = document.getElementById('rk2DonutSvg');
+        if (!svg) return;
+        const cx = 44, cy = 44, r = 34, sw = 11;
+        const circ = 2 * Math.PI * r;
+        pctA = Math.max(0, Math.min(100, pctA || 0));
+        const offA = circ * (1 - pctA / 100);
+        svg.innerHTML = `
+            <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${colorB}" stroke-width="${sw}"></circle>
+            <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${colorA}" stroke-width="${sw}"
+                stroke-dasharray="${circ}" stroke-dashoffset="${offA}" stroke-linecap="round"
+                transform="rotate(-90 ${cx} ${cy})"></circle>
+            <text x="${cx}" y="${cy + 5}" text-anchor="middle" class="rk2-donut-pct">${Math.round(pctA)}%</text>
+        `;
+    }
+
     function rkLapRender() {
         const sel = document.getElementById('rkLapBulan');
         if (!sel) return;
@@ -6956,8 +7147,22 @@
             sel.value = bulanList[bulanList.length - 1];
         }
         const bulan = sel.value;
+        const bulanLabel = bulan ? fmtBulanTahun(bulan) : '-';
 
         document.getElementById('rkLapEmpty').style.display = bulanList.length ? 'none' : 'block';
+
+        rk2SetText('rk2SubBulan', bulanLabel);
+        rk2SetText('rk2FooterPeriode', bulanLabel);
+        rk2SetText('rk2FooterUpdated', new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
+
+        // Status pill: bulan berjalan vs sudah lewat (final)
+        const now = new Date();
+        const bulanIni = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+        const statusPill = document.getElementById('rk2StatusPill');
+        if (statusPill) {
+            if (bulan === bulanIni) { statusPill.className = 'rk2-pill rk2-pill-status running'; statusPill.textContent = '🔵 Sedang Berjalan'; }
+            else { statusPill.className = 'rk2-pill rk2-pill-status'; statusPill.textContent = '✅ Selesai (Final)'; }
+        }
 
         // ----- Data Uang Masuk (sama seperti renderPemasukanCards, tapi untuk
         // bulan yang dipilih di Ringkasan, terlepas dari bulan aktif di Tab 2) -----
@@ -6974,6 +7179,12 @@
         document.getElementById('rkLapCashRupa').textContent = fmtRp(rupa);
         document.getElementById('rkLapCashGrand').textContent = fmtRp(grand);
 
+        // Sumber pendapatan: donut Minyak vs Rupa-rupa
+        const totalSumber = minyak + rupa;
+        const pctMinyak = totalSumber > 0 ? (minyak / totalSumber * 100) : 0;
+        rk2DrawDonut(pctMinyak, '#2563eb', '#bfdbfe');
+        rk2SetText('rk2Dominasi', 'Minyak ' + fmtPersen(pctMinyak));
+
         // ----- Piutang Tempo (sama seperti pumRenderSummaryCards, difilter ke bulan ini) -----
         const ptRows = (piutangUangMasukData || []).filter(d => d._bulan === bulan);
         let ptTagihan = 0, ptDibayar = 0, ptProfit = 0;
@@ -6982,10 +7193,20 @@
             ptDibayar += parseNumber(d.totalBayar) || 0;
             if (d.profit !== '' && d.profit != null) ptProfit += clampProfit(d.profit);
         });
-        document.getElementById('rkLapPtCount').textContent = ptRows.length + ' faktur';
+        const ptOutstanding = Math.max(0, ptTagihan - ptDibayar);
+        const ptRasio = ptTagihan > 0 ? (ptDibayar / ptTagihan * 100) : 0;
+        const ptMargin = ptTagihan > 0 ? (ptProfit / ptTagihan * 100) : 0;
+        const ptOutstandingPct = ptTagihan > 0 ? (ptOutstanding / ptTagihan * 100) : 0;
+        const namaBulanDepan = rk2NamaBulanBerikutnya(bulan);
+        document.getElementById('rkLapPtCount').textContent = ptRows.length.toLocaleString('id-ID') + ' FAKTUR';
         document.getElementById('rkLapPtTagihan').textContent = fmtRp(ptTagihan);
         document.getElementById('rkLapPtDibayar').textContent = fmtRp(ptDibayar);
         document.getElementById('rkLapPtProfit').textContent = fmtRp(ptProfit);
+        rk2SetText('rk2PtOutstanding', fmtRp(ptOutstanding));
+        rk2SetText('rk2PtRasio', fmtPersen(ptRasio));
+        rk2SetText('rk2PtMargin', fmtPersen(ptMargin));
+        rk2SetText('rk2PtOutstandingJt', fmtRp(ptOutstanding));
+        rk2SetText('rk2NextMonth', namaBulanDepan);
 
         // ----- Cash Dropping (sama seperti cddRenderSummaryCards, difilter ke bulan ini) -----
         const cddRows = (cashDroppingUangMasukData || []).filter(d => d._bulan === bulan);
@@ -6996,18 +7217,37 @@
             cddTransfer += parseNumber(d.bayarTransfer) || 0;
             if (d.profit !== '' && d.profit != null) cddProfit += clampProfit(d.profit);
         });
-        document.getElementById('rkLapCddCount').textContent = cddRows.length + ' faktur';
+        const cddMasuk = cddCash + cddTransfer;
+        const cddSelisih = cddNominal - cddMasuk;
+        const cddRasio = cddNominal > 0 ? (cddMasuk / cddNominal * 100) : 0;
+        const cddMargin = cddNominal > 0 ? (cddProfit / cddNominal * 100) : 0;
+        document.getElementById('rkLapCddCount').textContent = cddRows.length.toLocaleString('id-ID') + ' FAKTUR';
         document.getElementById('rkLapCddNominal').textContent = fmtRp(cddNominal);
         document.getElementById('rkLapCddCash').textContent = fmtRp(cddCash);
         document.getElementById('rkLapCddTransfer').textContent = fmtRp(cddTransfer);
         document.getElementById('rkLapCddProfit').textContent = fmtRp(cddProfit);
+        rk2SetText('rk2CddRasio', fmtPersen(cddRasio));
+        rk2SetText('rk2CddMargin', fmtPersen(cddMargin));
+        rk2SetText('rk2CddSelisih', fmtRp(Math.abs(cddSelisih)));
 
         // ----- Total Profit gabungan bulan ini: Cash Dropping + Piutang Tempo -----
         const totalProfitBulan = ptProfit + cddProfit;
+        const ptPct = totalProfitBulan > 0 ? (ptProfit / totalProfitBulan * 100) : 0;
+        const cddPct = totalProfitBulan > 0 ? (cddProfit / totalProfitBulan * 100) : 0;
         document.getElementById('rkLapProfitTotal').textContent = fmtRp(totalProfitBulan);
         document.getElementById('rkLapProfitCdd').textContent = fmtRp(cddProfit);
         document.getElementById('rkLapProfitPt').textContent = fmtRp(ptProfit);
-        document.getElementById('rkLapProfitBulanLabel').textContent = bulan ? fmtBulanTahun(bulan) : '';
+        rk2SetText('rk2PtPct', '(' + fmtPersen(ptPct) + ')');
+        rk2SetText('rk2CddPct', '(' + fmtPersen(cddPct) + ')');
+
+        // ----- Rekonsiliasi & Catatan Kritis -----
+        rk2SetText('rk2ReconPt', fmtRp(ptProfit));
+        rk2SetText('rk2ReconCdd', fmtRp(cddProfit));
+        rk2SetText('rk2ReconTotal', fmtRp(totalProfitBulan));
+        rk2SetText('rk2ReconSelisih', fmtRp(Math.abs(cddSelisih)));
+        rk2SetText('rk2ReconOutstanding', fmtRp(ptOutstanding));
+        rk2SetText('rk2ReconOutstandingPct', fmtPersen(ptOutstandingPct));
+        rk2SetText('rk2ReconNextMonth', namaBulanDepan);
     }
 
     document.getElementById('rkLapBulan').addEventListener('change', rkLapRender);

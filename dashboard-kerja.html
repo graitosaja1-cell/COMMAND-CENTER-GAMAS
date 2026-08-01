@@ -9990,7 +9990,6 @@
         // ================================================================
         function buildFakturCetakHtml(opts) {
             const items = Array.isArray(opts.items) ? opts.items : [];
-            const minRows = 4;
             let totalQty = 0,
                 totalJumlah = 0;
             let rowsHtml = items.map((it, i) => {
@@ -10006,9 +10005,6 @@
                         <td class="fc-jumlah">${fmtRp(it.jumlah || 0)}</td>
                     </tr>`;
             }).join('');
-            for (let i = items.length; i < minRows; i++) {
-                rowsHtml += `<tr><td class="fc-no">${i + 1}</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
-            }
             const jenisClass = opts.jenis === 'CASH' ? 'fc-jenis-cash' : 'fc-jenis-tempo';
             return `
                 <div class="fc-wrap">

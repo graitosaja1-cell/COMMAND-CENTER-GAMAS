@@ -9805,9 +9805,11 @@
             }
         }
 
-        function rkBuildSalesTable(rows, salesList) {
+        function rkBuildSalesTable(rows, salesList, opts) {
             // rows: array of {produk, bySales: {namaSales: qty}, total}
+            // opts.includeTotal (default true): tampilkan baris TOTAL di bawah tabel.
             // Mengembalikan {theadHtml, tbodyHtml}
+            const includeTotal = !opts || opts.includeTotal !== false;
             const theadHtml = '<tr><th>Produk</th>' +
                 salesList.map(s => `<th class="rk-num">${escapeHtml(s)}</th>`).join('') +
                 '<th class="rk-num">Total</th></tr>';
@@ -9825,9 +9827,11 @@
                     `<td class="rk-num">${row.total}</td></tr>`;
                 grandTotal += row.total;
             });
-            tbodyHtml += '<tr class="rk-total-row"><td>TOTAL</td>' +
-                salesList.map(s => `<td class="rk-num">${totalPerSales[s]}</td>`).join('') +
-                `<td class="rk-num">${grandTotal}</td></tr>`;
+            if (includeTotal) {
+                tbodyHtml += '<tr class="rk-total-row"><td>TOTAL</td>' +
+                    salesList.map(s => `<td class="rk-num">${totalPerSales[s]}</td>`).join('') +
+                    `<td class="rk-num">${grandTotal}</td></tr>`;
+            }
             return { theadHtml, tbodyHtml, grandTotal, totalPerSales };
         }
 
@@ -9924,7 +9928,7 @@
                 const q = rkSearchRupaTerm.toLowerCase();
                 rupaRowsArr = rupaRowsArr.filter(r => r.produk.toLowerCase().includes(q));
             }
-            const rupaTable = rkBuildSalesTable(rupaRowsArr, salesList);
+            const rupaTable = rkBuildSalesTable(rupaRowsArr, salesList, { includeTotal: false });
             document.querySelector('#rkTableRupa thead').innerHTML = rupaTable.theadHtml;
             document.querySelector('#rkTableRupa tbody').innerHTML = rupaTable.tbodyHtml;
             document.getElementById('rkRupaEmpty').style.display = rupaRowsArr.length ? 'none' : 'block';

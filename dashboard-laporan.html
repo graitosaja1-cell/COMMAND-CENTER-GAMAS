@@ -1,5 +1,24 @@
 <!DOCTYPE html>
-<html lang="id"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html lang="id"><head>
+    <script>
+      // ── GUARD PIN DASHBOARD LAPORAN ──
+      // Halaman ini owner-only. Cek dijalankan paling awal (sebelum apa pun
+      // dirender) supaya membuka file ini langsung lewat URL, bookmark,
+      // klik-kanan "buka di tab baru", dsb tetap diminta PIN lebih dulu —
+      // bukan hanya saat diakses lewat tombol "Laporan" di index.html.
+      (function () {
+        try {
+          if (sessionStorage.getItem('gm2026_laporan_pin_ok') !== '1') {
+            document.documentElement.style.display = 'none';
+            window.location.replace('index.html');
+          }
+        } catch (e) {
+          // sessionStorage tidak tersedia (mis. mode privat sangat ketat) → aman default: tolak akses
+          window.location.replace('index.html');
+        }
+      })();
+    </script>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>GAMAS 2026 - Dashboard Laporan</title>
     <meta name="robots" content="noindex, nofollow">

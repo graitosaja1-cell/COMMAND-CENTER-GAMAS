@@ -368,14 +368,15 @@
         .rk-table-wrap .rk-product-name { font-weight: 600; }
         .rk-empty { padding: 20px 14px; text-align: center; font-size: 11.5px; color: var(--rk-text-dim); }
 
-        /* Rupa Rupa: tingginya mengikuti kolom kiri (stats 2x2 + Penjualan Fitri)
-           lewat flex, jadi lebih lega — kalau produknya lebih banyak dari
-           ruang yang ada, baru discroll (daftar produknya tetap lengkap). */
-        #rkRupaScrollBox { overflow-y: auto; }
+        /* Rupa Rupa: tinggi tabel dibatasi (max-height tetap) supaya TIDAK
+           ikut memanjang mengikuti banyaknya produk di suatu periode — kalau
+           datanya banyak, tinggal discroll di dalam kotaknya sendiri, daftar
+           produknya tetap lengkap. */
+        #rkRupaScrollBox { max-height: 360px; overflow-y: auto; }
         @media (max-width: 960px) {
-            /* Di layar sempit rk-main-grid jadi satu kolom (tidak stretch),
-               jadi kasih batas tinggi supaya tabel tidak jadi sangat panjang. */
-            #rkRupaScrollBox { max-height: 260px; }
+            /* Di layar sempit rk-main-grid jadi satu kolom, kasih batas sedikit
+               lebih pendek supaya halaman tidak terlalu panjang di HP. */
+            #rkRupaScrollBox { max-height: 280px; }
         }
 
         .rk-empty-global { text-align: center; padding: 60px 20px; }

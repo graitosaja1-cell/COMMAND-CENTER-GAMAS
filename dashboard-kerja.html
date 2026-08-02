@@ -404,7 +404,7 @@
         .tab-btn[data-tab="tab10"].active {
             color: #fff;
             border-color: transparent;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #667eea;
             box-shadow: 0 3px 10px rgba(102, 126, 234, 0.35);
         }
         .tab-btn[data-tab="tab0"].active .tab-icon,
@@ -1353,16 +1353,14 @@
         .table-wrap th {
             position: sticky;
             top: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #ffffff;
+            background: #0f2744;
+            color: #7dd3fc;
             text-align: left;
-            padding: 10px 8px;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.2px;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 7px 9px;
+            font-size: 12px;
+            letter-spacing: normal;
             white-space: nowrap;
-            font-weight: 700;
+            font-weight: 600;
             z-index: 5;
             border: none;
         }
@@ -1370,7 +1368,7 @@
             padding: 6px 8px;
             border-bottom: 1px solid #e8ecf4;
             white-space: nowrap;
-            font-size: 13px;
+            font-size: 12px;
             background: #fafbfc;
             transition: all 0.2s ease;
         }
@@ -4503,16 +4501,14 @@
         #tab3 .cash-table-wrap th {
             position: sticky;
             top: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #ffffff;
+            background: #0f2744;
+            color: #7dd3fc;
             text-align: left;
-            padding: 10px 8px;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.2px;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 7px 9px;
+            font-size: 12px;
+            letter-spacing: normal;
             white-space: nowrap;
-            font-weight: 700;
+            font-weight: 600;
             z-index: 5;
             border: none;
         }
@@ -4520,7 +4516,7 @@
             padding: 6px 8px;
             border-bottom: 1px solid #e8ecf4;
             white-space: nowrap;
-            font-size: 13px;
+            font-size: 12px;
             background: #fafbfc;
             transition: all 0.2s ease;
         }
@@ -9626,7 +9622,7 @@
             }).join('');
         }
 
-        let tab3ViewMode = localStorage.getItem('tab3ViewMode') === 'table' ? 'table' : 'card';
+        let tab3ViewMode = localStorage.getItem('tab3ViewMode') === 'card' ? 'card' : 'table';
         function applyTab3ViewMode() {
             const isCard = tab3ViewMode === 'card';
             const tableWrap = document.getElementById('tab3TableWrap');
@@ -15230,7 +15226,7 @@ html.gamas-dark-mode .tab-btn[data-tab="tab6"].active,
 html.gamas-dark-mode .tab-btn[data-tab="tab7"].active,
 html.gamas-dark-mode .tab-btn[data-tab="tab8"].active,
 html.gamas-dark-mode .tab-btn[data-tab="tab10"].active {
-    background: linear-gradient(135deg, #8b9bf5 0%, #9868c9 100%) !important;
+    background: #8b9bf5 !important;
 }
 
 html.gamas-dark-mode .tab-btn .badge-tab {
@@ -15405,7 +15401,8 @@ html.gamas-dark-mode .table-wrap {
 }
 
 html.gamas-dark-mode .table-wrap th {
-    background: linear-gradient(135deg, #8b9bf5 0%, #9868c9 100%) !important;
+    background: #0c1526 !important;
+    color: #38bdf8 !important;
 }
 
 html.gamas-dark-mode .table-wrap td {
@@ -16289,7 +16286,8 @@ html.gamas-dark-mode #tab3 .cash-table-wrap {
 }
 
 html.gamas-dark-mode #tab3 .cash-table-wrap th {
-    background: linear-gradient(135deg, #8b9bf5 0%, #9868c9 100%) !important;
+    background: #0c1526 !important;
+    color: #38bdf8 !important;
 }
 
 html.gamas-dark-mode #tab3 .cash-table-wrap td {

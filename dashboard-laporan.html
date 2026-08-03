@@ -2870,6 +2870,7 @@
             <div class="field" style="justify-content:flex-end;"><label>&nbsp;</label><button class="btn btn-reset" id="cashDroppingUangMasukBtnReset">↺ Reset</button></div>
             <div class="field" style="justify-content:flex-end;"><label>&nbsp;</label><button class="btn" id="cashDroppingUangMasukBtnRefresh">🔄 Muat Ulang</button></div>
             <div class="field" style="justify-content:flex-end;"><label>&nbsp;</label><button class="btn btn-outline" id="cashDroppingUangMasukViewToggle">🗂️ Mode Kartu</button></div>
+            <button type="button" id="cddSelisihBadgeBtn" title="Ada faktur cash dropping yang uang masuknya kurang dari nominal faktur. Klik untuk lihat & pindahkan ke Piutang Tempo." style="display:none; align-items:center; gap:6px; background:#fff7ed; border:1px solid #fdba74; color:#c2410c; font-size:11px; font-weight:700; padding:5px 10px; border-radius:999px; cursor:pointer; white-space:nowrap;">⚠️ <span id="cddSelisihBadgeText">0 faktur kurang bayar</span></button>
             <span class="info-right" id="cashDroppingUangMasukInfo">0 data</span>
         </div>
         <div class="table-wrap" id="cashDroppingUangMasukTableWrap" style="height:450px; max-height:450px;">
@@ -3178,6 +3179,8 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            flex: 1 1 auto;
+            min-width: 0;
         }
 
         #tabKas .item-row .name i {
@@ -3192,6 +3195,10 @@
             font-weight: 500;
             color: #1f2a44;
             font-variant-numeric: tabular-nums;
+            flex: 0 0 auto;
+            margin-left: auto;
+            text-align: right;
+            white-space: nowrap;
         }
 
         #tabKas .item-row .amount .currency {
@@ -3225,6 +3232,9 @@
         }
         #tabKas .card-subtotal .value {
             color: #1f2a44;
+            margin-left: auto;
+            text-align: right;
+            white-space: nowrap;
         }
         #tabKas .card-subtotal .value.negative {
             color: #1f2a44;
@@ -5387,6 +5397,7 @@
                                 <th style="padding:6px 8px; border:1px solid #e2e8f0; text-align:right;">Nominal</th>
                                 <th style="padding:6px 8px; border:1px solid #e2e8f0; text-align:right;">Uang Masuk</th>
                                 <th style="padding:6px 8px; border:1px solid #e2e8f0; text-align:right;">Selisih</th>
+                                <th style="padding:6px 8px; border:1px solid #e2e8f0; text-align:center;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="rk2SelisihTbody"></tbody>
@@ -7284,7 +7295,7 @@
                     const penyebab=modalAda?null:diagnosaPenyebabProfitKosong(d.noFaktur,d.namaToko);
                     piutangUangMasukData.push({...d,sales:salesNama,tglFaktur:d.tglFaktur||day.tanggal,kategori:isFitri?'fitri':'rupa',produk:produkGabungan,jatuhTempo:d.jt||'-',totalBayar,sisaTagihan,statusClass,overdueDays,tglBayar,profit,modalTotal,modalAda,proporsiBayar,modalProporsional,profitKotorTotal,sisaModalTertahan,estimasiProfitSisa,profitItems,penyebab,_bulan:bulan,_tanggalHari:day.tanggal,_id:piutangUangMasukData.length});
                 });
-                (day.cashDroppingDetail||[]).forEach(d => {
+                (day.cashDroppingDetail||[]).forEach((d, rowIdxInDay) => {
                     const salesMatch=cariSalesMatch(d.noFaktur, d.tglFaktur||day.tanggal, d.namaToko);
                     const isFitri=salesMatch?salesMatch.hasFitri:((d.ket||'').toLowerCase().includes('minyak')||(d.namaToko||'').toLowerCase().includes('fitri'));
                     const salesNama=salesMatch&&salesMatch.salesName?salesMatch.salesName:(d.sales||d.dropping_sales||'-');
@@ -7307,7 +7318,7 @@
                     let tglBayarCdd='';
                     if(totalBayarCdd>0 && day.tanggal){ const dayPart=String(day.tanggal).split('-')[0]; const [tahun,bulanNum]=bulan.split('-'); if(dayPart) tglBayarCdd=`${dayPart.padStart(2,'0')}/${bulanNum}/${tahun}`; }
                     const estimasiProfitSisaCdd=modalAdaCdd?(sisaTagihanCdd-sisaModalTertahanCdd):'';
-                    cashDroppingUangMasukData.push({...d,sales:salesNama,tglFaktur:d.tglFaktur||day.tanggal,kategori:isFitri?'fitri':'rupa',produk:produkGabungan,tagihan:tagihanCdd,totalBayar:totalBayarCdd,sisaTagihan:sisaTagihanCdd,tglBayar:tglBayarCdd,modalTotal:modalTotalCdd,modalAda:modalAdaCdd,proporsiBayar:proporsiBayarCdd,modalProporsional:modalProporsionalCdd,profit:profitCdd,profitKotorTotal:profitKotorTotalCdd,sisaModalTertahan:sisaModalTertahanCdd,estimasiProfitSisa:estimasiProfitSisaCdd,profitItems:salesMatch?salesMatch.items:[],_bulan:bulan,_tanggalHari:day.tanggal,_id:cashDroppingUangMasukData.length});
+                    cashDroppingUangMasukData.push({...d,sales:salesNama,tglFaktur:d.tglFaktur||day.tanggal,kategori:isFitri?'fitri':'rupa',produk:produkGabungan,tagihan:tagihanCdd,totalBayar:totalBayarCdd,sisaTagihan:sisaTagihanCdd,tglBayar:tglBayarCdd,modalTotal:modalTotalCdd,modalAda:modalAdaCdd,proporsiBayar:proporsiBayarCdd,modalProporsional:modalProporsionalCdd,profit:profitCdd,profitKotorTotal:profitKotorTotalCdd,sisaModalTertahan:sisaModalTertahanCdd,estimasiProfitSisa:estimasiProfitSisaCdd,profitItems:salesMatch?salesMatch.items:[],_bulan:bulan,_tanggalHari:day.tanggal,_rowIdxInDay:rowIdxInDay,_id:cashDroppingUangMasukData.length});
                 });
             });
         }
@@ -8041,10 +8052,27 @@
         cddApplyViewModeUI();
         renderCashDroppingUangMasuk();
     });
+    document.getElementById('cddSelisihBadgeBtn').addEventListener('click', function(){
+        const bulanVal=document.getElementById('cashDroppingUangMasukBulan').value;
+        rk2OpenSelisihModal(bulanVal);
+    });
 
+    function cddUpdateSelisihBadge() {
+        const bulanVal=document.getElementById('cashDroppingUangMasukBulan').value;
+        const anomaliCount=(cashDroppingUangMasukData||[]).filter(d=>{
+            if(bulanVal && d._bulan!==bulanVal) return false;
+            const nominal=parseNumber(d.tagihan)||0;
+            const masuk=(parseNumber(d.bayarCash)||0)+(parseNumber(d.bayarTransfer)||0);
+            return (nominal-masuk)>=1;
+        }).length;
+        const badgeBtn=document.getElementById('cddSelisihBadgeBtn');
+        if(anomaliCount>0){ badgeBtn.style.display='inline-flex'; document.getElementById('cddSelisihBadgeText').textContent=anomaliCount+' faktur kurang bayar'; }
+        else { badgeBtn.style.display='none'; }
+    }
     function renderCashDroppingUangMasuk() {
         const filtered=getFilteredCashDroppingUangMasuk();
         cddRenderSummaryCards(filtered);
+        cddUpdateSelisihBadge();
         cddApplyViewModeUI();
         const totalPages=Math.max(1,Math.ceil(filtered.length/UANG_MASUK_ROWS_PER_PAGE));
         if(cashDroppingUangMasukPage>totalPages) cashDroppingUangMasukPage=totalPages;
@@ -8260,11 +8288,12 @@
     });
 
     // ----- Modal: daftar faktur penyumbang selisih Cash Dropping (nominal vs uang masuk) -----
-    function rk2OpenSelisihModal() {
-        const sel = document.getElementById('rkLapBulan');
-        const bulan = sel ? sel.value : '';
-        const bulanLabel = bulan ? fmtBulanTahun(bulan) : '-';
-        const rows = (cashDroppingUangMasukData || []).filter(d => d._bulan === bulan);
+    function rk2OpenSelisihModal(bulanOverride) {
+        let bulan = bulanOverride;
+        if(bulan===undefined){ const sel = document.getElementById('rkLapBulan'); bulan = sel ? sel.value : ''; }
+        rk2SelisihLastBulan = bulan;
+        const bulanLabel = bulan ? fmtBulanTahun(bulan) : 'Semua Periode';
+        const rows = (cashDroppingUangMasukData || []).filter(d => !bulan || d._bulan === bulan);
         const list = rows.map(d => {
             const nominal = parseNumber(d.tagihan) || 0;
             const masuk = (parseNumber(d.bayarCash) || 0) + (parseNumber(d.bayarTransfer) || 0);
@@ -8298,6 +8327,7 @@
                     <td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;">${fmtRp(r.nominal)}</td>
                     <td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;">${fmtRp(r.masuk)}</td>
                     <td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;color:${diffColor};font-weight:800;">${diffSign} ${fmtRp(Math.abs(r.diff))}</td>
+                    <td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:center;">${r.diff>0?`<button type="button" class="btn btn-outline" style="font-size:10px;padding:3px 8px;white-space:nowrap;" onclick="cddPindahkanKePiutang(${r.d._id})">↪️ Pindah ke Piutang</button>`:'-'}</td>
                 </tr>`;
             }).join('');
             tfoot.innerHTML = `<tr style="background:#f8fafc;font-weight:800;">
@@ -8305,9 +8335,55 @@
                 <td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;">${fmtRp(totalNominal)}</td>
                 <td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;">${fmtRp(totalMasuk)}</td>
                 <td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:right;color:${totalDiff>0?'#dc2626':'#0d8a5f'};">${fmtRp(Math.abs(totalDiff))}</td>
+                <td style="padding:6px 8px;border:1px solid #e2e8f0;"></td>
             </tr>`;
         }
         document.getElementById('rk2SelisihModal').classList.add('show');
+    }
+    let rk2SelisihLastBulan; // bulan filter dipakai terakhir kali modal dibuka, dipakai untuk refresh setelah pindah data
+    async function cddPindahkanKePiutang(id) {
+        const item = (cashDroppingUangMasukData || []).find(x => x._id === id);
+        if (!item) { showToast('⚠️ Data tidak ditemukan, coba muat ulang.', 'warning'); return; }
+        if (!confirm(`Pindahkan faktur ${item.noFaktur || '-'} (${item.namaToko || '-'}) dari Cash Dropping ke Piutang Tempo?\n\nNominal: ${fmtRp(item.tagihan)}\nUang masuk sejauh ini: ${fmtRp((item.bayarCash||0)+(item.bayarTransfer||0))}`)) return;
+        const bulanKey = item._bulan, tanggalKey = item._tanggalHari;
+        try {
+            let list;
+            try { const rec = await db.cashIncome.where('bulan').equals(bulanKey).first(); list = rec ? (rec.data || []) : (cashDataMap[bulanKey] || []); }
+            catch (e) { list = cashDataMap[bulanKey] || []; }
+            const day = list.find(dd => dd.tanggal === tanggalKey);
+            if (!day || !Array.isArray(day.cashDroppingDetail)) { showToast('⚠️ Data harian tidak ditemukan.', 'warning'); return; }
+            // Cari baris asli: pakai index yang tercatat, tapi divalidasi dulu no fakturnya cocok
+            // (jaga-jaga kalau array berubah urutan sejak render terakhir).
+            let idx = item._rowIdxInDay;
+            const cocok = (row) => row && (row.noFaktur || '').trim() === (item.noFaktur || '').trim() && (row.namaToko || '') === (item.namaToko || '');
+            if (idx == null || !cocok(day.cashDroppingDetail[idx])) {
+                idx = day.cashDroppingDetail.findIndex(cocok);
+            }
+            if (idx === -1 || idx == null) { showToast('⚠️ Baris faktur tidak ditemukan di data harian (mungkin sudah diubah).', 'warning'); return; }
+            const [moved] = day.cashDroppingDetail.splice(idx, 1);
+            if (!Array.isArray(day.piutangDetail)) day.piutangDetail = [];
+            day.piutangDetail.push(moved);
+            // Hitung ulang total harian
+            const sum = (arr, key) => (arr || []).reduce((s, it) => s + (it[key] || 0), 0);
+            day.piutangCash = sum(day.piutangDetail, 'bayarCash');
+            day.piutangTransfer = sum(day.piutangDetail, 'bayarTransfer');
+            day.penjualanCash = sum(day.cashDroppingDetail, 'bayarCash');
+            day.penjualanTransfer = sum(day.cashDroppingDetail, 'bayarTransfer');
+            day.totalCash = day.piutangCash + day.penjualanCash;
+            day.totalTransfer = day.piutangTransfer + day.penjualanTransfer;
+            day.grandTotal = day.totalCash + day.totalTransfer;
+            const existing = await db.cashIncome.where('bulan').equals(bulanKey).first();
+            if (existing) { await db.cashIncome.update(existing.id, { data: list, tanggal: new Date().toISOString() }); }
+            else { await db.cashIncome.add({ bulan: bulanKey, data: list, tanggal: new Date().toISOString() }); }
+            cashDataMap[bulanKey] = list;
+            refreshPiutangUangMasuk();
+            if (document.getElementById('tabRingkasan') && document.getElementById('tabRingkasan').classList.contains('active')) rkLapRender();
+            showToast(`✅ Faktur ${moved.noFaktur || '-'} dipindahkan ke Piutang Tempo.`, 'success');
+            // refresh isi modal (kalau masih terbuka) supaya baris yang barusan dipindah hilang dari daftar
+            if (document.getElementById('rk2SelisihModal').classList.contains('show')) rk2OpenSelisihModal(rk2SelisihLastBulan);
+        } catch (e) {
+            showToast('❌ Gagal memindahkan data: ' + e.message, 'warning');
+        }
     }
     function closeRk2SelisihModal() { document.getElementById('rk2SelisihModal').classList.remove('show'); }
     document.getElementById('rk2CddSelisihLine').addEventListener('click', rk2OpenSelisihModal);

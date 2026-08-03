@@ -9778,8 +9778,22 @@
         function ptParseISODate(str) { if (!str) return null; const m = String(str).match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
             if (!m) return null; return new Date(parseInt(m[1]), parseInt(m[2]) - 1, parseInt(m[3])); }
 
-        function ptParseDMY(str) { if (!str) return null; const m = String(str).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-            if (!m) return null; return new Date(parseInt(m[3]), parseInt(m[2]) - 1, parseInt(m[1])); }
+        function ptParseDMY(str) {
+            if (!str) return null;
+            const s = String(str).trim();
+            // Format DD/MM/YYYY (mis. 29/06/2026)
+            const mDMY = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (mDMY) return new Date(parseInt(mDMY[3]), parseInt(mDMY[2]) - 1, parseInt(mDMY[1]));
+            // Format ISO YYYY-MM-DD (mis. 2026-06-29), termasuk varian dengan waktu (2026-06-29T00:00:00)
+            const mISO = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+            if (mISO) return new Date(parseInt(mISO[1]), parseInt(mISO[2]) - 1, parseInt(mISO[3]));
+            // Fallback longgar: cari pola DD/MM/YYYY atau ISO di dalam string (kalau ada teks lain di sekitarnya)
+            const mDMYLoose = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+            if (mDMYLoose) return new Date(parseInt(mDMYLoose[3]), parseInt(mDMYLoose[2]) - 1, parseInt(mDMYLoose[1]));
+            const mISOLoose = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+            if (mISOLoose) return new Date(parseInt(mISOLoose[1]), parseInt(mISOLoose[2]) - 1, parseInt(mISOLoose[3]));
+            return null;
+        }
 
         function ptDaysBetween(a, b) { return Math.round((a - b) / (1000 * 60 * 60 * 24)); }
 

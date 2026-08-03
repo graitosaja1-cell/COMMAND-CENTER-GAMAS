@@ -5209,7 +5209,11 @@
                             <div class="judul-kecil">LAPORAN UANG MASUK HARIAN <span>MINYAK &amp; RUPA-RUPA</span></div>
                             <div id="inputHarianSourceStatus" class="status-info"></div>
                         </div>
-                        <div class="tanggal-controls" style="display:flex;align-items:center;gap:8px;">
+                        <div class="tanggal-controls" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <div class="cek-tercatat-wrap" style="position:relative;display:flex;align-items:center;gap:6px;">
+                                <input type="text" id="cekTercatatInput" placeholder="No faktur / nama toko..." style="width:200px;padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;">
+                                <div id="cekTercatatResult" style="display:none;position:absolute;top:calc(100% + 4px);left:0;min-width:260px;max-width:360px;background:#fff;border:1px solid #d1d5db;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);padding:8px 10px;font-size:12px;z-index:50;"></div>
+                            </div>
                             <label for="tanggalHarian">Tanggal</label>
                             <input type="date" id="tanggalHarian" value="2026-07-01">
                             <button class="btn btn-outline btn-sm" id="btnPrintHarian"><i class="bi bi-printer"></i> Cetak</button>
@@ -12812,6 +12816,73 @@
                 muatDataHarian();
                 updateTglHarianFormatted();
             });
+
+            // ===== Cek faktur/toko sudah tercatat di Pembayaran (semua tanggal) atau belum =====
+            let _cekTercatatTimer = null;
+            async function cekTercatatDiPembayaran(query) {
+                const box = document.getElementById('cekTercatatResult');
+                if (!box) return;
+                const q = query.trim().toLowerCase();
+                if (!q) { box.style.display = 'none'; box.innerHTML = ''; return; }
+                box.style.display = 'block';
+                box.innerHTML = '<span style="color:#6b7280;">Mencari...</span>';
+                let allDays = [];
+                try { allDays = await loadAllCashForCek(); } catch (e) { allDays = []; }
+                const hits = [];
+                allDays.forEach(day => {
+                    const bulan = day._bulanRecord || '';
+                    const tglHari = day.tanggal || '';
+                    (day.piutangDetail || []).forEach(d => {
+                        const no = (d.noFaktur || '').toString().toLowerCase();
+                        const toko = (d.namaToko || '').toString().toLowerCase();
+                        if (no.includes(q) || toko.includes(q)) {
+                            hits.push({ jenis: 'Piutang Tempo', noFaktur: d.noFaktur || '', namaToko: d.namaToko || '', bulan, tglHari });
+                        }
+                    });
+                    (day.cashDroppingDetail || []).forEach(d => {
+                        const no = (d.noFaktur || '').toString().toLowerCase();
+                        const toko = (d.namaToko || '').toString().toLowerCase();
+                        if (no.includes(q) || toko.includes(q)) {
+                            hits.push({ jenis: 'Cash Dropping', noFaktur: d.noFaktur || '', namaToko: d.namaToko || '', bulan, tglHari });
+                        }
+                    });
+                });
+                if (!hits.length) {
+                    box.innerHTML = '<span style="color:#dc2626;font-weight:700;">❌ Belum tercatat di Pembayaran</span>';
+                    return;
+                }
+                const fmtTglHit = (h) => {
+                    const dayPart = String(h.tglHari || '').split('-')[0].trim().padStart(2, '0');
+                    const parts = String(h.bulan || '').split('-');
+                    if (parts.length !== 2 || !/^\d+$/.test(dayPart)) return '-';
+                    return `${dayPart}/${parts[1]}/${parts[0]}`;
+                };
+                box.innerHTML = '<div style="color:#16a34a;font-weight:700;margin-bottom:4px;">✅ Sudah tercatat (' + hits.length + ')</div>' +
+                    hits.slice(0, 8).map(h =>
+                        `<div style="padding:3px 0;border-top:1px solid #f1f5f9;">
+                            <b>${h.noFaktur || '-'}</b> — ${h.namaToko || '-'}<br>
+                            <span style="color:#6b7280;">${h.jenis} · ${fmtTglHit(h)}</span>
+                        </div>`
+                    ).join('') +
+                    (hits.length > 8 ? `<div style="color:#6b7280;padding-top:4px;">+${hits.length - 8} lainnya...</div>` : '');
+            }
+            const cekTercatatInput = document.getElementById('cekTercatatInput');
+            if (cekTercatatInput) {
+                cekTercatatInput.addEventListener('input', function() {
+                    clearTimeout(_cekTercatatTimer);
+                    const val = this.value;
+                    _cekTercatatTimer = setTimeout(() => cekTercatatDiPembayaran(val), 350);
+                });
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.cek-tercatat-wrap')) {
+                        const box = document.getElementById('cekTercatatResult');
+                        if (box) box.style.display = 'none';
+                    }
+                });
+                cekTercatatInput.addEventListener('focus', function() {
+                    if (this.value.trim()) cekTercatatDiPembayaran(this.value);
+                });
+            }
 
             window.addEventListener('beforeunload', function(e) {
                 if (inputHarianDirty) {

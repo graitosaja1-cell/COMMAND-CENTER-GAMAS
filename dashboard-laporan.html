@@ -3163,6 +3163,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 10px;
             padding: 4px 0;
             border-bottom: 1px solid #f5f7fc;
             flex-shrink: 0;
@@ -3181,6 +3182,9 @@
             gap: 6px;
             flex: 1 1 auto;
             min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         #tabKas .item-row .name i {
@@ -3196,6 +3200,7 @@
             color: #1f2a44;
             font-variant-numeric: tabular-nums;
             flex: 0 0 auto;
+            flex-shrink: 0;
             margin-left: auto;
             text-align: right;
             white-space: nowrap;

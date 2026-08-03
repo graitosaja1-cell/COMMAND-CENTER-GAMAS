@@ -14968,16 +14968,20 @@
                 await loadCashNotes();
                 await loadCetakTagihanMap();
 
-                // Filter periode bulan dibuka otomatis di bulan TERBARU: diambil dari mana yang
-                // lebih baru antara tanggal sistem/perangkat saat ini dan bulan terakhir yang ada
-                // di data (Bank Data Penjualan). Jadi tidak perlu diubah manual tiap bulan lagi.
+                // Filter periode bulan dibuka otomatis di bulan TERBARU yang ada datanya
+                // di Bank Data Penjualan (bukan bulan sistem/perangkat saat ini), supaya
+                // tidak kosong di awal bulan baru sebelum data bulan itu diinput. Kalau
+                // belum ada data sama sekali, baru dipakai bulan sistem sekarang.
                 const nowForBulan = new Date();
                 let defaultBulan = nowForBulan.getFullYear() + '-' + String(nowForBulan.getMonth() + 1).padStart(2, '0');
                 const salesPeriodsAwal = new Set();
                 salesData.forEach(r => { if (r.Tanggal) salesPeriodsAwal.add(String(r.Tanggal).slice(0, 7)); });
                 if (salesPeriodsAwal.size) {
+                    // Selalu pakai bulan terakhir yang BENAR-BENAR ada datanya, meski
+                    // bulan itu lebih lama dari bulan sistem sekarang. Ini mencegah
+                    // tampilan kosong di awal bulan baru saat data bulan itu belum diinput.
                     const latestSalesBulan = Array.from(salesPeriodsAwal).sort().pop();
-                    if (latestSalesBulan > defaultBulan) defaultBulan = latestSalesBulan;
+                    defaultBulan = latestSalesBulan;
                 }
                 APP_DEFAULT_BULAN = defaultBulan;
 

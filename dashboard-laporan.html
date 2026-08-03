@@ -2999,6 +2999,16 @@
             font-size: 11px;
         }
 
+        #tabKas .lk-bulan-select {
+            border: none;
+            outline: none;
+            background: transparent;
+            font: inherit;
+            font-weight: 600;
+            color: #1f2a44;
+            cursor: pointer;
+        }
+
         #tabKas .btn-upload {
             background: #eef2f9;
             color: #1f2a44;
@@ -3616,7 +3626,7 @@
                 <h1><i class="fas fa-wallet"></i> Laporan Kas</h1>
             </div>
             <div class="header-actions">
-                <span class="badge-date"><i class="far fa-clock"></i> 01–31 Agt 2026</span>
+                <span class="badge-date"><i class="far fa-clock"></i> <select id="lkBulanSelect" class="lk-bulan-select"></select></span>
                 <button class="btn-upload"><i class="fas fa-upload"></i> Saldo Awal</button>
                 <button class="btn-upload secondary"><i class="fas fa-upload"></i> Saldo Akhir</button>
             </div>
@@ -8675,6 +8685,62 @@
     window.dispatchEvent(new Event('laporanKasDataChanged'));
   }
 
+  // ================================================================
+  // PEMILIH BULAN (periode laporan) — 12 bulan ke belakang s/d 1 bulan
+  // ke depan, disimpan terpisah per bulan (mirip tab Data Uang Masuk)
+  // ================================================================
+  const NAMA_BULAN_LK = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  function bulanKeyToLabel(key) {
+    const [y, m] = key.split('-').map(Number);
+    return NAMA_BULAN_LK[m - 1] + ' ' + y;
+  }
+  function bulanKeyNow() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  }
+  function buildBulanOptions() {
+    const opts = [];
+    const now = new Date();
+    for (let i = 12; i >= -1; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      opts.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+    }
+    return opts;
+  }
+
+  let currentBulan = bulanKeyNow();
+  const bulanSelect = root.querySelector('#lkBulanSelect');
+  if (bulanSelect) {
+    bulanSelect.innerHTML = buildBulanOptions().map(k =>
+      '<option value="' + k + '">' + bulanKeyToLabel(k) + '</option>'
+    ).join('');
+    bulanSelect.value = currentBulan;
+    bulanSelect.addEventListener('change', function () {
+      currentBulan = this.value;
+      resetFormToZero();
+      window.dispatchEvent(new Event('laporanKasBulanChanged'));
+    });
+  }
+
+  function resetFormToZero() {
+    CARD_SELECTORS.forEach(key => {
+      const card = root.querySelector('[data-card="' + key + '"]');
+      if (!card) return;
+      card.querySelectorAll('.amount').forEach(el => updateAmountDisplay(el, 0));
+      updateCardTotal(card);
+    });
+    Object.keys(EXTRA_IDS).forEach(key => {
+      const el = root.querySelector('#' + EXTRA_IDS[key]);
+      if (el) updateAmountDisplay(el, 0);
+    });
+    recalculateAll();
+  }
+
+  // Dipakai oleh sync-laporan-kas-supabase.js untuk tahu bulan mana yang
+  // sedang aktif ditampilkan, supaya push/pull menyasar baris yang benar.
+  window.__laporanKasTabGetBulan = () => currentBulan;
+
+
   // Toggle edit mode
   function enterEditMode(card, btn) {
     card.classList.add('editing');
@@ -8845,17 +8911,6 @@
       if (typeof runLaporanKasFullSync === 'function') runLaporanKasFullSync(true);
     });
   }
-
-  // Tampilkan periode bulan berjalan (bukan teks statis "Agustus 2026")
-  (function setPeriodeBadge() {
-    const badge = root.querySelector('.badge-date');
-    if (!badge) return;
-    const now = new Date();
-    const bulanNama = now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-    const akhirBulan = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-    badge.innerHTML = '<i class="far fa-clock"></i> 01\u2013' + akhirBulan + ' ' +
-      bulanNama.replace(/^\w/, c => c.toUpperCase());
-  })();
 
   // Init
   recalculateAll();

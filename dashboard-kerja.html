@@ -1634,11 +1634,11 @@
         @media (max-width: 640px) {
             #ptCardList.show { grid-template-columns: 1fr; }
         }
-        /* Blok info "Total Tagihan" → "Total Dibayar" → "Sisa Tagihan" di kartu Cek Piutang,
-           dibuat 3 kolom sejajar supaya urutan alurnya mudah dibaca sekilas. */
+        /* Blok info "Total Tagihan" → "Total Dibayar" → "Tgl Terakhir Bayar" → "Sisa Tagihan"
+           di kartu Cek Piutang, dibuat 4 kolom sejajar supaya urutan alurnya mudah dibaca sekilas. */
         .pt-card-tagihan-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
             gap: 2px 8px;
             margin-top: 8px;
             padding-top: 8px;
@@ -10624,6 +10624,10 @@
                         <div class="pt-card-tagihan-item">
                             <div class="pt-card-tagihan-label">Total Dibayar</div>
                             <div class="pt-card-tagihan-value">${r.totalBayar!=null ? fmtRp(r.totalBayar) : '-'}</div>
+                        </div>
+                        <div class="pt-card-tagihan-item">
+                            <div class="pt-card-tagihan-label">Tgl Terakhir Bayar</div>
+                            <div class="pt-card-tagihan-value">${r.tanggalBayar || '-'}</div>
                         </div>
                         <div class="pt-card-tagihan-item">
                             <div class="pt-card-tagihan-label">Sisa Tagihan</div>

@@ -9310,7 +9310,7 @@
             return map;
         }
 
-        function getFilteredCashDetail(detailList) {
+        function getFilteredCashDetail(detailList, skipBulan) {
             return detailList.filter(d => {
                 const no = (d.noFaktur || '').toString().toLowerCase();
                 const sales = (d.sales || '').toString().toLowerCase();
@@ -9327,10 +9327,12 @@
                     return true;
                 }
                 
-                // NORMAL FILTER: Apply semua filter termasuk bulan
+                // NORMAL FILTER: Apply semua filter termasuk bulan (kecuali skipBulan=true,
+                // dipakai saat mencocokkan status Lunas supaya invoice bulan lalu yang baru
+                // di-drop cash-nya di bulan berikutnya tetap terdeteksi Lunas)
                 if (cekFilterSales && !sales.includes(cekFilterSales.toLowerCase())) return false;
                 if (cekFilterTanggal && tglKey !== cekFilterTanggal) return false;
-                if (cekFilterBulan && bulan !== cekFilterBulan) return false;
+                if (!skipBulan && cekFilterBulan && bulan !== cekFilterBulan) return false;
                 return true;
             });
         }
@@ -9390,8 +9392,13 @@
                 }
             });
             const filteredCashDrop = getFilteredCashDetail(cashDroppingAll);
+            // Untuk pencocokan status Lunas, JANGAN batasi ke bulan filter aktif —
+            // invoice bulan lalu yang baru di-drop cash-nya di bulan berikutnya
+            // (mis. faktur 31 Juli, cash-nya baru di-drop 1 Agustus) tetap harus
+            // terdeteksi Lunas walau sedang melihat filter bulan apa pun.
+            const cashDropForMatch = getFilteredCashDetail(cashDroppingAll, true);
             const cashDropMap = new Map();
-            filteredCashDrop.forEach(d => { const no = normFaktur(d.noFaktur); if (no) cashDropMap.set(no, d); });
+            cashDropForMatch.forEach(d => { const no = normFaktur(d.noFaktur); if (no) cashDropMap.set(no, d); });
 
             let filteredCashSales = cashSales;
             let filteredCashDropFinal = filteredCashDrop;

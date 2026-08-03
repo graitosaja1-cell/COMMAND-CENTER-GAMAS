@@ -14996,8 +14996,10 @@
                     if (d !== dropdown) d.classList.remove('active');
                 });
                 if (willOpen) {
-                    positionDropdown();
+                    // Tampilkan dulu (biar offsetWidth terukur benar, bukan 0 karena
+                    // masih display:none), baru hitung posisinya supaya tidak kepotong.
                     dropdown.classList.add('active');
+                    positionDropdown();
                 } else {
                     dropdown.classList.remove('active');
                 }

@@ -34,6 +34,8 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 100 100&#39;%3E%3Crect width=&#39;100&#39; height=&#39;100&#39; rx=&#39;20&#39; fill=&#39;%232d3748&#39;/%3E%3Crect x=&#39;22&#39; y=&#39;55&#39; width=&#39;14&#39; height=&#39;28&#39; rx=&#39;3&#39; fill=&#39;%23f59e0b&#39;/%3E%3Crect x=&#39;43&#39; y=&#39;38&#39; width=&#39;14&#39; height=&#39;45&#39; rx=&#39;3&#39; fill=&#39;%233b82f6&#39;/%3E%3Crect x=&#39;64&#39; y=&#39;22&#39; width=&#39;14&#39; height=&#39;61&#39; rx=&#39;3&#39; fill=&#39;%2310b981&#39;/%3E%3C/svg%3E">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',-apple-system,Arial,sans-serif; }
         body { background:#f1f5f9; color:#1e293b; font-size:12px; min-height:100vh; }
@@ -63,14 +65,15 @@
         .tab-btn[data-tab="tabRingkasan"].active, .tab-btn[data-tab="tab1"].active, .tab-btn[data-tab="tab2"].active, .tab-btn[data-tab="tab3"].active,
         .tab-btn[data-tab="tab4"].active, .tab-btn[data-tab="tab6"].active, .tab-btn[data-tab="tab7"].active,
         .tab-btn[data-tab="tab8"].active, .tab-btn[data-tab="tab9"].active, .tab-btn[data-tab="tab10"].active,
-        .tab-btn[data-tab="tabSales"].active {
+        .tab-btn[data-tab="tabSales"].active, .tab-btn[data-tab="tabKas"].active {
             color:#fff; border-color:transparent; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); box-shadow:0 3px 10px rgba(102,126,234,0.35);
         }
         .tab-btn[data-tab="tabRingkasan"].active .tab-icon, .tab-btn[data-tab="tab1"].active .tab-icon, .tab-btn[data-tab="tab2"].active .tab-icon,
         .tab-btn[data-tab="tab3"].active .tab-icon, .tab-btn[data-tab="tab4"].active .tab-icon,
         .tab-btn[data-tab="tab6"].active .tab-icon, .tab-btn[data-tab="tab7"].active .tab-icon,
         .tab-btn[data-tab="tab8"].active .tab-icon, .tab-btn[data-tab="tab9"].active .tab-icon,
-        .tab-btn[data-tab="tab10"].active .tab-icon, .tab-btn[data-tab="tabSales"].active .tab-icon { color:#fff; }
+        .tab-btn[data-tab="tab10"].active .tab-icon, .tab-btn[data-tab="tabSales"].active .tab-icon,
+        .tab-btn[data-tab="tabKas"].active .tab-icon { color:#fff; }
         .tab-btn .badge-tab { background:#cbd5e1; color:#334155; border-radius:20px; padding:1px 7px; font-size:9px; font-weight:700; margin-left:2px; min-width:15px; text-align:center; display:inline-block; }
         .tab-btn.active .badge-tab { background:rgba(255,255,255,0.28); color:#fff; }
         .tab-btn:hover { color:#4c51bf; background:#eef2ff; border-color:#c7d2fe; transform:translateY(-1px); }
@@ -1941,6 +1944,10 @@
             <svg class="tab-icon" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1.5"></circle><circle cx="19" cy="21" r="1.5"></circle><path d="M2 3h3l2.4 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L22 7H6"></path></svg>
             Sales
         </button>
+        <button class="tab-btn" data-tab="tabKas">
+            <svg class="tab-icon" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"></path><path d="M3 10h18"></path><circle cx="16" cy="14.5" r="1.5"></circle></svg>
+            Laporan Kas
+        </button>
     </div>
 
     <div id="storageStatusBar" style="display:none;padding:6px 14px;font-size:10px;font-weight:600;text-align:center;cursor:pointer;"></div>
@@ -2892,6 +2899,891 @@
             <div><button id="cashDroppingUangMasukPrevPage" disabled>◀ Sebelumnya</button><span id="cashDroppingUangMasukPageLabel">Halaman 1 dari 1</span><button id="cashDroppingUangMasukNextPage" disabled>Berikutnya ▶</button></div>
             <div><span class="badge-count" id="cashDroppingUangMasukTotalData">0 data</span></div>
         </div>
+    </div>
+
+
+    <!-- ======= TAB LAPORAN KAS (disatukan dari Laporan_Kas.html) ======= -->
+    <style id="tabKasStyles">
+
+        #tabKas * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        #tabKas {
+            font-family: 'Inter', sans-serif;
+            color: #1a1f36;
+        }
+
+        #tabKas .app {
+            max-width: 1280px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: transparent;
+            padding: 0;
+        }
+
+        /* ---- HEADER ---- */
+        #tabKas .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: nowrap;
+            gap: 12px;
+            flex-shrink: 0;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #eaf0fa;
+        }
+
+        #tabKas .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: nowrap;
+        }
+
+        #tabKas .header-left h1 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+            color: #0b1a33;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #tabKas .header-left h1 i {
+            color: #2a7de1;
+            font-size: 18px;
+        }
+
+        #tabKas .header-left .sub {
+            font-size: 12px;
+            font-weight: 500;
+            color: #6b7a93;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #tabKas .header-left .sub i {
+            font-size: 11px;
+            color: #8a9bb5;
+        }
+
+        #tabKas .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+
+        #tabKas .badge-date {
+            background: #eef2f9;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #1f2a44;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        #tabKas .badge-date i {
+            color: #2a7de1;
+            font-size: 11px;
+        }
+
+        #tabKas .btn-upload {
+            background: #eef2f9;
+            color: #1f2a44;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: 0.15s;
+            box-shadow: none;
+            white-space: nowrap;
+        }
+
+        #tabKas .btn-upload:hover {
+            background: #e2e8f2;
+        }
+
+        #tabKas .btn-upload.secondary {
+            background: #eef2f9;
+            color: #1f2a44;
+            box-shadow: none;
+        }
+
+        #tabKas .btn-upload.secondary:hover {
+            background: #e2e8f2;
+        }
+
+        /* ---- SUMMARY ROW (lebih kecil) ---- */
+        #tabKas .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        #tabKas .summary-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 10px 14px;
+            border: 1px solid #edf1f9;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #tabKas .summary-card .label {
+            font-size: 10px;
+            font-weight: 600;
+            color: #7b8aa3;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        #tabKas .summary-card .label i {
+            font-size: 11px;
+            color: #8a9bb5;
+        }
+
+        #tabKas .summary-card .value {
+            font-size: 16px;
+            font-weight: 500;
+            color: #1f2a44;
+            line-height: 1.2;
+        }
+
+        #tabKas .summary-card .value .currency {
+            font-size: 11px;
+            font-weight: 400;
+            color: #7b8aa3;
+            margin-right: 1px;
+        }
+
+        /* tanpa aksen warna-warni */
+        #tabKas .summary-card.accent-blue,
+        #tabKas .summary-card.accent-green,
+        #tabKas .summary-card.accent-orange,
+        #tabKas .summary-card.accent-purple {
+            border-left: 1px solid #edf1f9;
+        }
+
+        /* ---- CONTENT GRID (2 kolom) ---- */
+        #tabKas .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            flex: 1 1 auto;
+            min-height: 0;
+        }
+
+        #tabKas .card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 12px 14px 10px 14px;
+            border: 1px solid #edf1f9;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #tabKas .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #f0f4fe;
+            flex-shrink: 0;
+        }
+
+        #tabKas .card-header h3 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0b1a33;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #tabKas .card-header h3 i {
+            font-size: 13px;
+            color: #2a7de1;
+            width: 20px;
+            text-align: center;
+        }
+
+        #tabKas .card-header .total-badge {
+            font-size: 10px;
+            font-weight: 500;
+            background: #f0f4fe;
+            padding: 2px 10px;
+            border-radius: 30px;
+            color: #1f2a44;
+        }
+
+        #tabKas .card-header .total-badge strong {
+            color: #1f2a44;
+            font-weight: 500;
+        }
+
+        /* item rows lebih rapat */
+        #tabKas .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            border-bottom: 1px solid #f5f7fc;
+            flex-shrink: 0;
+        }
+
+        #tabKas .item-row:last-child {
+            border-bottom: none;
+        }
+
+        #tabKas .item-row .name {
+            font-size: 12px;
+            font-weight: 500;
+            color: #1f2a44;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #tabKas .item-row .name i {
+            color: #8a9bb5;
+            font-size: 11px;
+            width: 16px;
+            text-align: center;
+        }
+
+        #tabKas .item-row .amount {
+            font-size: 12px;
+            font-weight: 500;
+            color: #1f2a44;
+            font-variant-numeric: tabular-nums;
+        }
+
+        #tabKas .item-row .amount .currency {
+            font-weight: 400;
+            color: #7b8aa3;
+            font-size: 10px;
+            margin-right: 1px;
+        }
+
+        #tabKas .item-row .amount.zero {
+            color: #a0afc4;
+        }
+
+        #tabKas .item-row .amount.positive { color: #1f2a44; }
+        #tabKas .item-row .amount.negative { color: #1f2a44; }
+
+        /* subtotal di dalam card */
+        #tabKas .card-subtotal {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 6px;
+            margin-top: 4px;
+            border-top: 2px dashed #eaf0fa;
+            font-weight: 500;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        #tabKas .card-subtotal .label {
+            color: #1f2a44;
+        }
+        #tabKas .card-subtotal .value {
+            color: #1f2a44;
+        }
+        #tabKas .card-subtotal .value.negative {
+            color: #1f2a44;
+        }
+
+        /* upload actions kecil */
+        #tabKas .upload-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+            flex-shrink: 0;
+        }
+
+        #tabKas .upload-actions .btn-upload {
+            font-size: 10px;
+            padding: 2px 12px;
+        }
+
+        /* ---- FINAL SECTION (full width) ---- */
+        #tabKas .final-section {
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+
+        #tabKas .final-section .card {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #f8faff 0%, #ffffff 100%);
+            border-color: #dce5f5;
+            gap: 12px;
+            flex-wrap: nowrap;
+        }
+
+        #tabKas .final-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #tabKas .final-left h3 {
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #0b1a33;
+        }
+
+        #tabKas .final-left h3 i {
+            color: #8b5cf6;
+        }
+
+        #tabKas .final-items {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        #tabKas .final-item {
+            text-align: center;
+            padding: 2px 8px;
+            background: #fafcff;
+            border-radius: 12px;
+            border: 1px solid #eaf0fa;
+        }
+
+        #tabKas .final-item .label {
+            font-size: 9px;
+            font-weight: 600;
+            color: #6b7a93;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+        }
+
+        #tabKas .final-item .value {
+            font-size: 15px;
+            font-weight: 500;
+            color: #1f2a44;
+            line-height: 1.2;
+        }
+
+        #tabKas .final-item .value .currency {
+            font-size: 10px;
+            font-weight: 400;
+            color: #7b8aa3;
+            margin-right: 1px;
+        }
+
+        #tabKas .final-item.highlight {
+            background: #f5f7fc;
+            border-color: #eaf0fa;
+        }
+        #tabKas .final-item.highlight .value {
+            color: #1f2a44;
+        }
+
+        #tabKas .formula-note {
+            font-size: 10px;
+            color: #6b7a93;
+            background: #f0f4fe;
+            padding: 3px 12px;
+            border-radius: 40px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        #tabKas .formula-note i {
+            color: #2a7de1;
+            font-size: 10px;
+        }
+
+        #tabKas .final-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        #tabKas .final-actions .btn-upload {
+            font-size: 10px;
+            padding: 3px 12px;
+        }
+
+        /* ---- RESPONSIVE TWEAKS ---- */
+        @media (max-width: 920px) {
+            #tabKas .app {
+                max-height: none;
+                height: 100%;
+                padding: 8px 10px;
+                gap: 6px;
+                overflow-y: auto;
+            }
+            #tabKas .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            #tabKas .content-grid {
+                grid-template-columns: 1fr;
+            }
+            #tabKas .final-section .card {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            #tabKas .final-items {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            #tabKas .header-left .sub {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            #tabKas .header-left h1 {
+                font-size: 14px;
+            }
+            #tabKas .badge-date {
+                font-size: 9px;
+                padding: 2px 8px;
+            }
+            #tabKas .btn-upload {
+                font-size: 9px;
+                padding: 2px 10px;
+            }
+            #tabKas .summary-card .value {
+                font-size: 14px;
+            }
+            #tabKas .final-item .value {
+                font-size: 13px;
+            }
+        }
+
+        /* ---- EXTRA TOTALS (Piutang, Stok Gudang & Hutang) ---- */
+        #tabKas .extra-totals {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            flex-shrink: 0;
+            padding: 4px 4px 0 4px;
+        }
+
+        #tabKas .extra-total-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #1f2a44;
+            font-weight: 500;
+        }
+
+        #tabKas .extra-total-item .extra-label {
+            color: #1f2a44;
+            white-space: nowrap;
+        }
+
+        #tabKas .extra-total-item .extra-value {
+            font-weight: 500;
+            color: #1f2a44;
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            min-width: 80px;
+            display: inline-block;
+            text-align: left;
+        }
+
+        #tabKas .extra-total-item .extra-value:hover {
+            background: #f0f4fe;
+            border-color: #dce5f5;
+        }
+
+        #tabKas .extra-total-item .extra-value .currency {
+            font-weight: 400;
+            color: #7b8aa3;
+            font-size: 11px;
+            margin-right: 2px;
+        }
+
+        #tabKas .extra-total-item .extra-input {
+            width: 120px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            border: 1px solid #c7d9f7;
+            border-radius: 8px;
+            padding: 2px 8px;
+            background: #f8faff;
+            color: #0b1a33;
+            outline: none;
+        }
+        #tabKas .extra-total-item .extra-input:focus {
+            border-color: #2a7de1;
+            box-shadow: 0 0 0 2px rgba(42, 125, 225, 0.15);
+        }
+
+        /* small fix */
+        #tabKas .flex-shrink-0 { flex-shrink: 0; }
+        #tabKas .gap-1 { gap: 4px; }
+        #tabKas .text-muted { color: #7b8aa3; }
+
+        /* ---- PRINT ---- */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 12mm 14mm;
+            }
+
+            #tabKas {
+                height: auto !important;
+                min-height: 0 !important;
+                overflow: visible !important;
+                background: #fff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                display: block !important;
+                align-items: stretch !important;
+                justify-content: flex-start !important;
+            }
+
+            #tabKas .app {
+                max-width: 100% !important;
+                width: 100% !important;
+                max-height: none !important;
+                height: auto !important;
+                min-height: 0 !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                gap: 14px !important;
+                overflow: visible !important;
+                display: flex !important;
+                flex-direction: column !important;
+                background: #fff !important;
+            }
+
+            #tabKas .header {
+                padding-bottom: 10px !important;
+                margin-bottom: 4px !important;
+            }
+
+            #tabKas .header-left h1 {
+                font-size: 16px !important;
+            }
+
+            #tabKas .btn-upload,
+            #tabKas .upload-actions,
+            #tabKas .final-actions,
+            #tabKas .header-actions .btn-upload {
+                display: none !important;
+            }
+
+            /* Sembunyikan seluruh dashboard (header, tab lain) saat cetak,
+               supaya yang tercetak cuma isi tab Laporan Kas ini saja. */
+            body > *:not(#darkWrap) { display: none !important; }
+            #darkWrap > *:not(.tab-content) { display: none !important; }
+            .tab-content:not(#tabKas) { display: none !important; }
+            #tabKas { display: block !important; }
+
+            #tabKas .content-grid {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 12px !important;
+                flex: none !important;
+                min-height: 0 !important;
+                overflow: visible !important;
+            }
+
+            #tabKas .card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                box-shadow: none !important;
+                border: 1px solid #d8dee9 !important;
+                padding: 12px 14px !important;
+                overflow: visible !important;
+                border-radius: 12px !important;
+            }
+
+            #tabKas .card .item-row {
+                padding: 6px 0 !important;
+            }
+
+            #tabKas .card-subtotal {
+                padding-top: 8px !important;
+                margin-top: 6px !important;
+            }
+
+            #tabKas .final-section {
+                margin-top: 6px !important;
+            }
+
+            #tabKas .final-section .card {
+                padding: 12px 16px !important;
+                flex-wrap: wrap !important;
+            }
+
+            #tabKas .extra-totals {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr 1fr !important;
+                gap: 16px !important;
+                padding: 10px 4px 0 4px !important;
+                margin-top: 4px !important;
+            }
+
+            #tabKas .extra-total-item {
+                font-size: 13px !important;
+            }
+
+            #tabKas .summary-grid {
+                display: none !important;
+            }
+        }
+
+        /* Edit mode inputs */
+        #tabKas .amount-input {
+            width: 110px;
+            text-align: right;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            border: 1px solid #c7d9f7;
+            border-radius: 8px;
+            padding: 2px 8px;
+            background: #f8faff;
+            color: #0b1a33;
+            outline: none;
+        }
+        #tabKas .amount-input:focus {
+            border-color: #2a7de1;
+            box-shadow: 0 0 0 2px rgba(42, 125, 225, 0.15);
+        }
+        #tabKas .btn-upload.saving {
+            background: #e8f5ef;
+            color: #1a7a4c;
+            border: 1px solid #b8e0c8;
+        }
+        #tabKas .btn-upload.saving:hover {
+            background: #d8efe3;
+        }
+        #tabKas .card.editing {
+            border-color: #c7d9f7;
+            box-shadow: 0 0 0 2px rgba(42, 125, 225, 0.08);
+        }
+    
+    </style>
+    <div class="tab-content" id="tabKas">
+<div class="app">
+
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-left">
+                <h1><i class="fas fa-wallet"></i> Laporan Kas</h1>
+            </div>
+            <div class="header-actions">
+                <span class="badge-date"><i class="far fa-clock"></i> 01–31 Agt 2026</span>
+                <button class="btn-upload"><i class="fas fa-upload"></i> Saldo Awal</button>
+                <button class="btn-upload secondary"><i class="fas fa-upload"></i> Saldo Akhir</button>
+            </div>
+        </header>
+
+        <!-- CONTENT 2 KOLOM -->
+        <div class="content-grid">
+
+            <!-- SALDO AWAL -->
+            <div class="card" data-card="saldo-awal">
+                <div class="card-header">
+                    <h3><i class="fas fa-arrow-right"></i> Saldo Awal</h3>
+                    <span class="total-badge">Total <strong class="card-total">Rp 0</strong></span>
+                </div>
+                <div class="item-row">
+                    <span class="name"><i class="fas fa-university"></i> BCA CV Operasional</span>
+                    <span class="amount zero" data-value="0"><span class="currency">Rp</span>0</span>
+                </div>
+                <div class="item-row">
+                    <span class="name"><i class="fas fa-lock"></i> BCA CV Escrow</span>
+                    <span class="amount zero" data-value="0"><span class="currency">Rp</span>0</span>
+                </div>
+                <div class="item-row">
+                    <span class="name"><i class="fas fa-history"></i> BCA Lama</span>
+                    <span class="amount zero" data-value="0"><span class="currency">Rp</span>0</span>
+                </div>
+                <div class="item-row">
+                    <span class="name"><i class="fas fa-safe"></i> Brankas</span>
+                    <span class="amount zero" data-value="0"><span class="currency">Rp</span>0</span>
+                </div>
+                <div class="upload-actions">
+                    <button class="btn-upload btn-upload-file"><i class="fas fa-upload"></i> Upload</button>
+                    <button class="btn-upload secondary btn-edit"><i class="fas fa-pen"></i> Edit</button>
+                </div>
+            </div>
+
+            <!-- SALDO AKHIR -->
+            <div class="card" data-card="saldo-akhir">
+                <div class="card-header">
+                    <h3><i class="fas fa-flag-checkered"></i> Saldo Akhir</h3>
+                    <span class="total-badge">Total <strong class="card-total">Rp 0</strong></span>
+                </div>
+                <div class="item-row">
+                    <span class="name"><i class="fas fa-university"></i> BCA CV Operasional</span>
+                    <span class="amount zero" data-value="0"><span class="currency">Rp</span>0</span>
+                </div>
+                <div class="item-row">
+                    <span class="name"><i class="fas fa-lock"></i> BCA CV Escrow</span>
+                    <span class="amount zero" data-value="0"><span class="currency">Rp</span>0</span>
+                </div>
+                <div class="item-row">
+                    <span class="name"><i class="fas fa-history"></i> BCA Lama</span>
+                    <span class="amount zero" data-value="0"><span class="currency">Rp</span>0</span>
+                </div>
+                <div class="item-row">
+                    <span class="name"><i class="fas fa-safe"></i> Brankas</span>
+                    <span class="amount zero" data-value="0"><span class="currency">Rp</span>0</span>
+                </div>
+                <div class="upload-actions">
+                    <button class="btn-upload btn-upload-file"><i class="fas fa-upload"></i> Upload</button>
+                    <button class="btn-upload secondary btn-edit"><i class="fas fa-pen"></i> Edit</button>
+                </div>
+            </div>
+
+            <!-- PEMASUKAN -->
+            <div class="card" data-card="pemasukan">
+                <div class="card-header">
+                    <h3><i class="fas fa-arrow-down" style="color:#22b573;"></i> Pemasukan</h3>
+                    <span class="total-badge">Total <strong class="card-total">Rp 0</strong></span>
+                </div>
+                <div class="item-row">
+                    <span class="name"><i class="fas fa-hand-holding-usd"></i> Penjualan Tunai</span>
+                    <span class="amount zero" data-value="0"><span class="currency">Rp</span>0</span>
+                </div>
+                <div class="item-row">
+                    <span class="name"><i class="fas fa-file-invoice"></i> Pembayaran Piutang</span>
+                    <span class="amount zero" data-value="0"><span class="currency">Rp</span>0</span>
+                </div>
+                <div class="card-subtotal">
+                    <span class="label">Total Pemasukan</span>
+                    <span class="value" data-subtotal="pemasukan"><span class="currency" style="font-weight:400;color:#7b8aa3;">Rp</span>0</span>
+                </div>
+                <div class="upload-actions">
+                    <button class="btn-upload btn-upload-file"><i class="fas fa-upload"></i> Upload</button>
+                    <button class="btn-upload secondary btn-edit"><i class="fas fa-pen"></i> Edit</button>
+                </div>
+            </div>
+
+            <!-- PENGELUARAN -->
+            <div class="card" data-card="pengeluaran">
+                <div class="card-header">
+                    <h3><i class="fas fa-arrow-up" style="color:#d32f2f;"></i> Pengeluaran</h3>
+                    <span class="total-badge">Total <strong class="card-total">Rp 0</strong></span>
+                </div>
+                <div class="item-row">
+                    <span class="name"><i class="fas fa-building"></i> Kas Besar</span>
+                    <span class="amount zero" data-value="0"><span class="currency">Rp</span>0</span>
+                </div>
+                <div class="item-row">
+                    <span class="name"><i class="fas fa-coffee"></i> Kas Kecil / Harian</span>
+                    <span class="amount zero" data-value="0"><span class="currency">Rp</span>0</span>
+                </div>
+                <div class="item-row">
+                    <span class="name"><i class="fas fa-file-invoice-dollar"></i> Bayar Hutang Dagang</span>
+                    <span class="amount zero" data-value="0"><span class="currency">Rp</span>0</span>
+                </div>
+                <div class="card-subtotal">
+                    <span class="label">Total Pengeluaran</span>
+                    <span class="value negative" data-subtotal="pengeluaran"><span class="currency" style="font-weight:400;color:#7b8aa3;">Rp</span>0</span>
+                </div>
+                <div class="upload-actions">
+                    <button class="btn-upload btn-upload-file"><i class="fas fa-upload"></i> Upload</button>
+                    <button class="btn-upload secondary btn-edit"><i class="fas fa-pen"></i> Edit</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FINAL SECTION (full width, compact) -->
+        <div class="final-section">
+            <div class="card">
+                <div class="final-left">
+                    <h3><i class="fas fa-calculator"></i> Saldo Final</h3>
+                    <span class="formula-note">
+                        <i class="fas fa-info-circle"></i> Saldo Awal + Masuk – Keluar
+                    </span>
+                    <div class="final-items">
+                        <div class="final-item">
+                            <div class="label">Masuk</div>
+                            <div class="value" id="lkFinalMasuk"><span class="currency">Rp</span>0</div>
+                        </div>
+                        <div class="final-item">
+                            <div class="label">Keluar</div>
+                            <div class="value" id="lkFinalKeluar"><span class="currency">Rp</span>0</div>
+                        </div>
+                        <div class="final-item highlight">
+                            <div class="label">Akhir</div>
+                            <div class="value" id="lkFinalAkhir"><span class="currency">Rp</span>0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="final-actions">
+                    <button class="btn-upload" id="lkBtnPdf" title="Simpan sebagai PDF"><i class="fas fa-file-pdf"></i> PDF</button>
+                    <button class="btn-upload secondary" id="lkBtnPrint" title="Cetak halaman"><i class="fas fa-print"></i> Cetak</button>
+                    <button class="btn-upload secondary" id="lkBtnRefresh" title="Muat ulang"><i class="fas fa-sync-alt"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOTAL PIUTANG, STOK GUDANG & HUTANG -->
+        <div class="extra-totals">
+            <div class="extra-total-item">
+                <span class="extra-label">Total Piutang Toko =</span>
+                <span class="extra-value editable-extra" id="lkTotalPiutang" data-value="0" title="Klik untuk edit"><span class="currency">Rp</span>0</span>
+            </div>
+            <div class="extra-total-item">
+                <span class="extra-label">Total Nominal Stok Gudang =</span>
+                <span class="extra-value editable-extra" id="lkTotalStokGudang" data-value="0" title="Klik untuk edit"><span class="currency">Rp</span>0</span>
+            </div>
+            <div class="extra-total-item">
+                <span class="extra-label">Total Hutang Dagang =</span>
+                <span class="extra-value editable-extra" id="lkTotalHutang" data-value="0" title="Klik untuk edit"><span class="currency">Rp</span>0</span>
+            </div>
+        </div>
+
+    </div>
+
+
     </div>
 
     <!-- ======= TAB SALES - BANK DATA (disatukan dari sales.html, bukan iframe) ======= -->
@@ -7462,6 +8354,7 @@
         if(tabName==='tab9'){ refreshPiutangUangMasukTabSwitch(); }
         if(tabName==='tab10'){ refreshPiutangUangMasukTabSwitch(); }
         if(tabName==='tabRingkasan'){ rkLapRender(); }
+        if(tabName==='tabKas'){ if(typeof lkRecalculateAll==='function') lkRecalculateAll(); }
     }
 
     document.querySelectorAll('.tab-btn[data-tab]').forEach(function(btn){ btn.addEventListener('click',function(e){ e.preventDefault(); const tabName=this.getAttribute('data-tab'); switchTab(tabName); }); });
@@ -7657,9 +8550,321 @@
         });
     }
     </script>
+    <script>
+// ================================================================
+// TAB "LAPORAN KAS" — diadaptasi dari Laporan_Kas.html (standalone)
+// Semua query di-scope ke dalam #tabKas supaya tidak bentrok dengan
+// tab lain. Ditambah hook __laporanKasTabGetData/SetData + event
+// 'laporanKasDataChanged' supaya bisa disinkronkan ke Supabase lewat
+// sync-laporan-kas-supabase.js (pola sama seperti tab Per Sales).
+// ================================================================
+(function () {
+  const root = document.getElementById('tabKas');
+  if (!root) return;
+
+  // Format angka ke format Indonesia (1.234.567)
+  function formatRp(num) {
+    const n = Math.round(Number(num) || 0);
+    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+
+  // Parse input (boleh pakai titik/koma)
+  function parseRp(str) {
+    if (typeof str !== 'string') return Number(str) || 0;
+    const cleaned = str.replace(/[^\d,-]/g, '').replace(',', '.');
+    return parseFloat(cleaned) || 0;
+  }
+
+  function updateAmountDisplay(el, value) {
+    const v = Number(value) || 0;
+    el.dataset.value = v;
+    el.innerHTML = '<span class="currency">Rp</span>' + formatRp(v);
+    el.classList.toggle('zero', v === 0);
+    el.classList.toggle('positive', v > 0);
+    el.classList.toggle('negative', v < 0);
+  }
+
+  function getCardTotal(card) {
+    let total = 0;
+    card.querySelectorAll('.amount').forEach(a => {
+      total += parseRp(a.dataset.value);
+    });
+    return total;
+  }
+
+  function updateCardTotal(card) {
+    const total = getCardTotal(card);
+    const badge = card.querySelector('.card-total');
+    if (badge) badge.textContent = 'Rp ' + formatRp(total);
+
+    const sub = card.querySelector('[data-subtotal]');
+    if (sub) {
+      const isNeg = sub.classList.contains('negative');
+      sub.innerHTML = '<span class="currency" style="font-weight:400;color:#7b8aa3;">Rp</span>' + formatRp(total);
+      if (isNeg) sub.classList.add('negative');
+    }
+    return total;
+  }
+
+  function recalculateAll() {
+    const saldoAwalEl = root.querySelector('[data-card="saldo-awal"]');
+    const pemasukanEl = root.querySelector('[data-card="pemasukan"]');
+    const pengeluaranEl = root.querySelector('[data-card="pengeluaran"]');
+    const saldoAwal = saldoAwalEl ? getCardTotal(saldoAwalEl) : 0;
+    const pemasukan = pemasukanEl ? getCardTotal(pemasukanEl) : 0;
+    const pengeluaran = pengeluaranEl ? getCardTotal(pengeluaranEl) : 0;
+
+    // Final section (formula: Awal + Masuk - Keluar)
+    const calculated = saldoAwal + pemasukan - pengeluaran;
+    const elMasuk = root.querySelector('#lkFinalMasuk');
+    const elKeluar = root.querySelector('#lkFinalKeluar');
+    const elAkhir = root.querySelector('#lkFinalAkhir');
+    if (elMasuk) elMasuk.innerHTML = '<span class="currency">Rp</span>' + formatRp(pemasukan);
+    if (elKeluar) elKeluar.innerHTML = '<span class="currency">Rp</span>' + formatRp(pengeluaran);
+    if (elAkhir) elAkhir.innerHTML = '<span class="currency">Rp</span>' + formatRp(calculated);
+  }
+
+  // ================================================================
+  // HOOK SINKRONISASI — dipanggil oleh sync-laporan-kas-supabase.js
+  // ================================================================
+  const CARD_SELECTORS = ['saldo-awal', 'saldo-akhir', 'pemasukan', 'pengeluaran'];
+  const EXTRA_IDS = { piutang: 'lkTotalPiutang', stokGudang: 'lkTotalStokGudang', hutang: 'lkTotalHutang' };
+
+  function getData() {
+    const payload = { cards: {}, extra: {} };
+    CARD_SELECTORS.forEach(key => {
+      const card = root.querySelector('[data-card="' + key + '"]');
+      payload.cards[key] = card
+        ? Array.from(card.querySelectorAll('.amount')).map(a => parseRp(a.dataset.value))
+        : [];
+    });
+    Object.keys(EXTRA_IDS).forEach(key => {
+      const el = root.querySelector('#' + EXTRA_IDS[key]);
+      payload.extra[key] = el ? parseRp(el.dataset.value) : 0;
+    });
+    return payload;
+  }
+
+  function setData(payload) {
+    if (!payload || typeof payload !== 'object') return;
+    const cards = payload.cards || {};
+    CARD_SELECTORS.forEach(key => {
+      const card = root.querySelector('[data-card="' + key + '"]');
+      if (!card || card.classList.contains('editing')) return; // jangan timpa saat sedang diedit user
+      const values = Array.isArray(cards[key]) ? cards[key] : [];
+      const amountEls = card.querySelectorAll('.amount');
+      amountEls.forEach((el, i) => {
+        if (values[i] !== undefined) updateAmountDisplay(el, values[i]);
+      });
+      updateCardTotal(card);
+    });
+    const extra = payload.extra || {};
+    Object.keys(EXTRA_IDS).forEach(key => {
+      const el = root.querySelector('#' + EXTRA_IDS[key]);
+      if (el && extra[key] !== undefined) updateAmountDisplay(el, extra[key]);
+    });
+    recalculateAll();
+  }
+
+  window.__laporanKasTabGetData = getData;
+  window.__laporanKasTabSetData = setData;
+  // Dipanggil manual dari switchTab() dashboard-laporan.html saat tab ini dibuka
+  window.lkRecalculateAll = recalculateAll;
+
+  function notifyChanged() {
+    window.dispatchEvent(new Event('laporanKasDataChanged'));
+  }
+
+  // Toggle edit mode
+  function enterEditMode(card, btn) {
+    card.classList.add('editing');
+    card.querySelectorAll('.amount').forEach(amountEl => {
+      const val = amountEl.dataset.value || '0';
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'amount-input';
+      input.value = formatRp(val);
+      input.dataset.old = val;
+      input.addEventListener('focus', function () { this.select(); });
+      input.addEventListener('input', function () {
+        this.value = this.value.replace(/[^\d.,]/g, '');
+      });
+      amountEl.replaceWith(input);
+    });
+
+    btn.innerHTML = '<i class="fas fa-check"></i> Simpan';
+    btn.classList.remove('secondary');
+    btn.classList.add('saving');
+    btn.dataset.mode = 'save';
+  }
+
+  function exitEditMode(card, btn) {
+    card.classList.remove('editing');
+    const inputs = card.querySelectorAll('.amount-input');
+    inputs.forEach(input => {
+      const val = parseRp(input.value);
+      const span = document.createElement('span');
+      span.className = 'amount';
+      updateAmountDisplay(span, val);
+      input.replaceWith(span);
+    });
+
+    updateCardTotal(card);
+    recalculateAll();
+    notifyChanged();
+
+    btn.innerHTML = '<i class="fas fa-pen"></i> Edit';
+    btn.classList.add('secondary');
+    btn.classList.remove('saving');
+    btn.dataset.mode = 'edit';
+  }
+
+  // Event listeners
+  root.querySelectorAll('.btn-edit').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const card = this.closest('.card');
+      if (this.dataset.mode === 'save') {
+        exitEditMode(card, this);
+      } else {
+        // Close other editing cards first
+        root.querySelectorAll('.card.editing').forEach(c => {
+          const otherBtn = c.querySelector('.btn-edit');
+          if (otherBtn && otherBtn.dataset.mode === 'save') {
+            exitEditMode(c, otherBtn);
+          }
+        });
+        enterEditMode(card, this);
+      }
+    });
+  });
+
+  // Enter key = save
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      const editing = root.querySelector('.card.editing');
+      if (editing) {
+        const btn = editing.querySelector('.btn-edit');
+        if (btn && btn.dataset.mode === 'save') {
+          exitEditMode(editing, btn);
+        }
+      }
+    }
+  });
+
+  // Escape = cancel (restore old values)
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      const editing = root.querySelector('.card.editing');
+      if (editing) {
+        editing.querySelectorAll('.amount-input').forEach(input => {
+          input.value = formatRp(input.dataset.old || 0);
+        });
+        const btn = editing.querySelector('.btn-edit');
+        if (btn) exitEditMode(editing, btn);
+      }
+      // Cancel extra input
+      const extraInput = root.querySelector('.extra-input');
+      if (extraInput) {
+        const span = document.createElement('span');
+        span.className = 'extra-value editable-extra';
+        span.id = extraInput.dataset.id;
+        span.dataset.value = extraInput.dataset.old || 0;
+        span.title = 'Klik untuk edit';
+        span.innerHTML = '<span class="currency">Rp</span>' + formatRp(extraInput.dataset.old || 0);
+        extraInput.replaceWith(span);
+        bindExtraEdit(span);
+      }
+    }
+  });
+
+  // ---- Edit Total Piutang / Stok Gudang / Hutang (klik nilai) ----
+  function bindExtraEdit(el) {
+    el.addEventListener('click', function () {
+      if (root.querySelector('.extra-input')) return; // sudah ada yang sedang diedit
+      const val = this.dataset.value || '0';
+      const id = this.id;
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'extra-input';
+      input.value = formatRp(val);
+      input.dataset.old = val;
+      input.dataset.id = id;
+      input.addEventListener('focus', function () { this.select(); });
+      input.addEventListener('input', function () {
+        this.value = this.value.replace(/[^\d.,]/g, '');
+      });
+
+      function saveExtra() {
+        const newVal = parseRp(input.value);
+        const span = document.createElement('span');
+        span.className = 'extra-value editable-extra';
+        span.id = id;
+        span.dataset.value = newVal;
+        span.title = 'Klik untuk edit';
+        span.innerHTML = '<span class="currency">Rp</span>' + formatRp(newVal);
+        input.replaceWith(span);
+        bindExtraEdit(span);
+        notifyChanged();
+      }
+
+      input.addEventListener('blur', saveExtra);
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          input.blur();
+        }
+      });
+
+      this.replaceWith(input);
+      input.focus();
+    });
+  }
+
+  root.querySelectorAll('.editable-extra').forEach(bindExtraEdit);
+
+  // ---- Cetak & PDF & Refresh ----
+  const btnPrint = root.querySelector('#lkBtnPrint');
+  const btnPdf = root.querySelector('#lkBtnPdf');
+  const btnRefresh = root.querySelector('#lkBtnRefresh');
+
+  if (btnPrint) {
+    btnPrint.addEventListener('click', function () {
+      window.print();
+    });
+  }
+
+  if (btnPdf) {
+    btnPdf.addEventListener('click', function () {
+      // Browser print dialog → pilih "Save as PDF" / "Microsoft Print to PDF"
+      window.print();
+    });
+  }
+
+  if (btnRefresh) {
+    btnRefresh.addEventListener('click', function () {
+      if (typeof runLaporanKasFullSync === 'function') runLaporanKasFullSync(true);
+    });
+  }
+
+  // Tampilkan periode bulan berjalan (bukan teks statis "Agustus 2026")
+  (function setPeriodeBadge() {
+    const badge = root.querySelector('.badge-date');
+    if (!badge) return;
+    const now = new Date();
+    const bulanNama = now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+    const akhirBulan = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    badge.innerHTML = '<i class="far fa-clock"></i> 01\u2013' + akhirBulan + ' ' +
+      bulanNama.replace(/^\w/, c => c.toUpperCase());
+  })();
+
+  // Init
+  recalculateAll();
+})();
+    </script>
     <script src="sync-supabase.js?v=20260727"></script>
     <script src="sync-per-sales-supabase.js?v=20260726"></script>
     <script src="sync-cash-income-supabase.js?v=20260727"></script>
+    <script src="sync-laporan-kas-supabase.js?v=20260803"></script>
     <script>
         // ================================================================
         // PREFETCH dashboard-kerja.html saat browser idle, supaya saat

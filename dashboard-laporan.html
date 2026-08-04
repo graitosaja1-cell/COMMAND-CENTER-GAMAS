@@ -5814,6 +5814,77 @@
     document.getElementById('pemTglPilih').addEventListener('change', pemUpdateTglValue);
 
     // Event handler Tab 2
+    // ================================================================
+    // CEK ANOMALI OTOMATIS SAAT UPLOAD "DATA UANG MASUK"
+    // Bandingkan tiap No.Faktur di file yang baru diupload (Piutang
+    // Tempo & Cash Dropping) dengan Bank Data Penjualan (salesData).
+    // Kalau No.Faktur tidak ditemukan sama sekali, atau ditemukan tapi
+    // nama customer-nya tidak cocok (indikasi salah ketik / tertukar
+    // No.Faktur antar customer), beri peringatan SEBELUM data disimpan
+    // — supaya bisa dicek/diperbaiki dulu di file sumbernya, bukan
+    // ketahuan belakangan lewat laporan Cash Dropping/Piutang Tempo.
+    // ================================================================
+    function normNamaTokoRingan(v) {
+        return String(v || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    }
+    function namaTokoCocokRingan(a, b) {
+        const na = normNamaTokoRingan(a), nb = normNamaTokoRingan(b);
+        if (!na || !nb) return true; // salah satu kosong -> info kurang, jangan dianggap anomali
+        if (na === nb) return true;
+        return na.includes(nb) || nb.includes(na);
+    }
+    function cekAnomaliUangMasukBaru(results) {
+        const petaFaktur = new Map(); // key normFaktur -> Set nama customer di Bank Data Penjualan
+        salesData.forEach(r => {
+            const key = normFaktur(r['No.Faktur']);
+            if (!key) return;
+            if (!petaFaktur.has(key)) petaFaktur.set(key, new Set());
+            const cust = String(r.Customer || '').trim();
+            if (cust) petaFaktur.get(key).add(cust);
+        });
+        const anomali = [];
+        results.forEach(day => {
+            [['Piutang Tempo', day.piutangDetail], ['Cash Dropping', day.cashDroppingDetail]].forEach(([jenisLabel, list]) => {
+                (list || []).forEach(d => {
+                    const noFakturAsli = String(d.noFaktur || '').trim();
+                    if (!noFakturAsli) return;
+                    const key = normFaktur(noFakturAsli);
+                    const customerSet = petaFaktur.get(key);
+                    if (!customerSet || customerSet.size === 0) {
+                        anomali.push({ tanggal: day.tanggal, jenis: jenisLabel, noFaktur: noFakturAsli, namaToko: d.namaToko || '-', masalah: 'tidak_ditemukan' });
+                    } else {
+                        const cocok = Array.from(customerSet).some(c => namaTokoCocokRingan(c, d.namaToko));
+                        if (!cocok) {
+                            anomali.push({ tanggal: day.tanggal, jenis: jenisLabel, noFaktur: noFakturAsli, namaToko: d.namaToko || '-', masalah: 'customer_beda', customerDitemukan: Array.from(customerSet) });
+                        }
+                    }
+                });
+            });
+        });
+        return anomali;
+    }
+    // Tampilkan peringatan (kalau ada anomali) dan kembalikan true kalau upload
+    // boleh dilanjutkan (tidak ada anomali, atau user memilih tetap lanjut).
+    function tampilkanPeringatanAnomaliUangMasuk(results) {
+        const anomali = cekAnomaliUangMasukBaru(results);
+        if (anomali.length === 0) return true;
+        const preview = anomali.slice(0, 10).map(a => {
+            const ket = a.masalah === 'tidak_ditemukan'
+                ? 'No.Faktur TIDAK ditemukan di Bank Data Penjualan'
+                : 'No.Faktur ada, tapi tercatat atas nama "' + a.customerDitemukan.join('", "') + '" (bukan "' + a.namaToko + '")';
+            return '• [' + a.jenis + '] ' + a.noFaktur + ' — ' + a.namaToko + '\n   ' + ket;
+        }).join('\n\n');
+        const sisa = anomali.length > 10 ? '\n\n... dan ' + (anomali.length - 10) + ' entri lain yang juga mencurigakan.' : '';
+        const lanjut = confirm('⚠️ PERINGATAN: ' + anomali.length + ' entri di file ini terlihat aneh (kemungkinan No.Faktur salah ketik atau tertukar antar customer):\n\n' + preview + sisa +
+            '\n\nSaran: klik Cancel, perbaiki dulu No.Faktur-nya di file Excel, baru upload ulang.\n\nTetap lanjutkan simpan apa adanya?');
+        if (!lanjut) {
+            showToast('⚠️ Upload dibatalkan. Perbaiki No.Faktur yang bermasalah lalu upload ulang.', 'warning');
+            return false;
+        }
+        showToast('⚠️ Tetap disimpan meski ada ' + anomali.length + ' entri mencurigakan. Cek lagi nanti kalau ada waktu.', 'warning');
+        return true;
+    }
+
     document.getElementById('pemasukanFileInput').addEventListener('change', function() {
         const name=this.files[0]?this.files[0].name:'No file chosen';
         document.getElementById('pemasukanFileName').textContent=name;
@@ -5851,6 +5922,11 @@
                     results.push({tanggal,piutangCash,piutangTransfer,penjualanCash,penjualanTransfer,totalCash:piutangCash+penjualanCash,totalTransfer:piutangTransfer+penjualanTransfer,grandTotal:piutangCash+piutangTransfer+penjualanCash+penjualanTransfer,piutangDetail,cashDroppingDetail});
                 });
                 if(results.length===0){ showToast('Tidak ada data ditemukan.','warning'); return; }
+                // ★ CEK ANOMALI: No.Faktur tidak ditemukan / customer tertukar ★
+                // Dicek SEBELUM data disimpan, supaya kalau ada yang aneh langsung
+                // ketahuan sekarang (bisa dibatalkan & diperbaiki dulu di file
+                // Excel-nya), bukan ketahuan belakangan lewat laporan Cash Dropping.
+                if(!tampilkanPeringatanAnomaliUangMasuk(results)) return;
                 // Muat ulang dari server dulu supaya tidak menimpa perubahan dari
                 // halaman/perangkat lain yang belum tercermin di memori browser ini.
                 await loadCashData();

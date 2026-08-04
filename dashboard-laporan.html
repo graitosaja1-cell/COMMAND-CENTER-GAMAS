@@ -5414,6 +5414,23 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="anomaliUangMasukModal">
+        <div class="modal-box" style="max-width:920px; max-height:94vh;">
+            <div class="modal-head"><h2 id="anomaliUangMasukTitle">⚠️ Peringatan Data Janggal</h2><button class="modal-close" id="anomaliUangMasukCloseX">✕</button></div>
+            <div class="modal-body" style="padding:14px 16px;">
+                <div style="font-size:12px; color:#374151; line-height:1.7; margin-bottom:12px;">
+                    Entri di bawah ini terlihat aneh (kemungkinan No.Faktur salah ketik, atau tertukar antar customer).
+                    Saran: klik <b>Batalkan Upload</b>, perbaiki dulu No.Faktur-nya di file Excel, baru upload ulang.
+                </div>
+                <div id="anomaliUangMasukList"></div>
+            </div>
+            <div style="flex-shrink:0; display:flex; justify-content:flex-end; gap:8px; padding:12px 16px; border-top:1px solid #e2e8f0; background:#f8fafc;">
+                <button id="anomaliUangMasukCancel" style="padding:9px 18px; border-radius:8px; border:1px solid #d1d5db; background:#fff; color:#374151; font-weight:700; font-size:12px; cursor:pointer;">Batalkan Upload</button>
+                <button id="anomaliUangMasukLanjut" style="padding:9px 18px; border-radius:8px; border:none; background:#b91c1c; color:#fff; font-weight:700; font-size:12px; cursor:pointer;">Tetap Lanjutkan Simpan</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast success" id="toastGlobal">🔄 Data dimuat.</div>
 
     <script>
@@ -5863,26 +5880,73 @@
         });
         return anomali;
     }
-    // Tampilkan peringatan (kalau ada anomali) dan kembalikan true kalau upload
-    // boleh dilanjutkan (tidak ada anomali, atau user memilih tetap lanjut).
+    // Tampilkan peringatan (kalau ada anomali) dan kembalikan Promise<boolean>
+    // yang resolve true kalau upload boleh dilanjutkan (tidak ada anomali,
+    // atau user memilih tetap lanjut lewat modal).
     function tampilkanPeringatanAnomaliUangMasuk(results) {
         const anomali = cekAnomaliUangMasukBaru(results);
-        if (anomali.length === 0) return true;
-        const preview = anomali.slice(0, 10).map(a => {
-            const ket = a.masalah === 'tidak_ditemukan'
-                ? 'No.Faktur TIDAK ditemukan di Bank Data Penjualan'
-                : 'No.Faktur ada, tapi tercatat atas nama "' + a.customerDitemukan.join('", "') + '" (bukan "' + a.namaToko + '")';
-            return '• [' + a.jenis + '] ' + a.noFaktur + ' — ' + a.namaToko + '\n   ' + ket;
-        }).join('\n\n');
-        const sisa = anomali.length > 10 ? '\n\n... dan ' + (anomali.length - 10) + ' entri lain yang juga mencurigakan.' : '';
-        const lanjut = confirm('⚠️ PERINGATAN: ' + anomali.length + ' entri di file ini terlihat aneh (kemungkinan No.Faktur salah ketik atau tertukar antar customer):\n\n' + preview + sisa +
-            '\n\nSaran: klik Cancel, perbaiki dulu No.Faktur-nya di file Excel, baru upload ulang.\n\nTetap lanjutkan simpan apa adanya?');
-        if (!lanjut) {
-            showToast('⚠️ Upload dibatalkan. Perbaiki No.Faktur yang bermasalah lalu upload ulang.', 'warning');
-            return false;
-        }
-        showToast('⚠️ Tetap disimpan meski ada ' + anomali.length + ' entri mencurigakan. Cek lagi nanti kalau ada waktu.', 'warning');
-        return true;
+        if (anomali.length === 0) return Promise.resolve(true);
+
+        // Urutkan berdasar tanggal lalu jenis, supaya mudah dibaca per-hari.
+        anomali.sort((a, b) => {
+            if (a.tanggal !== b.tanggal) return a.tanggal.localeCompare(b.tanggal);
+            return a.jenis.localeCompare(b.jenis);
+        });
+
+        const modal = document.getElementById('anomaliUangMasukModal');
+        const listEl = document.getElementById('anomaliUangMasukList');
+        const titleEl = document.getElementById('anomaliUangMasukTitle');
+        titleEl.textContent = '⚠️ ' + anomali.length + ' Entri Terlihat Aneh — Perlu Dicek';
+
+        listEl.innerHTML = anomali.map((a, i) => {
+            const tglTampil = fmtTanggalHarianYY(a.tanggal, cashBulan) || a.tanggal;
+            const jenisBadgeColor = a.jenis === 'Piutang Tempo' ? '#4c51bf' : '#b45309';
+            const jenisBadgeBg = a.jenis === 'Piutang Tempo' ? 'rgba(76,81,191,0.1)' : 'rgba(180,83,9,0.1)';
+            let ketHtml;
+            if (a.masalah === 'tidak_ditemukan') {
+                ketHtml = '<span style="color:#b91c1c; font-weight:700;">✗ No.Faktur TIDAK ditemukan</span> di Bank Data Penjualan sama sekali. Kemungkinan No.Faktur salah ketik.';
+            } else {
+                const namaLain = a.customerDitemukan.map(c => '<b>"' + c + '"</b>').join(', ');
+                ketHtml = 'No.Faktur ini <b>sudah ada</b> di Bank Data Penjualan, tapi tercatat atas nama ' + namaLain +
+                    ' — <u>bukan</u> <b>"' + a.namaToko + '"</b> seperti yang diinput. Kemungkinan No.Faktur tertukar antar customer.';
+            }
+            return '<div style="border:1px solid #fecaca; background:#fef2f2; border-radius:10px; padding:10px 12px; margin-bottom:8px;">' +
+                '<div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:6px;">' +
+                    '<span style="background:#1e293b; color:#fff; font-weight:700; font-size:10px; padding:3px 9px; border-radius:20px;">📅 Tanggal ' + tglTampil + '</span>' +
+                    '<span style="background:' + jenisBadgeBg + '; color:' + jenisBadgeColor + '; font-weight:700; font-size:10px; padding:3px 9px; border-radius:20px;">' + a.jenis + '</span>' +
+                    '<span style="font-size:10px; color:#94a3b8;">#' + (i + 1) + '</span>' +
+                '</div>' +
+                '<div style="font-size:12px; color:#1f2937; margin-bottom:4px;"><b>No.Faktur:</b> ' + a.noFaktur + ' &nbsp;|&nbsp; <b>Nama Toko diinput:</b> ' + a.namaToko + '</div>' +
+                '<div style="font-size:11.5px; color:#374151; line-height:1.6;">' + ketHtml + '</div>' +
+            '</div>';
+        }).join('');
+
+        modal.classList.add('show');
+
+        return new Promise(resolve => {
+            const cleanup = () => {
+                modal.classList.remove('show');
+                btnLanjut.removeEventListener('click', onLanjut);
+                btnCancel.removeEventListener('click', onCancel);
+                btnCloseX.removeEventListener('click', onCancel);
+            };
+            const btnLanjut = document.getElementById('anomaliUangMasukLanjut');
+            const btnCancel = document.getElementById('anomaliUangMasukCancel');
+            const btnCloseX = document.getElementById('anomaliUangMasukCloseX');
+            const onLanjut = () => {
+                cleanup();
+                showToast('⚠️ Tetap disimpan meski ada ' + anomali.length + ' entri mencurigakan. Cek lagi nanti kalau ada waktu.', 'warning');
+                resolve(true);
+            };
+            const onCancel = () => {
+                cleanup();
+                showToast('⚠️ Upload dibatalkan. Perbaiki No.Faktur yang bermasalah lalu upload ulang.', 'warning');
+                resolve(false);
+            };
+            btnLanjut.addEventListener('click', onLanjut);
+            btnCancel.addEventListener('click', onCancel);
+            btnCloseX.addEventListener('click', onCancel);
+        });
     }
 
     document.getElementById('pemasukanFileInput').addEventListener('change', function() {
@@ -5926,7 +5990,7 @@
                 // Dicek SEBELUM data disimpan, supaya kalau ada yang aneh langsung
                 // ketahuan sekarang (bisa dibatalkan & diperbaiki dulu di file
                 // Excel-nya), bukan ketahuan belakangan lewat laporan Cash Dropping.
-                if(!tampilkanPeringatanAnomaliUangMasuk(results)) return;
+                if(!(await tampilkanPeringatanAnomaliUangMasuk(results))) return;
                 // Muat ulang dari server dulu supaya tidak menimpa perubahan dari
                 // halaman/perangkat lain yang belum tercermin di memori browser ini.
                 await loadCashData();

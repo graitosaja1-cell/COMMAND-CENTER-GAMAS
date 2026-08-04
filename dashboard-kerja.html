@@ -9389,9 +9389,18 @@
             const cashSales = finalFilteredSales.filter(d => (d.Pembayaran || '').toLowerCase() === 'cash');
             const cashDataAll = await loadAllCashForCek();
             let cashDroppingAll = [];
+            let piutangTempoAll = [];
             cashDataAll.forEach(day => {
                 if (day.cashDroppingDetail && Array.isArray(day.cashDroppingDetail)) {
                     day.cashDroppingDetail.forEach(f => { cashDroppingAll.push({ ...f, _tglHari: day.tanggal,
+                            _bulanRecord: day._bulanRecord }); });
+                }
+                // Real-world case: customer niat order Cash, tapi barang datang uangnya
+                // belum ada jadi dibayar belakangan (masuk kolom Piutang Tempo di Data
+                // Uang Masuk). Bukan kesalahan input — supaya tetap terdeteksi Lunas di
+                // Cek Cash, kita ikutkan piutangDetail juga sebagai sumber pencocokan.
+                if (day.piutangDetail && Array.isArray(day.piutangDetail)) {
+                    day.piutangDetail.forEach(f => { piutangTempoAll.push({ ...f, _tglHari: day.tanggal,
                             _bulanRecord: day._bulanRecord }); });
                 }
             });
@@ -9403,29 +9412,36 @@
             const cashDropForMatch = getFilteredCashDetail(cashDroppingAll, true);
             const cashDropMap = new Map();
             cashDropForMatch.forEach(d => { const no = normFaktur(d.noFaktur); if (no) cashDropMap.set(no, d); });
+            // Sumber ke-2: pembayaran yang nyebrang masuk lewat Piutang Tempo.
+            const piutangTempoForMatch = getFilteredCashDetail(piutangTempoAll, true);
+            const piutangTempoMap = new Map();
+            piutangTempoForMatch.forEach(d => { const no = normFaktur(d.noFaktur); if (no) piutangTempoMap.set(no, d); });
+            const cocokFaktur = no => cashDropMap.has(no) || piutangTempoMap.has(no);
 
             let filteredCashSales = cashSales;
             let filteredCashDropFinal = filteredCashDrop;
             if (cekFilterKet === 'cocok') {
-                filteredCashSales = cashSales.filter(d => cashDropMap.has(normFaktur(d['No.Faktur'])));
-                filteredCashDropFinal = filteredCashDrop.filter(d => cashDropMap.has(normFaktur(d.noFaktur)));
+                filteredCashSales = cashSales.filter(d => cocokFaktur(normFaktur(d['No.Faktur'])));
+                filteredCashDropFinal = filteredCashDrop.filter(d => cocokFaktur(normFaktur(d.noFaktur)));
             } else if (cekFilterKet === 'tidak') {
-                filteredCashSales = cashSales.filter(d => !cashDropMap.has(normFaktur(d['No.Faktur'])));
-                filteredCashDropFinal = filteredCashDrop.filter(d => !cashDropMap.has(normFaktur(d.noFaktur)));
+                filteredCashSales = cashSales.filter(d => !cocokFaktur(normFaktur(d['No.Faktur'])));
+                filteredCashDropFinal = filteredCashDrop.filter(d => !cocokFaktur(normFaktur(d.noFaktur)));
             }
 
             rawCashSales = filteredCashSales;
             rawCashDrop = filteredCashDropFinal;
 
-            // Gabungkan data cash sales dengan status dari cash dropping
+            // Gabungkan data cash sales dengan status dari cash dropping (+ fallback Piutang Tempo)
             const merged = filteredCashSales.map(d => {
                 const no = normFaktur(d['No.Faktur']);
                 const inCashDrop = cashDropMap.has(no);
+                const inPiutangTempo = !inCashDrop && piutangTempoMap.has(no);
                 return {
                     ...d,
-                    _inCashDrop: inCashDrop,
-                    _dropDetail: cashDropMap.get(no) || null,
-                    _status: inCashDrop ? 'cocok' : 'tidak'
+                    _inCashDrop: inCashDrop || inPiutangTempo,
+                    _dropDetail: cashDropMap.get(no) || piutangTempoMap.get(no) || null,
+                    _status: (inCashDrop || inPiutangTempo) ? 'cocok' : 'tidak',
+                    _viaPiutangTempo: inPiutangTempo
                 };
             });
 
@@ -9436,7 +9452,7 @@
             // dan chip yang belum aktif tetap kelihatan jumlahnya).
             let cLunasChip = 0, cBelumChip = 0;
             cashSales.forEach(d => {
-                if (cashDropMap.has(normFaktur(d['No.Faktur']))) cLunasChip++; else cBelumChip++;
+                if (cocokFaktur(normFaktur(d['No.Faktur']))) cLunasChip++; else cBelumChip++;
             });
             const setChipTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
             setChipTxt('tab3ChipCountSemua', cashSales.length);
@@ -9478,6 +9494,7 @@
                     const badgeClass = d._status === 'cocok' ? 'cocok' : 'tidak';
                     const stempel = d._status === 'cocok' ? '<span class="stempel-lunas">Lunas</span>' :
                         `<span class="badge ${badgeClass}">${statusLabel}</span>`;
+                    const viaBadge = d._viaPiutangTempo ? '<br><span title="Pembayarannya masuk lewat kolom Piutang Tempo, bukan Cash Dropping — bukan error, cuma beda jalur." style="display:inline-block; margin-top:3px; font-size:9.5px; font-weight:700; color:#92400e; background:#fef3c7; border:1px solid #fde68a; border-radius:20px; padding:1px 7px; cursor:help;">📇 via Piutang Tempo</span>' : '';
                     const kategori = (d.Produk || '').toLowerCase().includes('fitri') ? 'Minyak Fitri' : 'Rupa Rupa';
                     const fakturLinkStyle = 'color:#1f4e78;font-weight:700;text-decoration:underline;';
                     return `<tr>
@@ -9489,7 +9506,7 @@
                         <td>${d.Sales || ''}</td>
                         <td><span class="badge pt-tercatat">${kategori}</span></td>
                         <td class="num">${fmtRp(d.Total || 0)}</td>
-                        <td>${stempel}</td>
+                        <td>${stempel}${viaBadge}</td>
                     </tr>`;
                 }).join('');
             }
@@ -9624,7 +9641,7 @@
                     ${rincian.html}
                     <div class="sales-card-mid">
                         <span class="sales-card-total">${fmtRp(rincian.totalJual)}</span>
-                        <span class="sales-card-badges"><span class="badge pt-tercatat">${kategori}</span> <span class="badge ${d._status === 'cocok' ? 'cocok' : 'tidak'}">${statusLabel}</span></span>
+                        <span class="sales-card-badges"><span class="badge pt-tercatat">${kategori}</span> <span class="badge ${d._status === 'cocok' ? 'cocok' : 'tidak'}">${statusLabel}</span>${d._viaPiutangTempo ? ' <span title="Pembayarannya masuk lewat kolom Piutang Tempo, bukan Cash Dropping — bukan error, cuma beda jalur." style="display:inline-block; font-size:9.5px; font-weight:700; color:#92400e; background:#fef3c7; border:1px solid #fde68a; border-radius:20px; padding:1px 7px; cursor:help;">📇 via Piutang Tempo</span>' : ''}</span>
                     </div>
                     <div class="sales-card-foot">
                         <span><b>${escapeHtml(d.Sales || '-')}</b></span>
@@ -10046,37 +10063,53 @@
         // "status terkini" (ket, jt, namaToko) tetap diambil dari kemunculan PALING
         // BARU (berdasarkan tanggal asli, bukan cuma bulan), supaya keterangan yang
         // ditampilkan tetap relevan dengan kondisi terbaru.
+        // PENTING (real-world case): customer kadang niat order Tempo, tapi begitu
+        // barang datang langsung bayar cash di tempat — jadi tercatat di kolom
+        // "Cash Dropping" di Data Uang Masuk, BUKAN di kolom "Piutang Tempo".
+        // Itu bukan kesalahan input, itu memang kejadian nyata. Supaya faktur
+        // seperti ini tetap kedeteksi Lunas di Cek Piutang, ptSumByFaktur() HARUS
+        // menjumlahkan dari KEDUA sumber (piutangDetail & cashDroppingDetail),
+        // persis seperti yang sudah dilakukan ptHitungRiwayatFaktur() untuk modal
+        // riwayat. Kita tandai per-faktur lewat viaCashDropping/viaPiutangTempo
+        // supaya UI bisa kasih keterangan "dibayar via jalur lain" (bukan error,
+        // cuma informasi) kalau sumbernya nyebrang dari yang seharusnya.
         function ptSumByFaktur() {
             const map = {};
-            Object.keys(ptIncomeByMonth).sort().forEach(bulan => {
+            const proses = (bulan, day, list, sumber) => {
                 const tahun = (bulan || '').slice(0, 4) || String(new Date().getFullYear());
                 const bulanNum = (bulan || '').slice(5, 7) || '01';
+                const dayPart = String(day.tanggal || '').split('-')[0] || '01';
+                const tglISO = `${tahun}-${bulanNum}-${dayPart.padStart(2,'0')}`;
+                (list || []).forEach(d => {
+                    const key = normFaktur(d.noFaktur);
+                    if (!key) return;
+                    if (!map[key]) map[key] = { totalBayar: 0, bayarCash: 0, bayarTransfer: 0, jt: '',
+                        ket: '', namaToko: '', _bulan: '', _tanggalHari: '', _tglISO: '',
+                        viaCashDropping: false, viaPiutangTempo: false };
+                    const p = map[key];
+                    const cash = parseNumber(d.bayarCash || 0);
+                    const transfer = parseNumber(d.bayarTransfer || 0);
+                    const total = (d.totalBayar != null) ? parseNumber(d.totalBayar) : (cash + transfer);
+                    p.totalBayar += total;
+                    p.bayarCash += cash;
+                    p.bayarTransfer += transfer;
+                    if (sumber === 'cash') p.viaCashDropping = true; else p.viaPiutangTempo = true;
+                    // Metadata tampilan (ket/jt/namaToko/tgl bayar) diambil dari kemunculan
+                    // paling baru berdasarkan tanggal asli (bukan cuma bulan).
+                    if (!p._tglISO || tglISO >= p._tglISO) {
+                        p._tglISO = tglISO;
+                        p._bulan = bulan;
+                        p._tanggalHari = day.tanggal;
+                        p.jt = d.jt || p.jt;
+                        p.ket = d.ket || p.ket;
+                        p.namaToko = d.namaToko || p.namaToko;
+                    }
+                });
+            };
+            Object.keys(ptIncomeByMonth).sort().forEach(bulan => {
                 (ptIncomeByMonth[bulan] || []).forEach(day => {
-                    const dayPart = String(day.tanggal || '').split('-')[0] || '01';
-                    const tglISO = `${tahun}-${bulanNum}-${dayPart.padStart(2,'0')}`;
-                    (day.piutangDetail || []).forEach(d => {
-                        const key = normFaktur(d.noFaktur);
-                        if (!key) return;
-                        if (!map[key]) map[key] = { totalBayar: 0, bayarCash: 0, bayarTransfer: 0, jt: '',
-                            ket: '', namaToko: '', _bulan: '', _tanggalHari: '', _tglISO: '' };
-                        const p = map[key];
-                        const cash = parseNumber(d.bayarCash || 0);
-                        const transfer = parseNumber(d.bayarTransfer || 0);
-                        const total = (d.totalBayar != null) ? parseNumber(d.totalBayar) : (cash + transfer);
-                        p.totalBayar += total;
-                        p.bayarCash += cash;
-                        p.bayarTransfer += transfer;
-                        // Metadata tampilan (ket/jt/namaToko/tgl bayar) diambil dari kemunculan
-                        // paling baru berdasarkan tanggal asli (bukan cuma bulan).
-                        if (!p._tglISO || tglISO >= p._tglISO) {
-                            p._tglISO = tglISO;
-                            p._bulan = bulan;
-                            p._tanggalHari = day.tanggal;
-                            p.jt = d.jt || p.jt;
-                            p.ket = d.ket || p.ket;
-                            p.namaToko = d.namaToko || p.namaToko;
-                        }
-                    });
+                    proses(bulan, day, day.piutangDetail, 'tempo');
+                    proses(bulan, day, day.cashDroppingDetail, 'cash');
                 });
             });
             return map;
@@ -10150,7 +10183,8 @@
                     tanggalBayar = '';
                 let bayarCash = null,
                     bayarTransfer = null,
-                    namaTokoUM = '';
+                    namaTokoUM = '',
+                    viaCashDropping = false;
                 if (detail) {
                     cls = ptStatusClassFromKet(detail.ket);
                     jt = detail.jt || '';
@@ -10159,6 +10193,10 @@
                     bayarCash = detail.bayarCash;
                     bayarTransfer = detail.bayarTransfer;
                     namaTokoUM = detail.namaToko || '';
+                    // Faktur ini Tempo, tapi ada (sebagian/seluruh) pembayaran yang masuk
+                    // lewat kolom Cash Dropping — bukan salah, cuma info supaya kelihatan
+                    // jalur bayarnya beda dari kategori aslinya.
+                    viaCashDropping = !!detail.viaCashDropping;
                     if ((cls === 'lunas' || (totalBayar && totalBayar > 0)) && detail._tanggalHari && detail
                     ._bulan) {
                         const dayPart = String(detail._tanggalHari).split('-')[0];
@@ -10198,7 +10236,7 @@
                     jt, statusClass: cls,
                     ketRaw, bayarCash, bayarTransfer, namaTokoUM, produkNama: r.Produk, totalBayar,
                     overdueDays, tanggalBayar, produk: r.Produk, kategori: ptIsFitri(r.Produk) ? 'fitri' :
-                        'rupa', pembayaran: r.Pembayaran || 'Tempo' });
+                        'rupa', pembayaran: r.Pembayaran || 'Tempo', viaCashDropping });
             });
             // Urutkan berdasarkan Tgl Transaksi TERTUA dulu. PENTING sejak pindah ke
             // Firestore: Firestore TIDAK menjamin urutan dokumen mengikuti urutan
@@ -10373,7 +10411,7 @@
                                 <td class="num">${r.totalBayar!=null ? fmtRp(r.totalBayar) : '-'}</td>
                                 <td class="num">${r.statusClass === 'lunas' ? '-' : fmtRp(sisaTagihan)}</td>
                                 <td>${r.jt ? fmtTanggalYY(r.jt) : '-'}</td>
-                                <td>${r.statusClass === 'lunas' ? '<span class="stempel-lunas">Lunas</span>' : `<span class="badge pt-${r.statusClass}">${r.statusClass==='overdue' && r.overdueDays!=null ? `${r.overdueDays} hr/Overdue` : ptStatusLabel(r.statusClass)}</span>`}</td>
+                                <td>${r.statusClass === 'lunas' ? '<span class="stempel-lunas">Lunas</span>' : `<span class="badge pt-${r.statusClass}">${r.statusClass==='overdue' && r.overdueDays!=null ? `${r.overdueDays} hr/Overdue` : ptStatusLabel(r.statusClass)}</span>`}${r.viaCashDropping ? '<br><span title="Sebagian/seluruh bayarnya masuk lewat kolom Cash Dropping, bukan Piutang Tempo — bukan error, cuma beda jalur." style="display:inline-block; margin-top:3px; font-size:9.5px; font-weight:700; color:#92400e; background:#fef3c7; border:1px solid #fde68a; border-radius:20px; padding:1px 7px; cursor:help;">💵 via Cash Dropping</span>' : ''}</td>
                                 <td>${r.tanggalBayar || '-'}</td>
                                 <td>${cetakTagihanMap[r.noFaktur] || '-'}</td>
                                 <td>${r.ketRaw || '-'}</td>
@@ -10635,7 +10673,7 @@
                         </div>
                     </div>
                     <div class="sales-card-mid">
-                        <span class="sales-card-badges"><span class="badge pt-tercatat">${r.kategori === 'fitri' ? 'Minyak Fitri' : 'Rupa Rupa'}</span> ${statusBadge}</span>
+                        <span class="sales-card-badges"><span class="badge pt-tercatat">${r.kategori === 'fitri' ? 'Minyak Fitri' : 'Rupa Rupa'}</span> ${statusBadge}${r.viaCashDropping ? ' <span title="Sebagian/seluruh bayarnya masuk lewat kolom Cash Dropping, bukan Piutang Tempo — bukan error, cuma beda jalur." style="display:inline-block; font-size:9.5px; font-weight:700; color:#92400e; background:#fef3c7; border:1px solid #fde68a; border-radius:20px; padding:1px 7px; cursor:help;">💵 via Cash Dropping</span>' : ''}</span>
                     </div>
                     <div class="sales-card-foot">
                         <span><b>${escapeHtml(r.sales || '-')}</b></span>

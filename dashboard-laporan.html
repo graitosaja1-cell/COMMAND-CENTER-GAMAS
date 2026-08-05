@@ -8690,22 +8690,25 @@
             let found=false; for(let opt of bulanSelect.options){ if(opt.value===defaultBulan){ opt.selected=true; found=true; break; } } if(!found) bulanSelect.value='2026-07'; cashBulan=bulanSelect.value;
             await loadCashData();
 
-            // FIX: kalau bulan default (Juli) ternyata belum/tidak ada datanya, tapi ada
-            // bulan LAIN yang datanya sudah diupload (mis. Agustus), otomatis pindah ke
-            // bulan TERBARU yang datanya tersedia — supaya saat aplikasi pertama dibuka
-            // tidak "nyangkut" di Juli walau user sudah upload bulan yang lebih baru.
-            // NB: sebelumnya ini cuma cek cashDataMap (data Uang Kas), jadi kalau yang
-            // diupload baru data PENJUALAN (Bank Data Penjualan / faktur), bulan Agustus
-            // tidak pernah ketemu dan aplikasi tetap "nyangkut" di Juli. Sekarang dicek
-            // dari data Penjualan (salesData) DAN data Kas (cashDataMap) sekaligus.
+            // FIX: saat aplikasi pertama dibuka, SELALU pilih bulan TERBARU yang ada
+            // datanya (dari Bank Data Penjualan / salesData ATAU dari Data Uang Masuk
+            // / cashDataMap), bukan cuma pindah "kalau bulan default kosong".
+            // NB: versi sebelumnya cuma pindah bulan kalau Juli (default) BENAR-BENAR
+            // kosong. Tapi karena Bank Data Penjualan (dashboard-kerja) selalu ada
+            // transaksi tiap bulan (termasuk Juli), Juli jadi tidak pernah "kosong" —
+            // jadi walau Agustus sudah ada data uang masuk yang baru, aplikasi tetap
+            // nyangkut di Juli karena kondisi "kosong"-nya tidak pernah kepenuhi.
+            // Sekarang: cari bulan PALING BARU yang ada datanya (dari kedua sumber),
+            // lalu langsung pakai itu sebagai default — tidak peduli bulan lama juga
+            // masih ada datanya atau tidak.
             {
                 const bulanOptionValues=Array.from(bulanSelect.options).map(o=>o.value);
                 const bulanDenganDataSet=new Set();
                 salesData.forEach(r=>{ if(r.Tanggal){ const k=periodKey(r.Tanggal); if(k) bulanDenganDataSet.add(k); } });
                 bulanOptionValues.forEach(b=>{ if(cashDataMap[b] && cashDataMap[b].length) bulanDenganDataSet.add(b); });
+                Object.keys(cashDataMap).forEach(b=>{ if(cashDataMap[b] && cashDataMap[b].length) bulanDenganDataSet.add(b); });
                 const bulanDenganData=Array.from(bulanDenganDataSet).sort();
-                const bulanIniAdaData = (cashDataMap[cashBulan] && cashDataMap[cashBulan].length) || salesData.some(r=>r.Tanggal && periodKey(r.Tanggal)===cashBulan);
-                if(bulanDenganData.length && !bulanIniAdaData){
+                if(bulanDenganData.length){
                     const bulanTerbaru=bulanDenganData[bulanDenganData.length-1];
                     if(bulanOptionValues.includes(bulanTerbaru)) bulanSelect.value=bulanTerbaru;
                     cashBulan=bulanTerbaru; APP_DEFAULT_BULAN=bulanTerbaru;

@@ -8274,6 +8274,12 @@
     // ================================================================
     function rkLapBuildBulanOptions() {
         const set = new Set();
+        // FIX: sebelumnya daftar bulan di sini cuma diambil dari data Kas
+        // (cashDataMap), jadi kalau baru upload data Penjualan (Bank Data
+        // Penjualan) untuk bulan Agustus tapi belum ada data Kas Agustus,
+        // "Agustus 2026" tidak pernah muncul sebagai pilihan di tab Ringkasan.
+        // Sekarang bulan dari data Penjualan (salesData) ikut dihitung juga.
+        salesData.forEach(r => { if (r.Tanggal) { const k = periodKey(r.Tanggal); if (k) set.add(k); } });
         Object.keys(cashDataMap).forEach(b => { if ((cashDataMap[b]||[]).length) set.add(b); });
         (piutangUangMasukData||[]).forEach(d => { if (d._bulan) set.add(d._bulan); });
         (cashDroppingUangMasukData||[]).forEach(d => { if (d._bulan) set.add(d._bulan); });
@@ -8680,7 +8686,6 @@
             await loadCashNotes();
             await loadCetakTagihanMap();
             const defaultBulan='2026-07'; APP_DEFAULT_BULAN=defaultBulan;
-            rebuildSalesFilterOptions();
             const bulanSelect=document.getElementById('bulanPemasukan');
             let found=false; for(let opt of bulanSelect.options){ if(opt.value===defaultBulan){ opt.selected=true; found=true; break; } } if(!found) bulanSelect.value='2026-07'; cashBulan=bulanSelect.value;
             await loadCashData();
@@ -8689,14 +8694,25 @@
             // bulan LAIN yang datanya sudah diupload (mis. Agustus), otomatis pindah ke
             // bulan TERBARU yang datanya tersedia — supaya saat aplikasi pertama dibuka
             // tidak "nyangkut" di Juli walau user sudah upload bulan yang lebih baru.
+            // NB: sebelumnya ini cuma cek cashDataMap (data Uang Kas), jadi kalau yang
+            // diupload baru data PENJUALAN (Bank Data Penjualan / faktur), bulan Agustus
+            // tidak pernah ketemu dan aplikasi tetap "nyangkut" di Juli. Sekarang dicek
+            // dari data Penjualan (salesData) DAN data Kas (cashDataMap) sekaligus.
             {
                 const bulanOptionValues=Array.from(bulanSelect.options).map(o=>o.value);
-                const bulanDenganData=bulanOptionValues.filter(b=>cashDataMap[b] && cashDataMap[b].length).sort();
-                if(bulanDenganData.length && !(cashDataMap[cashBulan] && cashDataMap[cashBulan].length)){
+                const bulanDenganDataSet=new Set();
+                salesData.forEach(r=>{ if(r.Tanggal){ const k=periodKey(r.Tanggal); if(k) bulanDenganDataSet.add(k); } });
+                bulanOptionValues.forEach(b=>{ if(cashDataMap[b] && cashDataMap[b].length) bulanDenganDataSet.add(b); });
+                const bulanDenganData=Array.from(bulanDenganDataSet).sort();
+                const bulanIniAdaData = (cashDataMap[cashBulan] && cashDataMap[cashBulan].length) || salesData.some(r=>r.Tanggal && periodKey(r.Tanggal)===cashBulan);
+                if(bulanDenganData.length && !bulanIniAdaData){
                     const bulanTerbaru=bulanDenganData[bulanDenganData.length-1];
-                    bulanSelect.value=bulanTerbaru; cashBulan=bulanTerbaru; APP_DEFAULT_BULAN=bulanTerbaru;
+                    if(bulanOptionValues.includes(bulanTerbaru)) bulanSelect.value=bulanTerbaru;
+                    cashBulan=bulanTerbaru; APP_DEFAULT_BULAN=bulanTerbaru;
+                    if(!cashDataMap[cashBulan]) cashDataMap[cashBulan]=[];
                 }
             }
+            rebuildSalesFilterOptions();
             
             // FIX: Cleanup duplicate cashIncome documents on startup
             console.log('[STARTUP] Cleaning up duplicate cashIncome documents...');

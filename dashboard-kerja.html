@@ -2193,6 +2193,56 @@
             font-size: 9px;
             padding: 2px 6px;
         }
+        /* ---- Peringatan Harga Di Bawah Minimal (Tab 1 - Bank Data Penjualan) ---- */
+        tr.row-harga-warning td {
+            background: #fde3ea !important;
+        }
+        tr.row-harga-warning:hover td {
+            background: #fbd0dd !important;
+        }
+        tr.row-harga-confirmed td {
+            background: #fff8e6 !important;
+        }
+        tr.row-harga-confirmed:hover td {
+            background: #fff1cc !important;
+        }
+        .btn-kesepakatan-toggle {
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 0 0 0 4px;
+            line-height: 1;
+            vertical-align: middle;
+        }
+        html.gamas-dark-mode tr.row-harga-warning td {
+            background: #3a1c26 !important;
+        }
+        html.gamas-dark-mode tr.row-harga-warning:hover td {
+            background: #4a2430 !important;
+        }
+        html.gamas-dark-mode tr.row-harga-confirmed td {
+            background: #3a3320 !important;
+        }
+        html.gamas-dark-mode tr.row-harga-confirmed:hover td {
+            background: #4a3f28 !important;
+        }
+        .sales-card.card-harga-warning {
+            background: #fde3ea !important;
+            border-color: #f3b8c6 !important;
+        }
+        .sales-card.card-harga-confirmed {
+            background: #fff8e6 !important;
+            border-color: #f0dca0 !important;
+        }
+        html.gamas-dark-mode .sales-card.card-harga-warning {
+            background: #3a1c26 !important;
+            border-color: #5a2c3a !important;
+        }
+        html.gamas-dark-mode .sales-card.card-harga-confirmed {
+            background: #3a3320 !important;
+            border-color: #5a4f30 !important;
+        }
         .badge {
             display: inline-block;
             padding: 4px 10px;
@@ -4814,6 +4864,9 @@
                             </div>
                             <div class="menu-item">
                                 <button class="btn btn-outline" id="btnExportSales" style="flex:1;margin:0;">📥 Download</button>
+                            </div>
+                            <div class="menu-item">
+                                <button class="btn btn-outline" id="btnExportAnomaliHarga" style="flex:1;margin:0;border-color:#9b2c2c;color:#9b2c2c;" title="Download semua transaksi yang Harga Jual-nya di bawah Harga Minimal produk (Master Produk &amp; Harga, Tab 8), termasuk yang sudah ditandai Kesepakatan Khusus">⚠️ Download Anomali Harga</button>
                             </div>
                             <div class="menu-item">
                                 <button class="btn btn-outline" id="btnBersihkanHantu" style="flex:1;margin:0;border-color:#0d6efd;color:#0d6efd;" title="Hapus pasangan baris minus/plus akibat edit faktur (baris hantu), tandai sisanya untuk diperiksa manual">🧹 Bersihkan Baris Hantu</button>
@@ -8034,7 +8087,20 @@
             const statusBadge = isCash ? '' : (status === 'lunas' ?
                 '<span class="badge lunas-mini">✅ Lunas</span>' :
                 '<span class="badge belum-mini">❌ Belum Lunas</span>');
-            return `<div class="sales-card${salesRowsSelected.has(gidx) ? ' selected' : ''}">
+            // ---- Peringatan Harga Di Bawah Minimal (per produk, dari Master Produk & Harga) ----
+            const hargaMinimal = getHargaMinimalProduk(r.Produk);
+            const dibawahMinimal = hargaMinimal !== null && harga > 0 && harga < hargaMinimal;
+            const dikonfirmasi = !!r._KesepakatanKhusus;
+            let cardWarnClass = '';
+            let hargaCardExtra = '';
+            if (dibawahMinimal && !dikonfirmasi) {
+                cardWarnClass = ' card-harga-warning';
+                hargaCardExtra = ` <button type="button" class="btn-kesepakatan-toggle" data-gidx="${gidx}" title="Harga di bawah minimal (Rp ${fmtRp(hargaMinimal)}). Klik untuk tandai sebagai Kesepakatan Khusus.">⚠️</button>`;
+            } else if (dibawahMinimal && dikonfirmasi) {
+                cardWarnClass = ' card-harga-confirmed';
+                hargaCardExtra = ` <button type="button" class="btn-kesepakatan-toggle" data-gidx="${gidx}" title="Kesepakatan Khusus — di bawah minimal (Rp ${fmtRp(hargaMinimal)}) tapi sudah dikonfirmasi. Klik untuk batalkan.">✅</button>`;
+            }
+            return `<div class="sales-card${salesRowsSelected.has(gidx) ? ' selected' : ''}${cardWarnClass}">
                     <div class="sales-card-top">
                         <div class="sales-card-top-left">
                             <input type="checkbox" class="sales-trash-checkbox" data-gidx="${gidx}" ${cbChecked}>
@@ -8043,7 +8109,7 @@
                         <span class="sales-card-date">${fmtTanggal(r.Tanggal)}</span>
                     </div>
                     <div class="sales-card-produk">${escapeHtml(r.Produk || '')}</div>
-                    <div class="sales-card-qty">${jumlah} ${escapeHtml(r.Satuan || '')} × ${fmtRp(harga)}${disc ? ' − disc ' + fmtRp(disc) : ''}</div>
+                    <div class="sales-card-qty">${jumlah} ${escapeHtml(r.Satuan || '')} × ${fmtRp(harga)}${disc ? ' − disc ' + fmtRp(disc) : ''}${hargaCardExtra}</div>
                     <div class="sales-card-mid">
                         <span class="sales-card-total">${fmtRp(total)}</span>
                         <span class="sales-card-badges"><span class="badge ${isCash ? 'cash' : 'tempo'}">${r.Pembayaran || 'Tempo'}</span>${statusBadge}</span>
@@ -8139,6 +8205,14 @@
             }
         });
 
+        document.getElementById('salesCardList').addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-kesepakatan-toggle');
+            if (btn) {
+                const gidx = parseInt(btn.dataset.gidx, 10);
+                toggleKesepakatanKhususSales(gidx);
+            }
+        });
+
         function buildSalesRowHtml(r, salesIndexMap) {
             const jumlah = parseNumber(r.Jumlah);
             const harga = parseNumber(r['Harga Jual']);
@@ -8155,7 +8229,20 @@
                 'color:#b45309;font-weight:700;text-decoration:underline;' :
                 'color:#1f4e78;font-weight:700;text-decoration:underline;';
             const fakturLinkTitle = sudahDiedit ? ' title="Faktur ini pernah diedit dari modal detail"' : '';
-            return `<tr><td><input type="checkbox" class="sales-trash-checkbox" data-gidx="${gidx}" ${cbChecked}></td><td>${fmtTanggal(r.Tanggal)}</td><td>${noFakturSafe ? `<a href="#" class="tab1-faktur-link" data-faktur="${noFakturSafe}" style="${fakturLinkStyle}"${fakturLinkTitle}>${sudahDiedit ? '✏️ ' : ''}${noFakturSafe}</a>` : ''}</td><td>${r.Produk || ''}</td><td class="num">${jumlah}</td><td>${r.Satuan || ''}</td><td class="num">${fmtRp(harga)}</td><td class="num">${hargaBeli !== null ? fmtRp(hargaBeli) : '-'}</td><td class="num">${fmtRp(disc)}</td><td class="num">${fmtRp(total)}</td><td class="num">${profit !== null ? fmtRp(profit) : '-'}</td><td>${r.Sales || ''}</td><td>${r.Customer || ''}</td><td>${r.Alamat || ''}</td><td><span class="badge ${r.Pembayaran === 'Cash' ? 'cash' : 'tempo'}">${r.Pembayaran || 'Tempo'}</span></td></tr>`;
+            // ---- Peringatan Harga Di Bawah Minimal (per produk, dari Master Produk & Harga) ----
+            const hargaMinimal = getHargaMinimalProduk(r.Produk);
+            const dibawahMinimal = hargaMinimal !== null && harga > 0 && harga < hargaMinimal;
+            const dikonfirmasi = !!r._KesepakatanKhusus;
+            let rowClass = '';
+            let hargaJualCellExtra = '';
+            if (dibawahMinimal && !dikonfirmasi) {
+                rowClass = ' class="row-harga-warning"';
+                hargaJualCellExtra = ` <button type="button" class="btn-kesepakatan-toggle" data-gidx="${gidx}" title="Harga di bawah minimal (Rp ${fmtRp(hargaMinimal)}). Klik untuk tandai sebagai Kesepakatan Khusus.">⚠️</button>`;
+            } else if (dibawahMinimal && dikonfirmasi) {
+                rowClass = ' class="row-harga-confirmed"';
+                hargaJualCellExtra = ` <button type="button" class="btn-kesepakatan-toggle" data-gidx="${gidx}" title="Kesepakatan Khusus — di bawah minimal (Rp ${fmtRp(hargaMinimal)}) tapi sudah dikonfirmasi. Klik untuk batalkan.">✅</button>`;
+            }
+            return `<tr${rowClass}><td><input type="checkbox" class="sales-trash-checkbox" data-gidx="${gidx}" ${cbChecked}></td><td>${fmtTanggal(r.Tanggal)}</td><td>${noFakturSafe ? `<a href="#" class="tab1-faktur-link" data-faktur="${noFakturSafe}" style="${fakturLinkStyle}"${fakturLinkTitle}>${sudahDiedit ? '✏️ ' : ''}${noFakturSafe}</a>` : ''}</td><td>${r.Produk || ''}</td><td class="num">${jumlah}</td><td>${r.Satuan || ''}</td><td class="num">${fmtRp(harga)}${hargaJualCellExtra}</td><td class="num">${hargaBeli !== null ? fmtRp(hargaBeli) : '-'}</td><td class="num">${fmtRp(disc)}</td><td class="num">${fmtRp(total)}</td><td class="num">${profit !== null ? fmtRp(profit) : '-'}</td><td>${r.Sales || ''}</td><td>${r.Customer || ''}</td><td>${r.Alamat || ''}</td><td><span class="badge ${r.Pembayaran === 'Cash' ? 'cash' : 'tempo'}">${r.Pembayaran || 'Tempo'}</span></td></tr>`;
         }
 
         function renderSalesTableWindow() {
@@ -9081,6 +9168,8 @@
             XLSX.writeFile(wb, filename);
             showToast('📥 ' + filename + ' (' + salesData.length + ' baris)', 'success');
         });
+
+        document.getElementById('btnExportAnomaliHarga').addEventListener('click', exportAnomaliHargaExcel);
         document.getElementById('btnClearSales').addEventListener('click', async function() {
             if (!salesData.length) { showToast('Tidak ada data.', 'warning'); return; }
             if (!confirm('⚠️ Hapus SEMUA data penjualan?')) return;
@@ -9143,6 +9232,14 @@
                 const gidx = parseInt(e.target.dataset.gidx, 10);
                 if (e.target.checked) salesRowsSelected.add(gidx); else salesRowsSelected.delete(gidx);
                 updateSalesSelectedInfo();
+            }
+        });
+
+        document.getElementById('salesTableBody').addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-kesepakatan-toggle');
+            if (btn) {
+                const gidx = parseInt(btn.dataset.gidx, 10);
+                toggleKesepakatanKhususSales(gidx);
             }
         });
 
@@ -13099,6 +13196,99 @@
             };
         }
 
+        // ================================================================
+        // PERINGATAN HARGA DI BAWAH MINIMAL: ambil "Harga Minimal" per produk
+        // dari Master Produk & Harga (Tab 8). Kalau Harga Jual transaksi di
+        // Bank Data Penjualan (Tab 1) lebih rendah dari ini, baris ditandai
+        // merah muda kecuali sudah ditandai "Kesepakatan Khusus".
+        // ================================================================
+        function getHargaMinimalProduk(namaProduk) {
+            const nama = (namaProduk || '').trim().toLowerCase();
+            if (!nama) return null;
+            const master = loadProdukHargaMaster();
+            let found = master.find(function(p) { return (p.produk || '').trim().toLowerCase() === nama; });
+            if (!found) found = master.find(function(p) {
+                const pn = (p.produk || '').trim().toLowerCase();
+                return pn && (pn.includes(nama) || nama.includes(pn));
+            });
+            if (!found || found.hargaMinimal === undefined || found.hargaMinimal === '') return null;
+            const v = parseFloat(found.hargaMinimal);
+            return isNaN(v) || v <= 0 ? null : v;
+        }
+
+        // Toggle status "Kesepakatan Khusus" pada satu baris transaksi (gidx =
+        // index baris itu di salesData). Dipanggil dari klik ikon ⚠️/✅ di tabel.
+        async function toggleKesepakatanKhususSales(gidx) {
+            const row = salesData[gidx];
+            if (!row) return;
+            const sudah = !!row._KesepakatanKhusus;
+            if (!sudah) {
+                if (!confirm('Tandai baris ini sebagai "Kesepakatan Khusus" dengan customer?\n\nHarga jual di bawah batas minimal akan dianggap sudah dicek & disetujui, dan peringatan merah muda akan hilang.')) return;
+                row._KesepakatanKhusus = true;
+            } else {
+                if (!confirm('Batalkan tanda "Kesepakatan Khusus" pada baris ini?\n\nPeringatan merah muda akan muncul lagi kalau harga jual masih di bawah batas minimal.')) return;
+                row._KesepakatanKhusus = false;
+            }
+            await saveSalesData();
+            renderSales();
+        }
+
+        // ================================================================
+        // DOWNLOAD ANOMALI HARGA: semua transaksi yang Harga Jual-nya di
+        // bawah Harga Minimal produk (Master Produk & Harga, Tab 8) — baik
+        // yang masih jadi peringatan (merah muda) maupun yang sudah ditandai
+        // Kesepakatan Khusus (kuning), diekspor jadi 1 file Excel.
+        // ================================================================
+        function kumpulkanAnomaliHarga() {
+            const hasil = [];
+            salesData.forEach(r => {
+                const harga = parseNumber(r['Harga Jual']);
+                const hargaMinimal = getHargaMinimalProduk(r.Produk);
+                if (hargaMinimal === null || harga <= 0 || harga >= hargaMinimal) return;
+                const jumlah = parseNumber(r.Jumlah);
+                const selisih = hargaMinimal - harga;
+                hasil.push({
+                    'Tanggal': fmtTanggal(r.Tanggal),
+                    'No.Faktur': r['No.Faktur'] || '',
+                    'Produk': r.Produk || '',
+                    'Jumlah': jumlah,
+                    'Satuan': r.Satuan || '',
+                    'Harga Jual': harga,
+                    'Harga Minimal': hargaMinimal,
+                    'Selisih per Satuan': selisih,
+                    'Total Selisih': selisih * jumlah,
+                    'Sales': r.Sales || '',
+                    'Customer': r.Customer || '',
+                    'Alamat': r.Alamat || '',
+                    'Pembayaran': r.Pembayaran || '',
+                    'Status': r._KesepakatanKhusus ? 'Kesepakatan Khusus (Dikonfirmasi)' : 'Belum Dikonfirmasi'
+                });
+            });
+            // Terbaru dulu supaya gampang dicek
+            hasil.sort((a, b) => String(b.Tanggal).localeCompare(String(a.Tanggal)));
+            return hasil;
+        }
+
+        function exportAnomaliHargaExcel() {
+            const data = kumpulkanAnomaliHarga();
+            if (!data.length) {
+                showToast('✅ Tidak ada transaksi di bawah Harga Minimal saat ini.', 'success');
+                return;
+            }
+            const ws = XLSX.utils.json_to_sheet(data);
+            ws['!cols'] = [
+                { wch: 12 }, { wch: 18 }, { wch: 22 }, { wch: 8 }, { wch: 8 },
+                { wch: 13 }, { wch: 13 }, { wch: 14 }, { wch: 14 }, { wch: 10 },
+                { wch: 20 }, { wch: 24 }, { wch: 12 }, { wch: 26 }
+            ];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Anomali Harga');
+            const filename = 'Anomali_Harga_' + new Date().toISOString().slice(0, 10) + '.xlsx';
+            XLSX.writeFile(wb, filename);
+            const belumKonfirmasi = data.filter(d => d.Status === 'Belum Dikonfirmasi').length;
+            showToast('📥 ' + filename + ' (' + data.length + ' baris, ' + belumKonfirmasi + ' belum dikonfirmasi)', 'success');
+        }
+
         // Isi ulang <datalist> nama produk (untuk autocomplete di form Bank Data Penjualan)
         function refreshProdukMasterDatalist() {
             let dl = document.getElementById('produkMasterDatalist');
@@ -13125,9 +13315,11 @@
                 const produkInput = tr.querySelector('.ph-produk');
                 const hbInput = tr.querySelector('.ph-hargabeli');
                 const hjInput = tr.querySelector('.ph-hargajual');
+                const hminInput = tr.querySelector('.ph-hargaminimal');
                 if (produkInput) item.produk = produkInput.value.trim();
                 if (hbInput) item.hargaBeli = hbInput.value === '' ? '' : parseAngka(hbInput.value);
                 if (hjInput) item.hargaJual = hjInput.value === '' ? '' : parseAngka(hjInput.value);
+                if (hminInput) item.hargaMinimal = hminInput.value === '' ? '' : parseAngka(hminInput.value);
             });
         }
 
@@ -13144,6 +13336,7 @@
                     <td style="padding:4px 8px;"><input type="text" class="ph-produk" value="${escapeHtml(p.produk || '')}" style="width:100%;box-sizing:border-box;padding:4px 6px;border:1px solid #cbd5e1;border-radius:3px;font-size:11px;"></td>
                     <td style="padding:4px 8px;"><input type="number" class="ph-hargabeli num" value="${p.hargaBeli !== undefined && p.hargaBeli !== '' ? p.hargaBeli : ''}" placeholder="-" style="width:100%;box-sizing:border-box;text-align:right;padding:4px 6px;border:1px solid #cbd5e1;border-radius:3px;font-size:11px;"></td>
                     <td style="padding:4px 8px;"><input type="number" class="ph-hargajual num" value="${p.hargaJual !== undefined && p.hargaJual !== '' ? p.hargaJual : ''}" placeholder="-" style="width:100%;box-sizing:border-box;text-align:right;padding:4px 6px;border:1px solid #cbd5e1;border-radius:3px;font-size:11px;"></td>
+                    <td style="padding:4px 8px;"><input type="number" class="ph-hargaminimal num" value="${p.hargaMinimal !== undefined && p.hargaMinimal !== '' ? p.hargaMinimal : ''}" placeholder="-" title="Kalau diisi, transaksi produk ini dengan Harga Jual di bawah angka ini akan ditandai merah muda di Bank Data Penjualan (Tab 1)." style="width:100%;box-sizing:border-box;text-align:right;padding:4px 6px;border:1px solid #f3b8c6;border-radius:3px;font-size:11px;background:#fff8f9;"></td>
                     <td style="text-align:center;padding:4px 8px;"><button type="button" class="btn-hapus-produk-harga" data-idx="${i}" style="color:#dc3545;background:none;border:none;font-size:16px;cursor:pointer;line-height:1;" title="Hapus produk ini">&times;</button></td>
                 </tr>`;
             }).join('');
@@ -13162,8 +13355,9 @@
                     <table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed;">
                         <colgroup>
                             <col style="width:auto;">
-                            <col style="width:140px;">
-                            <col style="width:140px;">
+                            <col style="width:120px;">
+                            <col style="width:120px;">
+                            <col style="width:120px;">
                             <col style="width:40px;">
                         </colgroup>
                         <thead>
@@ -13171,6 +13365,7 @@
                                 <th style="text-align:left;padding:6px 8px;">Produk</th>
                                 <th style="text-align:right;padding:6px 8px;">Harga Beli</th>
                                 <th style="text-align:right;padding:6px 8px;">Harga Jual</th>
+                                <th style="text-align:right;padding:6px 8px;color:#9b2c2c;" title="Batas bawah Harga Jual. Kalau transaksi di bawah angka ini, ditandai merah muda di Bank Data Penjualan.">⚠️ Harga Minimal</th>
                                 <th style="padding:6px 8px;"></th>
                             </tr>
                         </thead>
@@ -13196,7 +13391,7 @@
             });
             document.getElementById('phBtnTambah').addEventListener('click', function() {
                 bacaFormProdukHargaKeWorking();
-                _produkHargaWorking.unshift({ produk: '', hargaBeli: '', hargaJual: '' });
+                _produkHargaWorking.unshift({ produk: '', hargaBeli: '', hargaJual: '', hargaMinimal: '' });
                 renderModalProdukHarga();
             });
             document.getElementById('phBtnAmbilBankData').addEventListener('click', ambilProdukDariBankDataKeMaster);

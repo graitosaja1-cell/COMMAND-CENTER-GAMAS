@@ -1982,11 +1982,16 @@
         }
         /* Responsive & Hidden Columns untuk Small Screens */
         @media (max-width: 1200px) {
-            .table-wrap:not(#tagihanTableWrap) th:nth-child(n+5),
-            .table-wrap:not(#tagihanTableWrap) td:nth-child(n+5) {
+            .table-wrap:not(#tagihanTableWrap):not(#tab1TableWrap) th:nth-child(n+5),
+            .table-wrap:not(#tagihanTableWrap):not(#tab1TableWrap) td:nth-child(n+5) {
                 display: none;
             }
         }
+        /* TAB 1 - Bank Data Penjualan: di laptop/layar lebar, tabel SELALU
+           tampil lengkap (semua kolom, bisa di-scroll ke samping kalau perlu),
+           tidak ada kolom yang disembunyikan. Untuk layar sempit (HP), tampilan
+           otomatis dialihkan ke mode Kartu lewat JS (lihat applyTab1ViewMode). */
+        #tab1TableWrap table { min-width: 1250px; }
         
         /* Stempel Lunas Modern */
         .stempel-lunas {
@@ -7898,7 +7903,14 @@
         }
 
         // ===== TAB 1 - App-like toolbar: Toggle Tabel/Kartu + Filter Chip =====
-        let tab1ViewMode = localStorage.getItem('tab1ViewMode') === 'card' ? 'card' : 'table';
+        // Otomatis: layar sempit (HP, <=900px) -> mode Kartu; layar lebar
+        // (laptop/PC) -> mode Tabel penuh (semua kolom, bisa di-scroll).
+        // Kalau user pernah pilih manual lewat tombol toggle, pilihan itu
+        // dihormati SELAMA masih di kategori layar yang sama (mobile/desktop);
+        // begitu pindah kategori layar, otomatis menyesuaikan lagi.
+        const TAB1_MOBILE_MQ = window.matchMedia('(max-width: 900px)');
+        let tab1ManualOverride = false;
+        let tab1ViewMode = TAB1_MOBILE_MQ.matches ? 'card' : 'table';
         let tab1QuickFilter = 'semua'; // semua | cash | tempo | lunas | belum_lunas
 
         // Cache peta status faktur (lunas/belum) supaya tidak dihitung ulang
@@ -7979,8 +7991,17 @@
         document.getElementById('tab1ViewToggle').addEventListener('click', function(e) {
             const btn = e.target.closest('.tab1-view-btn');
             if (!btn) return;
+            tab1ManualOverride = true;
             tab1ViewMode = btn.dataset.view === 'card' ? 'card' : 'table';
-            localStorage.setItem('tab1ViewMode', tab1ViewMode);
+            applyTab1ViewMode();
+            renderSales();
+        });
+        // Kalau ukuran layar berpindah kategori (mis. HP diputar / jendela
+        // laptop di-resize melewati 900px), reset ke mode otomatis lagi
+        // supaya tabel di laptop selalu tampil penuh & di HP selalu Kartu.
+        TAB1_MOBILE_MQ.addEventListener('change', function(e) {
+            tab1ManualOverride = false;
+            tab1ViewMode = e.matches ? 'card' : 'table';
             applyTab1ViewMode();
             renderSales();
         });
@@ -13248,6 +13269,7 @@
                 const jumlah = parseNumber(r.Jumlah);
                 const selisih = hargaMinimal - harga;
                 hasil.push({
+                    'TanggalISO': r.Tanggal || '',
                     'Tanggal': fmtTanggal(r.Tanggal),
                     'No.Faktur': r['No.Faktur'] || '',
                     'Produk': r.Produk || '',
@@ -13264,29 +13286,127 @@
                     'Status': r._KesepakatanKhusus ? 'Kesepakatan Khusus (Dikonfirmasi)' : 'Belum Dikonfirmasi'
                 });
             });
-            // Terbaru dulu supaya gampang dicek
-            hasil.sort((a, b) => String(b.Tanggal).localeCompare(String(a.Tanggal)));
+            // Kronologis (tanggal ISO), terlama dulu, supaya enak dibaca per blok produk
+            hasil.sort((a, b) => String(a.TanggalISO).localeCompare(String(b.TanggalISO)));
             return hasil;
         }
 
+        // Format rentang tanggal ala Indonesia: "04-07 Agustus 2026" (sebulan sama),
+        // "28 Juli - 03 Agustus 2026" (beda bulan), atau "31 Des 2025 - 02 Jan 2026" (beda tahun).
+        function fmtPeriodeIndo(tanggalISOList) {
+            const valid = tanggalISOList.filter(Boolean).slice().sort();
+            if (!valid.length) return '-';
+            const parse = iso => {
+                const p = String(iso).split('-');
+                return { d: parseInt(p[2], 10) || 1, m: parseInt(p[1], 10) || 1, y: p[0] || '' };
+            };
+            const a = parse(valid[0]);
+            const b = parse(valid[valid.length - 1]);
+            const dd = n => String(n).padStart(2, '0');
+            if (valid[0] === valid[valid.length - 1]) return `${dd(a.d)} ${NAMA_BULAN_ID[a.m - 1]} ${a.y}`;
+            if (a.y === b.y && a.m === b.m) return `${dd(a.d)}-${dd(b.d)} ${NAMA_BULAN_ID[a.m - 1]} ${a.y}`;
+            if (a.y === b.y) return `${dd(a.d)} ${NAMA_BULAN_ID[a.m - 1]} - ${dd(b.d)} ${NAMA_BULAN_ID[b.m - 1]} ${a.y}`;
+            return `${dd(a.d)} ${NAMA_BULAN_ID[a.m - 1]} ${a.y} - ${dd(b.d)} ${NAMA_BULAN_ID[b.m - 1]} ${b.y}`;
+        }
+
+        // ================================================================
+        // Susun sheet Excel per PRODUK: tiap produk yang punya transaksi di
+        // bawah Harga Minimal dapat blok sendiri, lengkap dengan judul,
+        // keterangan sumber & periode, Harga Minimal, tabel rincian, dan
+        // baris TOTAL — supaya langsung jelas dibaca tanpa perlu olah lagi.
+        // ================================================================
+        const ANOMALI_HEADER = ['No', 'Tanggal', 'No.Faktur', 'Jumlah', 'Satuan', 'Harga Jual (Rp)',
+            'Selisih dari Minimal (Rp)', 'Total Selisih (Rp)', 'Sales', 'Customer', 'Alamat', 'Pembayaran', 'Status'
+        ];
+        const ANOMALI_NCOL = ANOMALI_HEADER.length;
+
         function exportAnomaliHargaExcel() {
-            const data = kumpulkanAnomaliHarga();
-            if (!data.length) {
+            const flat = kumpulkanAnomaliHarga();
+            if (!flat.length) {
                 showToast('✅ Tidak ada transaksi di bawah Harga Minimal saat ini.', 'success');
                 return;
             }
-            const ws = XLSX.utils.json_to_sheet(data);
+
+            // Kelompokkan per Produk, urut nama produk A-Z supaya konsisten.
+            const byProduk = new Map();
+            flat.forEach(r => {
+                if (!byProduk.has(r.Produk)) byProduk.set(r.Produk, []);
+                byProduk.get(r.Produk).push(r);
+            });
+            const produkList = Array.from(byProduk.keys()).sort((a, b) => a.localeCompare(b, 'id'));
+
+            const aoa = [];
+            const merges = [];
+            const numFmtCells = []; // {r,c} sel yang perlu format ribuan "#,##0"
+            const NUMCOLS = [3, 5, 6, 7]; // Jumlah, Harga Jual, Selisih per Satuan, Total Selisih
+
+            produkList.forEach(produk => {
+                const rows = byProduk.get(produk);
+                const hargaMinimal = rows[0]['Harga Minimal'];
+                const periode = fmtPeriodeIndo(rows.map(r => r.TanggalISO));
+
+                // Judul blok
+                const rTitle = aoa.length;
+                aoa.push([`${produk} — Transaksi di Bawah Harga Minimal (${fmtRp(hargaMinimal)})`]);
+                merges.push({ s: { r: rTitle, c: 0 }, e: { r: rTitle, c: ANOMALI_NCOL - 1 } });
+
+                // Keterangan sumber & periode
+                const rSub = aoa.length;
+                aoa.push([`Sumber: Bank Data Penjualan — periode ${periode}`]);
+                merges.push({ s: { r: rSub, c: 0 }, e: { r: rSub, c: ANOMALI_NCOL - 1 } });
+
+                aoa.push([]); // baris kosong
+
+                // Harga Minimal
+                aoa.push(['Harga Minimal', fmtRp(hargaMinimal)]);
+
+                aoa.push([]); // baris kosong
+
+                // Header tabel
+                const rHeader = aoa.length;
+                aoa.push(ANOMALI_HEADER.slice());
+
+                // Baris data
+                let totalJumlah = 0, totalSelisih = 0;
+                rows.forEach((r, i) => {
+                    totalJumlah += r.Jumlah;
+                    totalSelisih += r['Total Selisih'];
+                    const rData = aoa.length;
+                    aoa.push([
+                        i + 1, r.Tanggal, r['No.Faktur'], r.Jumlah, r.Satuan,
+                        r['Harga Jual'], r['Selisih per Satuan'], r['Total Selisih'],
+                        r.Sales, r.Customer, r.Alamat, r.Pembayaran, r.Status
+                    ]);
+                    NUMCOLS.forEach(c => numFmtCells.push({ r: rData, c }));
+                });
+
+                // Baris TOTAL
+                const rTotal = aoa.length;
+                aoa.push(['TOTAL', '', '', totalJumlah, '', '', '', totalSelisih, '', '', '', '', '']);
+                merges.push({ s: { r: rTotal, c: 0 }, e: { r: rTotal, c: 2 } });
+                numFmtCells.push({ r: rTotal, c: 3 }, { r: rTotal, c: 7 });
+
+                aoa.push([]); // baris kosong
+                aoa.push([]); // pemisah antar produk
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(aoa);
+            ws['!merges'] = merges;
+            numFmtCells.forEach(({ r, c }) => {
+                const addr = XLSX.utils.encode_cell({ r, c });
+                if (ws[addr] && typeof ws[addr].v === 'number') ws[addr].z = '#,##0';
+            });
             ws['!cols'] = [
-                { wch: 12 }, { wch: 18 }, { wch: 22 }, { wch: 8 }, { wch: 8 },
-                { wch: 13 }, { wch: 13 }, { wch: 14 }, { wch: 14 }, { wch: 10 },
-                { wch: 20 }, { wch: 24 }, { wch: 12 }, { wch: 26 }
+                { wch: 5 }, { wch: 12 }, { wch: 18 }, { wch: 10 }, { wch: 8 },
+                { wch: 14 }, { wch: 16 }, { wch: 15 }, { wch: 10 },
+                { wch: 20 }, { wch: 26 }, { wch: 12 }, { wch: 26 }
             ];
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Anomali Harga');
             const filename = 'Anomali_Harga_' + new Date().toISOString().slice(0, 10) + '.xlsx';
             XLSX.writeFile(wb, filename);
-            const belumKonfirmasi = data.filter(d => d.Status === 'Belum Dikonfirmasi').length;
-            showToast('📥 ' + filename + ' (' + data.length + ' baris, ' + belumKonfirmasi + ' belum dikonfirmasi)', 'success');
+            const belumKonfirmasi = flat.filter(d => d.Status === 'Belum Dikonfirmasi').length;
+            showToast('📥 ' + filename + ' (' + produkList.length + ' produk, ' + flat.length + ' baris, ' + belumKonfirmasi + ' belum dikonfirmasi)', 'success');
         }
 
         // Isi ulang <datalist> nama produk (untuk autocomplete di form Bank Data Penjualan)

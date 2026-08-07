@@ -8301,6 +8301,20 @@
             if (botH > 0) html +=
                 `<tr class="vrow-spacer" aria-hidden="true" style="height:${botH}px;"><td colspan="15" style="padding:0;border:0;background:transparent;"></td></tr>`;
             tbody.innerHTML = html;
+
+            // Kalibrasi ulang tinggi baris dari baris NYATA yang baru dirender.
+            // Sebelumnya, untuk data >VIRTUAL_ROW_THRESHOLD baris, salesRowHeightPx
+            // tidak pernah dikalibrasi (tetap pakai default 33px) sehingga tinggi
+            // spacer meleset dari tinggi asli baris -> scroll terasa "mantul"/
+            // loncat-loncat. Dengan pengukuran ulang di sini, nilainya otomatis
+            // menyesuaikan ke tinggi baris sebenarnya dalam beberapa frame scroll.
+            const realRow = tbody.querySelector('tr:not(.vrow-spacer)');
+            if (realRow) {
+                const measured = realRow.getBoundingClientRect().height;
+                if (measured > 10 && Math.abs(measured - salesRowHeightPx) > 0.5) {
+                    salesRowHeightPx = measured;
+                }
+            }
         }
         (function initSalesVirtualScroll() {
             const wrap = document.getElementById('tab1TableWrap');

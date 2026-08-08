@@ -15,7 +15,7 @@
     <meta name="theme-color" content="#1f4e78">
     <link rel="apple-touch-icon" href="./icon-192.png">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 100 100&#39;%3E%3Crect width=&#39;100&#39; height=&#39;100&#39; rx=&#39;20&#39; fill=&#39;%232d3748&#39;/%3E%3Crect x=&#39;22&#39; y=&#39;55&#39; width=&#39;14&#39; height=&#39;28&#39; rx=&#39;3&#39; fill=&#39;%23f59e0b&#39;/%3E%3Crect x=&#39;43&#39; y=&#39;38&#39; width=&#39;14&#39; height=&#39;45&#39; rx=&#39;3&#39; fill=&#39;%233b82f6&#39;/%3E%3Crect x=&#39;64&#39; y=&#39;22&#39; width=&#39;14&#39; height=&#39;61&#39; rx=&#39;3&#39; fill=&#39;%2310b981&#39;/%3E%3C/svg%3E">
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js">
     </script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
@@ -13352,6 +13352,8 @@
             const aoa = [];
             const merges = [];
             const numFmtCells = []; // {r,c} sel yang perlu format ribuan "#,##0"
+            const titleRows = []; // baris judul blok produk, buat dibold
+            const blockRanges = []; // {header,total} baris per blok produk, buat dikasih border tabel
             const NUMCOLS = [3, 5, 6, 7]; // Jumlah, Harga Jual, Selisih per Satuan, Total Selisih
 
             produkList.forEach(produk => {
@@ -13363,6 +13365,7 @@
                 const rTitle = aoa.length;
                 aoa.push([`${produk} — Transaksi di Bawah Harga Minimal (${fmtRp(hargaMinimal)})`]);
                 merges.push({ s: { r: rTitle, c: 0 }, e: { r: rTitle, c: ANOMALI_NCOL - 1 } });
+                titleRows.push(rTitle);
 
                 // Keterangan sumber & periode
                 const rSub = aoa.length;
@@ -13399,6 +13402,7 @@
                 aoa.push(['TOTAL', '', '', totalJumlah, '', '', '', totalSelisih, '', '', '', '', '']);
                 merges.push({ s: { r: rTotal, c: 0 }, e: { r: rTotal, c: 2 } });
                 numFmtCells.push({ r: rTotal, c: 3 }, { r: rTotal, c: 7 });
+                blockRanges.push({ header: rHeader, total: rTotal });
 
                 aoa.push([]); // baris kosong
                 aoa.push([]); // pemisah antar produk
@@ -13410,6 +13414,32 @@
                 const addr = XLSX.utils.encode_cell({ r, c });
                 if (ws[addr] && typeof ws[addr].v === 'number') ws[addr].z = '#,##0';
             });
+
+            // Bold judul blok produk
+            titleRows.forEach(r => {
+                const addr = XLSX.utils.encode_cell({ r, c: 0 });
+                if (ws[addr]) ws[addr].s = { font: { bold: true, sz: 12 } };
+            });
+
+            // Border tipis + header tebal untuk tiap tabel produk, supaya rapi dilihat di Excel
+            const thinBorder = { style: 'thin', color: { rgb: 'B7B7B7' } };
+            const boxBorder = { top: thinBorder, bottom: thinBorder, left: thinBorder, right: thinBorder };
+            blockRanges.forEach(({ header, total }) => {
+                for (let r = header; r <= total; r++) {
+                    for (let c = 0; c < ANOMALI_NCOL; c++) {
+                        const addr = XLSX.utils.encode_cell({ r, c });
+                        if (!ws[addr]) ws[addr] = { t: 's', v: '' };
+                        const isHeader = r === header;
+                        ws[addr].s = {
+                            border: boxBorder,
+                            font: isHeader ? { bold: true } : (ws[addr].s && ws[addr].s.font),
+                            fill: isHeader ? { fgColor: { rgb: 'EDEDED' } } : undefined,
+                            alignment: isHeader ? { horizontal: 'center', vertical: 'center', wrapText: true } : undefined
+                        };
+                    }
+                }
+            });
+
             ws['!cols'] = [
                 { wch: 5 }, { wch: 12 }, { wch: 18 }, { wch: 10 }, { wch: 8 },
                 { wch: 14 }, { wch: 16 }, { wch: 15 }, { wch: 10 },

@@ -10731,18 +10731,25 @@
 
         // ================================================================
         // AUDIT: cari No.Faktur di Data Uang Masuk (Piutang Tempo & Cash
-        // Dropping, SEMUA bulan) yang TIDAK ADA di Bank Data Penjualan sama
-        // sekali. Ini sinyal paling kuat untuk salah ketik No.Faktur saat
-        // upload Excel / input manual -- karena normFaktur() sudah menoleransi
-        // beda format (nol di depan, spasi, tanda hubung), jadi kalau tetap
-        // tidak ketemu, kemungkinan besar angkanya sendiri yang beda/typo.
+        // Dropping) yang TIDAK ADA di Bank Data Penjualan sama sekali. Ini
+        // sinyal paling kuat untuk salah ketik No.Faktur saat upload Excel /
+        // input manual -- karena normFaktur() sudah menoleransi beda format
+        // (nol di depan, spasi, tanda hubung), jadi kalau tetap tidak ketemu,
+        // kemungkinan besar angkanya sendiri yang beda/typo.
         // Dipakai oleh banner peringatan di Cek Cash & Cek Piutang.
+        //
+        // BATASAN BULAN: data bulan Mei & Juni (dan sebelumnya) sengaja tidak
+        // diikutkan di audit ini -- terlalu banyak baris lama utk dicek satu
+        // per satu secara manual. Audit cuma jalan mulai bulan yg ditentukan
+        // di AUDIT_FAKTUR_BULAN_MULAI ke atas (default: Juli 2026 dst).
         // ================================================================
+        const AUDIT_FAKTUR_BULAN_MULAI = '2026-07';
         function cariFakturUangMasukTakCocok() {
             const validSet = new Set();
             salesData.forEach(s => { const k = normFaktur(s['No.Faktur']); if (k) validSet.add(k); });
             const hasil = [];
             for (const bulan in cashDataMap) {
+                if (bulan < AUDIT_FAKTUR_BULAN_MULAI) continue;
                 (cashDataMap[bulan] || []).forEach(day => {
                     (day.piutangDetail || []).forEach(d => {
                         const key = normFaktur(d.noFaktur);
@@ -10780,7 +10787,7 @@
             banner.style.display = 'flex';
             banner.dataset.count = daftar.length;
             banner.querySelector('.fk-count').textContent =
-                daftar.length + ' No.Faktur di Data Uang Masuk tidak ditemukan di Bank Data Penjualan (kemungkinan salah ketik)';
+                daftar.length + ' No.Faktur di Data Uang Masuk (mulai ' + fmtBulanTahun(AUDIT_FAKTUR_BULAN_MULAI) + ') tidak ditemukan di Bank Data Penjualan (kemungkinan salah ketik)';
             if (body) {
                 body.innerHTML = daftar.map(d => `
                     <tr>

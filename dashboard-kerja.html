@@ -5119,6 +5119,14 @@
 
     <div id="storageStatusBar" style="display:none;padding:6px 14px;font-size:10px;font-weight:600;text-align:center;cursor:pointer;"></div>
 
+    <div id="backupReminderBar" style="display:none;padding:8px 14px;font-size:11px;font-weight:600;background:#fff7ed;color:#9a3412;border-bottom:2px solid #f59e0b;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <span id="backupReminderMsg" style="cursor:pointer;flex:1;"></span>
+        <span style="display:flex;gap:8px;align-items:center;">
+            <button id="btnBackupReminderGo" class="btn btn-success" style="padding:4px 12px;font-size:11px;">💾 Save All Data Sekarang</button>
+            <span style="cursor:pointer;font-size:16px;font-weight:700;padding:0 6px;line-height:1;" id="backupReminderClose">×</span>
+        </span>
+    </div>
+
     <div id="transferBankDataBar" style="display:none;padding:8px 14px;font-size:12px;font-weight:600;background:#fff7ed;color:#9a3412;border-bottom:2px solid #fb923c;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;">
         <span id="transferBankDataMsg"></span>
         <button id="btnTransferBankDataImport" class="btn" style="padding:4px 12px;font-size:11px;">📥 Import Sekarang</button>
@@ -5875,7 +5883,7 @@
                 </div>
                 <div class="tab8-card-body">
                     <div class="no-print" style="font-size:10px;color:#6b7280;margin-bottom:12px;">
-                        Menyimpan seluruh data (Bank Data Penjualan, Data Uang Masuk, Riwayat Cetak Tagihan, Input Harian/Pembayaran, Catatan Piutang, dan Data Sampah) menjadi satu file backup <strong>.json</strong>.
+                        Menyimpan seluruh data (Bank Data Penjualan, Data Uang Masuk, Riwayat Cetak Tagihan, Input Harian/Pembayaran, Catatan Piutang, Pengeluaran/Kas Kecil, dan Data Sampah) menjadi satu file backup <strong>.json</strong>.
                     </div>
 
                     <div class="save-actions">
@@ -7359,6 +7367,65 @@
                     bar.style.display = 'none';
                     sessionStorage.setItem('gmBannerDismissed', 'true');
                 }, 6000);
+            }
+        }
+
+        // ================================================================
+        // PENGINGAT BACKUP RUTIN — banner terpisah dari checkStorageStatus
+        // di atas. Muncul kalau "Save All Data" belum pernah dilakukan,
+        // atau sudah lebih dari BACKUP_REMINDER_JAM sejak backup terakhir,
+        // supaya data harian selalu aman ter-download ke file .json
+        // (untuk disimpan di Google Drive / laptop lain).
+        // ================================================================
+        const BACKUP_REMINDER_JAM = 24; // ganti di sini kalau mau ubah ambang waktunya
+
+        function checkBackupReminder() {
+            const bar = document.getElementById('backupReminderBar');
+            if (!bar) return;
+
+            // Jangan tampilkan bareng dengan banner file:/// yang lebih kritis,
+            // dan jangan tampilkan lagi kalau sudah ditutup di sesi ini.
+            if (location.protocol === 'file:') { bar.style.display = 'none'; return; }
+            if (sessionStorage.getItem('gmBackupBannerDismissed') === 'true') { bar.style.display = 'none'; return; }
+
+            const lastIso = localStorage.getItem('gmLastBackupAtISO');
+            let msg = null;
+
+            if (!lastIso) {
+                msg = '⏰ Belum pernah <strong>Save All Data</strong> di perangkat ini. Yuk backup dulu supaya data aman kalau browser bermasalah.';
+            } else {
+                const jamBerlalu = (Date.now() - new Date(lastIso).getTime()) / 3600000;
+                if (jamBerlalu >= BACKUP_REMINDER_JAM) {
+                    const jamBulat = Math.floor(jamBerlalu);
+                    msg = '⏰ Sudah <strong>' + jamBulat + ' jam</strong> sejak backup terakhir (Save All Data). Waktunya backup lagi supaya data hari ini ikut aman.';
+                }
+            }
+
+            if (!msg) { bar.style.display = 'none'; return; }
+
+            bar.style.display = 'flex';
+            document.getElementById('backupReminderMsg').innerHTML = msg;
+
+            const msgSpan = document.getElementById('backupReminderMsg');
+            if (msgSpan) msgSpan.onclick = function() { switchTab('tab8'); };
+
+            const goBtn = document.getElementById('btnBackupReminderGo');
+            if (goBtn) {
+                goBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    switchTab('tab8');
+                    const realBtn = document.getElementById('btnSaveAllData');
+                    if (realBtn) realBtn.click();
+                };
+            }
+
+            const closeBtn = document.getElementById('backupReminderClose');
+            if (closeBtn) {
+                closeBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    sessionStorage.setItem('gmBackupBannerDismissed', 'true');
+                    bar.style.display = 'none';
+                };
             }
         }
 
@@ -15747,14 +15814,15 @@
             if (!ok) return;
 
             try {
-                const [sales, cashIncome, printHistory, trash, piutangNotes, cashNotes, cetakTagihan] = await Promise.all([
+                const [sales, cashIncome, printHistory, trash, piutangNotes, cashNotes, cetakTagihan, pengeluaran] = await Promise.all([
                     db.sales.toArray(),
                     db.cashIncome.toArray(),
                     db.printHistory.toArray(),
                     db.trash.toArray(),
                     db.piutangNotes.toArray(),
                     db.cashNotes.toArray(),
-                    db.cetakTagihanMap.toArray()
+                    db.cetakTagihanMap.toArray(),
+                    (db.pengeluaran ? db.pengeluaran.toArray() : Promise.resolve([]))
                 ]);
 
                 const inputHarian = {};
@@ -15766,9 +15834,9 @@
 
                 const backup = {
                     app: 'GAMAS 2026 - All in One',
-                    backupVersion: 2,
+                    backupVersion: 3,
                     exportedAt: new Date().toISOString(),
-                    data: { sales, cashIncome, printHistory, inputHarian, trash, piutangNotes, cashNotes, cetakTagihan }
+                    data: { sales, cashIncome, printHistory, inputHarian, trash, piutangNotes, cashNotes, cetakTagihan, pengeluaran }
                 };
 
                 const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
@@ -15784,6 +15852,11 @@
 
                 const now = new Date().toLocaleString('id-ID');
                 localStorage.setItem('gmLastBackupAt', now);
+                localStorage.setItem('gmLastBackupAtISO', new Date().toISOString());
+
+                const reminderBar = document.getElementById('backupReminderBar');
+                if (reminderBar) reminderBar.style.display = 'none';
+                sessionStorage.removeItem('gmBackupBannerDismissed');
                 
                 // === PERBAIKAN: Banner peringatan hilang otomatis setelah Save All Data ===
                 const bar = document.getElementById('storageStatusBar');
@@ -15812,7 +15885,7 @@
                     const ok = confirm('Restore akan MENIMPA data yang ada saat ini dengan isi file backup. Lanjutkan?');
                     if (!ok) return;
 
-                    const { sales, cashIncome, printHistory, inputHarian, trash, piutangNotes, cashNotes, cetakTagihan } = backup.data;
+                    const { sales, cashIncome, printHistory, inputHarian, trash, piutangNotes, cashNotes, cetakTagihan, pengeluaran } = backup.data;
 
                     if (Array.isArray(sales)) {
                         await db.sales.clear();
@@ -15842,6 +15915,10 @@
                         await db.cetakTagihanMap.clear();
                         if (cetakTagihan.length) await db.cetakTagihanMap.bulkAdd(cetakTagihan);
                     }
+                    if (Array.isArray(pengeluaran) && db.pengeluaran) {
+                        await db.pengeluaran.clear();
+                        if (pengeluaran.length) await db.pengeluaran.bulkAdd(pengeluaran);
+                    }
                     if (inputHarian && typeof inputHarian === 'object') {
                         getAllInputHarianKeys().forEach(function(k) { localStorage.removeItem(k); });
                         Object.keys(inputHarian).forEach(function(k) {
@@ -15855,6 +15932,8 @@
                     await loadPiutangNotes();
                     await loadCashNotes();
                     await loadCetakTagihanMap();
+                    if (typeof loadPengeluaranData === 'function') { try { await loadPengeluaranData(); } catch (e) {} }
+                    if (typeof renderPengeluaran === 'function') { try { renderPengeluaran(); } catch (e) {} }
                     autoBackupSalesToLocalStorage();
                     await autoBackupCashToLocalStorage();
                     renderPemasukan();
@@ -17149,6 +17228,8 @@
 
         async function startApp() {
             checkStorageStatus();
+            checkBackupReminder();
+            setInterval(checkBackupReminder, 60 * 60 * 1000); // cek ulang tiap 1 jam
             try {
                 try { await cobaPulihkanDariLocalStorageBackup(); } catch (e) { console.warn('Lewati pemulihan cadangan lokal:', e); }
                 await loadSalesData();

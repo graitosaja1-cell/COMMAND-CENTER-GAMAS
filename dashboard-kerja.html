@@ -401,6 +401,7 @@
         .tab-btn[data-tab="tab6"].active,
         .tab-btn[data-tab="tab7"].active,
         .tab-btn[data-tab="tab8"].active,
+        .tab-btn[data-tab="tab9"].active,
         .tab-btn[data-tab="tab10"].active {
             color: #fff;
             border-color: transparent;
@@ -415,6 +416,7 @@
         .tab-btn[data-tab="tab6"].active .tab-icon,
         .tab-btn[data-tab="tab7"].active .tab-icon,
         .tab-btn[data-tab="tab8"].active .tab-icon,
+        .tab-btn[data-tab="tab9"].active .tab-icon,
         .tab-btn[data-tab="tab10"].active .tab-icon {
             color: #fff;
         }
@@ -426,6 +428,7 @@
         .tab-btn[data-tab="tab6"].active .badge-tab,
         .tab-btn[data-tab="tab7"].active .badge-tab,
         .tab-btn[data-tab="tab8"].active .badge-tab,
+        .tab-btn[data-tab="tab9"].active .badge-tab,
         .tab-btn[data-tab="tab10"].active .badge-tab {
             background: rgba(255, 255, 255, 0.28);
             color: #fff;
@@ -4661,6 +4664,267 @@
         .data-baru-notif:hover {
             background: #fde68a;
         }
+
+        /* ============================================================
+           TAB 2 – DATA UANG MASUK (gaya "Cek Uang Masuk" / UANG_MASUK.html)
+           Dinamespace dengan awalan t2- supaya tidak bentrok dengan style lain.
+        ============================================================ */
+        #tab9 {
+            --t2-bg: #f1f5f9;
+            --t2-card: #ffffff;
+            --t2-border: #e2e8f0;
+            --t2-text: #1e293b;
+            --t2-muted: #64748b;
+            --t2-accent: #0284c7;
+            --t2-accent-soft: #e0f2fe;
+            --t2-green: #16a34a;
+            --t2-green-bg: #dcfce7;
+            --t2-yellow: #ca8a04;
+            --t2-yellow-bg: #fef9c3;
+            --t2-red: #dc2626;
+            --t2-red-bg: #fee2e2;
+            --t2-indigo: #4f46e5;
+            --t2-indigo-bg: #e0e7ff;
+            --t2-th-bg: #f8fafc;
+            --t2-hover: #f8fafc;
+        }
+        html.gamas-dark-mode #tab9 {
+            --t2-bg: #0f172a;
+            --t2-card: #1e293b;
+            --t2-border: #334155;
+            --t2-text: #e2e8f0;
+            --t2-muted: #94a3b8;
+            --t2-accent: #38bdf8;
+            --t2-accent-soft: #0c4a6e;
+            --t2-green: #4ade80;
+            --t2-green-bg: #14532d;
+            --t2-yellow: #facc15;
+            --t2-yellow-bg: #713f12;
+            --t2-red: #f87171;
+            --t2-red-bg: #7f1d1d;
+            --t2-indigo: #a5b4fc;
+            --t2-indigo-bg: #312e81;
+            --t2-th-bg: #0f172a;
+            --t2-hover: #243047;
+        }
+        #tab9 .t2-mini-cards {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        #tab9 .t2-mini {
+            background: var(--t2-card);
+            border: 1px solid var(--t2-border);
+            border-radius: 8px;
+            padding: 7px 12px;
+            text-align: center;
+            min-width: 78px;
+            box-shadow: var(--shadow);
+        }
+        #tab9 .t2-mini .t2-l { font-size: 0.65rem; color: var(--t2-muted); text-transform: uppercase; letter-spacing: .03em; }
+        #tab9 .t2-mini .t2-v { font-size: 1rem; font-weight: 700; color: var(--t2-text); }
+        #tab9 .t2-search-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        #tab9 .t2-search-bar input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+            background: var(--t2-card);
+            border: 1px solid var(--t2-border);
+            border-radius: 8px;
+            padding: 9px 12px;
+            color: var(--t2-text);
+            font-size: 0.9rem;
+            outline: none;
+        }
+        #tab9 .t2-search-bar input[type="text"]:focus { border-color: var(--t2-accent); box-shadow: 0 0 0 3px var(--t2-accent-soft); }
+        #tab9 .t2-search-bar select {
+            background: var(--t2-card);
+            border: 1px solid var(--t2-border);
+            border-radius: 8px;
+            padding: 9px 10px;
+            color: var(--t2-text);
+            font-size: 0.85rem;
+            outline: none;
+        }
+        #tab9 .t2-btn {
+            background: var(--t2-accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 9px 16px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        #tab9 .t2-btn:hover { opacity: .9; }
+        #tab9 .t2-btn-outline {
+            background: transparent;
+            border: 1px solid var(--t2-border);
+            color: var(--t2-text);
+        }
+        #tab9 .t2-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        #tab9 .t2-badge-lunas { background: var(--t2-green-bg); color: var(--t2-green); }
+        #tab9 .t2-badge-titip { background: var(--t2-yellow-bg); color: var(--t2-yellow); }
+        #tab9 .t2-badge-tf { background: var(--t2-accent-soft); color: var(--t2-accent); }
+        #tab9 .t2-badge-retur { background: var(--t2-red-bg); color: var(--t2-red); }
+        #tab9 .t2-badge-section { background: var(--t2-indigo-bg); color: var(--t2-indigo); font-size: 0.65rem; }
+        #tab9 .t2-result-info {
+            margin-bottom: 8px;
+            color: var(--t2-muted);
+            font-size: 0.85rem;
+        }
+        #tab9 .t2-result-info strong { color: var(--t2-text); }
+        #tab9 .t2-table-wrap {
+            overflow-x: auto;
+            overflow-y: auto;
+            border: 1px solid var(--t2-border);
+            border-radius: 10px;
+            background: var(--t2-card);
+            box-shadow: var(--shadow);
+            margin-bottom: 14px;
+        }
+        #tab9 .t2-table-wrap table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+        #tab9 .t2-table-wrap th {
+            background: var(--t2-th-bg);
+            color: var(--t2-muted);
+            text-align: left;
+            padding: 10px 8px;
+            font-weight: 600;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            border-bottom: 1px solid var(--t2-border);
+        }
+        #tab9 .t2-table-wrap td { padding: 8px; border-top: 1px solid var(--t2-border); vertical-align: top; color: var(--t2-text); }
+        #tab9 .t2-table-wrap tr:hover td { background: var(--t2-hover); }
+        #tab9 .t2-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        #tab9 .t2-faktur { font-family: ui-monospace, 'Cascadia Code', monospace; color: var(--t2-accent); font-weight: 600; font-size: 0.8rem; }
+        #tab9 .t2-toko { font-weight: 600; }
+        #tab9 .t2-muted { color: var(--t2-muted); }
+        #tab9 .t2-faktur-link { cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+        #tab9 .t2-faktur-link:hover { opacity: .8; }
+        #tab9 .t2-daily-panel {
+            background: var(--t2-card);
+            border: 1px solid var(--t2-border);
+            border-radius: 10px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: none;
+        }
+        #tab9 .t2-daily-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--t2-border);
+            font-size: 0.9rem;
+            color: var(--t2-text);
+        }
+        #tab9 .t2-daily-scroll { overflow-x: auto; max-height: 280px; overflow-y: auto; }
+        #tab9 .t2-daily-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        #tab9 .t2-daily-table th {
+            background: var(--t2-th-bg);
+            color: var(--t2-muted);
+            text-align: left;
+            padding: 8px 10px;
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            position: sticky;
+            top: 0;
+            border-bottom: 1px solid var(--t2-border);
+        }
+        #tab9 .t2-daily-table td { padding: 7px 10px; border-top: 1px solid var(--t2-border); cursor: pointer; color: var(--t2-text); }
+        #tab9 .t2-daily-table tr:hover td { background: var(--t2-hover); }
+        #tab9 .t2-daily-table tr.t2-active td { background: var(--t2-accent-soft); }
+        #tab9 .t2-daily-table .t2-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        #tab9 .t2-daily-table .t2-total-row td { font-weight: 700; border-top: 2px solid var(--t2-border); background: var(--t2-th-bg); cursor: default; }
+        .t2-modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,.45);
+            z-index: 400;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .t2-modal-backdrop.t2-open { display: flex; }
+        .t2-modal-backdrop .t2-modal {
+            background: var(--t2-card, #fff);
+            border: 1px solid var(--t2-border, #e2e8f0);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 760px;
+            max-height: 85vh;
+            overflow: auto;
+            box-shadow: 0 20px 50px rgba(0,0,0,.2);
+        }
+        .t2-modal-h {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--t2-border, #e2e8f0);
+            gap: 12px;
+        }
+        .t2-modal-h h2 { font-size: 1rem; font-weight: 700; color: var(--t2-text, #1e293b); }
+        .t2-modal-h .t2-sub { font-size: 0.8rem; color: var(--t2-muted, #64748b); margin-top: 2px; }
+        .t2-modal-close {
+            background: var(--t2-bg, #f1f5f9);
+            border: 1px solid var(--t2-border, #e2e8f0);
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            color: var(--t2-text, #1e293b);
+            font-size: 0.85rem;
+        }
+        .t2-modal-body { padding: 14px 16px; }
+        .t2-modal-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .t2-modal-stat {
+            background: var(--t2-bg, #f1f5f9);
+            border: 1px solid var(--t2-border, #e2e8f0);
+            border-radius: 8px;
+            padding: 8px 10px;
+        }
+        .t2-modal-stat .t2-l { font-size: 0.65rem; color: var(--t2-muted, #64748b); text-transform: uppercase; }
+        .t2-modal-stat .t2-v { font-size: 0.95rem; font-weight: 700; margin-top: 2px; color: var(--t2-text, #1e293b); }
+        .t2-hist-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        .t2-hist-table th {
+            background: var(--t2-th-bg, #f8fafc);
+            color: var(--t2-muted, #64748b);
+            text-align: left;
+            padding: 8px;
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--t2-border, #e2e8f0);
+        }
+        .t2-hist-table td { padding: 8px; border-top: 1px solid var(--t2-border, #e2e8f0); color: var(--t2-text, #1e293b); }
+        @media (max-width: 700px) {
+            #tab9 .t2-mini { min-width: 62px; padding: 5px 8px; }
+            #tab9 .t2-mini .t2-v { font-size: 0.85rem; }
+        }
     </style>
 </head>
 <body>
@@ -4736,6 +5000,10 @@
         <button class="tab-btn" data-tab="tab7">
             <svg class="tab-icon" viewBox="0 0 24 24"><rect x="2.5" y="5.5" width="19" height="13" rx="1.5"></rect><line x1="2.5" y1="9.5" x2="21.5" y2="9.5"></line><line x1="5.5" y1="14.5" x2="10.5" y2="14.5"></line></svg>
             Pembayaran <span class="badge-tab" id="badgePembayaran">2</span>
+        </button>
+        <button class="tab-btn" data-tab="tab9">
+            <svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 3v12"></path><path d="M7 8l5-5 5 5"></path><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"></path></svg>
+            Upload Uang Masuk
         </button>
         <button class="tab-btn" data-tab="tab10">
             <svg class="tab-icon" viewBox="0 0 24 24"><polyline points="3 7 10 14 14 10 21 17"></polyline><polyline points="15 17 21 17 21 11"></polyline></svg>
@@ -4935,69 +5203,9 @@
         </div>
     </div>
 
-    <!-- ======= TAB 2 – DATA UANG MASUK ======= -->
+    <!-- ======= TAB 2 – DATA UANG MASUK (gaya "Cek Uang Masuk") ======= -->
     <div class="tab-content" id="tab2">
-        <div class="cards" id="pemasukanCards">
-            <div class="card"><span class="label">TOTAL CASH</span><span class="value" id="pemTotalCash">Rp 0</span></div>
-            <div class="card"><span class="label">TOTAL TRANSFER</span><span class="value" id="pemTotalTransfer">Rp 0</span></div>
-            <div class="card"><span class="label">UANG MASUK MINYAK</span><span class="value orange" id="pemTotalMinyak">Rp 0</span></div>
-            <div class="card"><span class="label">UANG MASUK RUPA RUPA</span><span class="value purple" id="pemTotalRupa">Rp 0</span></div>
-            <div class="card"><span class="label">GRAND TOTAL</span><span class="value" id="pemGrandTotal">Rp 0</span></div>
-        </div>
-        <div class="toolbar">
-            <div class="toolbar-left">
-                <span class="label-cari">CARI FAKTUR / TOKO</span>
-                <input type="text" id="cariFakturInput" placeholder="No Faktur atau nama toko...">
-                <button class="btn" id="cariFakturBtn">Cari</button>
-                <button class="btn btn-reset" id="resetCariBtn">✕ Reset</button>
-            </div>
-            <div class="toolbar-right">
-                <span class="hari-label">Hari: <span class="num" id="pemasukanTotalDays">0</span></span>
-                <select id="bulanPemasukan">
-                    <option value="2026-04">April 2026</option>
-                    <option value="2026-05">Mei 2026</option>
-                    <option value="2026-06">Juni 2026</option>
-                    <option value="2026-07" selected="">Juli 2026</option>
-                    <option value="2026-08">Agustus 2026</option>
-                    <option value="2026-09">September 2026</option>
-                    <option value="2026-10">Oktober 2026</option>
-                    <option value="2026-11">November 2026</option>
-                    <option value="2026-12">Desember 2026</option>
-                </select>
-                <div style="position: relative;">
-                    <button class="menu-toggle-btn" id="pemasukanMenuBtn">⚙️ Menu <span style="font-size:8px;">▼</span></button>
-                    <div class="menu-dropdown" id="pemasukanMenuDropdown">
-                        <div class="file-wrap-modal">
-                            <input type="file" id="pemasukanFileInput" accept=".xlsx,.xls">
-                            <span class="file-name-modal empty" id="pemasukanFileName">No file chosen</span>
-                        </div>
-                        <div class="menu-item">
-                            <button class="btn" id="pemasukanUploadBtn" style="flex:1;margin:0;">⬆ Upload Excel</button>
-                        </div>
-                        <div class="menu-item">
-                            <button class="btn btn-outline" id="pemasukanExportBtn" style="flex:1;margin:0;">📥 Export JSON</button>
-                        </div>
-                        <div class="menu-item">
-                            <button class="btn btn-outline" id="pemasukanImportBtn" style="flex:1;margin:0;">📤 Import JSON</button>
-                        </div>
-                        <input type="file" id="pemasukanImportFileInput" accept=".json" style="display:none;">
-                        <div class="menu-item">
-                            <button class="btn btn-danger" id="pemasukanHapusBtn" style="flex:1;margin:0;">🗑️ Hapus</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Tanggal</th><th>Piutang Cash</th><th>Piutang Transfer</th><th>Penjualan Cash</th><th>Penjualan Transfer</th><th>Total Cash</th><th>Total Transfer</th><th>Grand Total</th><th>Faktur</th></tr></thead>
-                <tbody id="pemasukanTableBody"><tr><td colspan="9" class="empty-msg">Tidak ada data.</td></tr></tbody>
-            </table>
-        </div>
-        <div class="pagination">
-            <div><button id="pemPrevPage" disabled="">◀ Sebelumnya</button><span id="pemPageInfo">Halaman 1 dari 1</span><button id="pemNextPage" disabled="">Berikutnya ▶</button></div>
-            <div><span class="badge-count" id="pemTotalData">0 data</span></div>
-        </div>
+
     </div>
 
     <!-- ======= TAB 3 – CEK CASH ======= -->
@@ -5023,8 +5231,8 @@
                 <div class="fc-right">
                     <span class="info-right" id="cashInfoRight" style="display:none;">0 data</span>
                     <div class="actions" style="margin:0;">
-                        <span class="data-baru-notif" id="cashDataBaruNotif" style="display:none;" title="Klik Muat Ulang untuk memperbarui tabel">🆕 Data baru masuk</span>
-                        <button class="btn" id="cekBtnRefresh">🔄 Muat Ulang</button>
+                        <span class="data-baru-notif" id="cashDataBaruNotif" style="display:none;" title="Klik Sinkronkan Data untuk memperbarui tabel">🆕 Data baru masuk</span>
+                        <button class="btn" id="cekBtnRefresh" title="Ambil data terbaru dari server (Supabase) dan muat ulang tabel">🔄 Sinkronkan Data</button>
                         <button class="btn btn-outline" id="btnExportCekCash" title="Download data Cek Cash yang sedang tampil (sesuai filter aktif) sebagai file Excel">📥 Download Excel</button>
                     </div>
                 </div>
@@ -5092,12 +5300,12 @@
                 <button type="button" class="fc-adv-toggle" id="ptAdvToggle">Filter Lanjutan <span class="arrow">→</span></button>
                 <div class="fc-right">
                     <div class="action-inline" style="margin-left:0; padding-left:0;">
-                        <span class="data-baru-notif" id="ptDataBaruNotif" style="display:none;" title="Klik Muat Ulang untuk memperbarui tabel">🆕 Data baru masuk</span>
+                        <span class="data-baru-notif" id="ptDataBaruNotif" style="display:none;" title="Klik Sinkronkan Data untuk memperbarui tabel">🆕 Data baru masuk</span>
                         <div style="position: relative;">
                             <button class="menu-toggle-btn" id="ptMenuBtn">⚙️ Menu <span style="font-size:8px;">▼</span></button>
                             <div class="menu-dropdown" id="ptMenuDropdown">
                                 <div class="menu-item">
-                                    <button class="btn" id="ptBtnRefresh" style="flex:1;margin:0;">🔄 Muat Ulang</button>
+                                    <button class="btn" id="ptBtnRefresh" style="flex:1;margin:0;" title="Ambil data terbaru dari server (Supabase) dan muat ulang tabel">🔄 Sinkronkan Data</button>
                                 </div>
                                 <div class="menu-item">
                                     <button class="btn" id="ptBtnInputManual" style="flex:1;margin:0;">✍️ Input Manual</button>
@@ -5237,7 +5445,7 @@
                 <div style="font-size:12px; font-weight:700; color:#1f4e78;">🖨️ Riwayat Cetak Tagihan <span style="font-weight:400; color:#6b7280; font-size:10px;">(log setiap klik Cetak Semua di tab ini)</span></div>
                 <span style="font-size:10px; color:#6b7280;" id="tagihanRiwayatCetakCount">0 log</span>
             </div>
-            <div class="riwayat-cetak-tagihan-wrap" style="max-height:208px; overflow:auto;">
+            <div class="riwayat-cetak-tagihan-wrap" id="tagihanRiwayatCetakWrap" style="max-height:208px; overflow:auto;">
                 <table style="width:100%; font-size:10px; border-collapse:collapse;">
                     <thead>
                         <tr>
@@ -5589,7 +5797,7 @@
                             <i class="bi bi-trash"></i> Kosongkan Riwayat
                         </button>
                     </div>
-                    <div class="trash-table-wrap" style="margin-top:12px;">
+                    <div class="trash-table-wrap" id="riwayatCetakWrap" style="margin-top:12px;">
                         <table>
                             <thead>
                                 <tr>
@@ -5676,6 +5884,241 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- ======= TAB 9 – UPLOAD DATA UANG MASUK (EXCEL) ======= -->
+    <div class="tab-content" id="tab9">
+        <div class="container" style="max-width:1400px; margin:0 auto; padding:0 16px;">
+
+            <!-- Bar ringkas: selalu tampil, klik untuk buka/tutup kotak upload -->
+            <div id="umToggleBar" style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 18px;margin-bottom:0;cursor:pointer;user-select:none;transition:background .12s ease;">
+                <span style="font-size:18px;">📥</span>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:13px;font-weight:800;color:#1e293b;">Upload Data Uang Masuk</div>
+                    <div id="umToggleStatus" style="font-size:11px;color:#64748b;margin-top:1px;">dari file Excel laporan harian</div>
+                </div>
+                <span id="umToggleChevron" style="font-size:11px;color:#94a3b8;transition:transform .15s ease;">▼ Buka</span>
+            </div>
+
+            <div id="umCollapsibleBody" style="margin-top:12px;">
+            <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;margin-bottom:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+                    <div>
+                        <div style="font-size:14px;font-weight:800;color:#1e293b;letter-spacing:.02em;">UPLOAD DATA UANG MASUK <span style="font-weight:600;color:#64748b;font-size:12px;">dari file Excel laporan harian</span></div>
+                        <p style="font-size:12px;color:#64748b;margin-top:4px;max-width:580px;line-height:1.5;">
+                            Upload file Excel laporan Piutang Tempo &amp; Cash Dropping (format sama seperti yang biasa
+                            dibuat staf — 1 sheet = 1 hari). Bisa pilih beberapa file/bulan sekaligus. Data hasil upload
+                            akan otomatis dipakai oleh tab <b>Cek Cash</b> dan <b>Cek Piutang</b> — tidak perlu ketik ulang
+                            manual di tab Pembayaran (tab Pembayaran tetap bisa dipakai untuk koreksi kecil).
+                            Semua data yang sudah tersimpan bisa dicari &amp; dilihat langsung di bagian bawah halaman ini.
+                        </p>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:2px;">
+                        <label style="font-size:10px;font-weight:700;color:#4a5568;text-transform:uppercase;">Tahun cadangan</label>
+                        <input type="number" id="umTahunFallback" value="2026" style="width:90px;padding:6px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;">
+                        <span style="font-size:10px;color:#94a3b8;max-width:90px;">dipakai kalau sheet tidak ada tahunnya</span>
+                    </div>
+                </div>
+
+                <div id="umDropzone" style="margin-top:14px;border:2px dashed #c7d2fe;border-radius:10px;padding:28px;text-align:center;background:#f8fafc;cursor:pointer;transition:all .15s ease;">
+                    <div style="font-size:28px;">📥</div>
+                    <div style="font-weight:700;margin-top:6px;color:#334155;">Klik atau seret file Excel ke sini</div>
+                    <div style="font-size:12px;color:#64748b;margin-top:2px;">Bisa pilih beberapa file sekaligus (.xlsx / .xls)</div>
+                    <input type="file" id="umFileInput" accept=".xlsx,.xls" multiple style="display:none;">
+                </div>
+                <div id="umFileNames" style="font-size:12px;color:#16a34a;margin-top:8px;font-weight:600;"></div>
+            </div>
+
+            <div id="umPreviewWrap" style="display:none;">
+                <div id="umWarningBox" style="display:none;background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400e;margin-bottom:14px;line-height:1.5;"></div>
+
+                <div class="cards" id="umSummaryCards" style="margin-bottom:14px;"></div>
+
+                <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:14px;">
+                    <div style="padding:10px 14px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;">
+                        <b style="font-size:13px;">📋 Pratinjau per Hari</b>
+                        <span id="umTotalHariLabel" style="font-size:12px;color:#64748b;"></span>
+                    </div>
+                    <div style="max-height:380px;overflow:auto;">
+                        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                            <thead><tr style="background:#f8fafc;position:sticky;top:0;">
+                                <th style="padding:6px 10px;text-align:left;border-bottom:1px solid #e2e8f0;">Bulan</th>
+                                <th style="padding:6px 10px;text-align:left;border-bottom:1px solid #e2e8f0;">Tanggal</th>
+                                <th style="padding:6px 10px;text-align:right;border-bottom:1px solid #e2e8f0;">Piutang Tempo</th>
+                                <th style="padding:6px 10px;text-align:right;border-bottom:1px solid #e2e8f0;">Cash Dropping</th>
+                                <th style="padding:6px 10px;text-align:right;border-bottom:1px solid #e2e8f0;">Grand Total</th>
+                                <th style="padding:6px 10px;text-align:center;border-bottom:1px solid #e2e8f0;">Status</th>
+                            </tr></thead>
+                            <tbody id="umPreviewBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                    <button class="btn btn-outline" id="umBtnBatal">✕ Batal</button>
+                    <button class="btn btn-success" id="umBtnSimpan">💾 Simpan ke Data Uang Masuk</button>
+                </div>
+            </div>
+
+            <div id="umEmptyState" style="text-align:center;color:#94a3b8;padding:44px 0;font-size:13px;">
+                📂 Belum ada file diupload pada sesi ini.
+            </div>
+            </div>
+        </div>
+
+        <div style="max-width:1400px;margin:18px auto 10px;padding:0 16px;display:flex;align-items:center;gap:10px;" id="umDataSectionDivider">
+            <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+            <span style="font-size:11px;font-weight:700;color:#64748b;letter-spacing:.04em;text-transform:uppercase;">📊 Data Uang Masuk (semua bulan)</span>
+            <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+        </div>
+        <div style="max-width:1400px;margin:0 auto;padding:0 16px;">
+        <div class="t2-mini-cards" id="t2MiniCards">
+            <div class="t2-mini"><div class="t2-l">Faktur</div><div class="t2-v" id="t2sTotal">0</div></div>
+            <div class="t2-mini"><div class="t2-l">Piutang</div><div class="t2-v" id="t2sPiutang">0</div></div>
+            <div class="t2-mini"><div class="t2-l">Dropping</div><div class="t2-v" id="t2sDropping">0</div></div>
+            <div class="t2-mini"><div class="t2-l">Lunas</div><div class="t2-v" id="t2sLunas" style="color:var(--t2-green)">0</div></div>
+            <div class="t2-mini"><div class="t2-l">Titip</div><div class="t2-v" id="t2sTitip" style="color:var(--t2-yellow)">0</div></div>
+            <div class="t2-mini"><div class="t2-l">Cash</div><div class="t2-v" id="t2sCash">Rp 0</div></div>
+            <div class="t2-mini"><div class="t2-l">Transfer</div><div class="t2-v" id="t2sTransfer">Rp 0</div></div>
+            <div class="t2-mini"><div class="t2-l">Hari</div><div class="t2-v" id="t2sSheets">0</div></div>
+        </div>
+
+        <div class="t2-search-bar">
+            <input type="text" id="t2SearchInput" placeholder="Cari No Faktur, toko, alamat, atau sales..." autocomplete="off">
+            <select id="t2FilterMonth">
+                <option value="all">Semua Bulan</option>
+                <option value="2026-04">April 2026</option>
+                <option value="2026-05">Mei 2026</option>
+                <option value="2026-06">Juni 2026</option>
+                <option value="2026-07" selected="">Juli 2026</option>
+                <option value="2026-08">Agustus 2026</option>
+                <option value="2026-09">September 2026</option>
+                <option value="2026-10">Oktober 2026</option>
+                <option value="2026-11">November 2026</option>
+                <option value="2026-12">Desember 2026</option>
+            </select>
+            <select id="t2FilterSection">
+                <option value="all">Semua Bagian</option>
+                <option value="PIUTANG TEMPO">Piutang Tempo</option>
+                <option value="CASH DROPPING">Cash Dropping</option>
+            </select>
+            <select id="t2FilterStatus">
+                <option value="all">Semua Status</option>
+                <option value="LUNAS">Lunas</option>
+                <option value="TITIP">Titip</option>
+            </select>
+            <button class="t2-btn" id="t2SearchBtn">Cari</button>
+            <button class="t2-btn t2-btn-outline" id="t2ResetBtn">Reset</button>
+            <div style="position: relative;">
+                <button class="menu-toggle-btn" id="pemasukanMenuBtn">⚙️ Menu <span style="font-size:8px;">▼</span></button>
+                <div class="menu-dropdown" id="pemasukanMenuDropdown">
+                    <div class="file-wrap-modal">
+                        <input type="file" id="pemasukanFileInput" accept=".xlsx,.xls">
+                        <span class="file-name-modal empty" id="pemasukanFileName">No file chosen</span>
+                    </div>
+                    <div class="menu-item">
+                        <button class="btn" id="pemasukanUploadBtn" style="flex:1;margin:0;">⬆ Upload Excel</button>
+                    </div>
+                    <div class="menu-item">
+                        <button class="btn btn-outline" id="pemasukanExportBtn" style="flex:1;margin:0;">📥 Export JSON</button>
+                    </div>
+                    <div class="menu-item">
+                        <button class="btn btn-outline" id="pemasukanImportBtn" style="flex:1;margin:0;">📤 Import JSON</button>
+                    </div>
+                    <input type="file" id="pemasukanImportFileInput" accept=".json" style="display:none;">
+                    <div class="menu-item">
+                        <button class="btn btn-danger" id="pemasukanHapusBtn" style="flex:1;margin:0;">🗑️ Hapus</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="t2-daily-panel" id="t2DailyPanel">
+            <div class="t2-daily-head">
+                <strong>📅 Ringkasan Harian</strong>
+                <span class="t2-muted" id="t2DailyHint">Klik baris tanggal untuk filter detail faktur</span>
+            </div>
+            <div class="t2-daily-scroll">
+                <table class="t2-daily-table">
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th class="t2-num">Jml Faktur</th>
+                            <th class="t2-num">Piutang</th>
+                            <th class="t2-num">Dropping</th>
+                            <th class="t2-num">Tagihan</th>
+                            <th class="t2-num">Bayar Cash</th>
+                            <th class="t2-num">Bayar TF</th>
+                            <th class="t2-num">Total Bayar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="t2DailyBody"><tr><td colspan="8" style="text-align:center;padding:30px;color:var(--t2-muted);cursor:default;">Belum ada data.</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="t2-result-info" id="t2ResultInfo">Menampilkan <strong>0</strong> dari <strong>0</strong> faktur</div>
+
+        <div class="t2-table-wrap" id="tab2TableWrap" style="height:485px;max-height:485px;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Bagian</th>
+                        <th>Sales</th>
+                        <th>No Faktur</th>
+                        <th>Nama Toko</th>
+                        <th>Alamat</th>
+                        <th>Tagihan</th>
+                        <th>Minyak Cash</th>
+                        <th>Minyak TF</th>
+                        <th>Rupa Cash</th>
+                        <th>Rupa TF</th>
+                        <th>Bayar Terakhir</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="t2Tbody"><tr><td colspan="13" style="text-align:center;padding:32px;color:var(--t2-muted)">Belum ada data. Upload Excel lewat menu ⚙️ Menu di atas.</td></tr></tbody>
+            </table>
+        </div>
+
+        <!-- Modal riwayat pembayaran faktur -->
+        <div class="t2-modal-backdrop" id="t2FakturModal" onclick="if(event.target===this) t2CloseFakturModal()">
+            <div class="t2-modal">
+                <div class="t2-modal-h">
+                    <div>
+                        <h2 id="t2ModalTitle">—</h2>
+                        <div class="t2-sub" id="t2ModalSub">Pilih faktur untuk melihat riwayat</div>
+                    </div>
+                    <button class="t2-modal-close" onclick="t2CloseFakturModal()">Tutup</button>
+                </div>
+                <div class="t2-modal-body">
+                    <div class="t2-modal-stats" id="t2ModalStats"></div>
+                    <div style="font-size:0.85rem;font-weight:600;margin-bottom:8px;">Riwayat pembayaran</div>
+                    <div style="overflow-x:auto;">
+                        <table class="t2-hist-table">
+                            <thead>
+                                <tr>
+                                    <th>Tgl Masuk</th>
+                                    <th>Bagian</th>
+                                    <th>Sales</th>
+                                    <th class="t2-num">Tagihan</th>
+                                    <th class="t2-num">Cash</th>
+                                    <th class="t2-num">TF</th>
+                                    <th class="t2-num">Bayar</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="t2ModalHist"></tbody>
+                        </table>
+                    </div>
+                    <p class="t2-muted" style="font-size:0.75rem;margin-top:12px;">
+                        Untuk faktur <strong>TITIP</strong>, setiap baris = 1 kali pembayaran. Urut dari paling lama → terbaru. Total bayar dijumlahkan di atas.
+                    </p>
+                </div>
+            </div>
+        </div>
         </div>
     </div>
 
@@ -6239,10 +6682,15 @@
                 if (typeof salesCell === 'string' && salesCell.trim() !== '') {
                     currentSales = salesCell.trim();
                 }
-                if (noCell === undefined || noCell === null || noCell === '') continue;
                 if (typeof noCell === 'string' && noCell.toLowerCase().includes('total')) continue;
+                // PENTING: baris data dikenali dari ada-tidaknya No.Faktur (kolom D),
+                // BUKAN dari kolom "NO" urut (kolom B) — staf kadang mengosongkan nomor
+                // urut kalau baris ditambah manual belakangan di tengah grup, padahal
+                // No.Fakturnya tetap terisi. Kalau syaratnya kolom NO harus terisi, baris
+                // semacam ini kelewat (tidak ke-input) walau datanya sebenarnya valid.
                 const noFaktur = row[3];
                 if (noFaktur === undefined || noFaktur === null || noFaktur === '') continue;
+                if (typeof noFaktur === 'string' && noFaktur.toLowerCase().includes('total')) continue;
                 const tagihan = ambilAngka(row, 8);
                 // PENTING: Minyak & Rupa-Rupa disimpan TERPISAH (bukan digabung),
                 // supaya saat ditarik ke tab Pembayaran, split-nya tetap akurat
@@ -6872,9 +7320,9 @@
             return allRecords;
         }
         // Load ALL cash data from database - used before ptRefresh
-        async function loadAllCashDataBeforePtRefresh() {
+        async function loadAllCashDataBeforePtRefresh(force) {
             try {
-                const allRecords = await ambilSemuaCashIncomeCached(false);
+                const allRecords = await ambilSemuaCashIncomeCached(!!force);
                 console.log('Loading all cash data records:', allRecords.length);
                 allRecords.forEach(record => {
                     if (record.bulan && Array.isArray(record.data)) {
@@ -6928,83 +7376,707 @@
             return cashDataMap[cashBulan];
         }
 
+        // ================================================================
+        // TAB 2 – "Cek Uang Masuk" style rendering
+        // ----------------------------------------------------------------
+        // cashDataMap (semua bulan, dari IndexedDB, sudah dimuat oleh
+        // loadCashData/ambilSemuaCashIncomeCached) diratakan (flatten) jadi
+        // t2AllRows: 1 baris = 1 faktur di 1 hari, meniru struktur "allRows"
+        // pada UANG_MASUK.html supaya UI & fitur (cari/filter/ringkasan
+        // harian/riwayat faktur) bisa sama persis dengan file itu.
+        // ================================================================
+        let t2AllRows = [];
+        const T2_BULAN_NAMA = {
+            '01': 'Januari', '02': 'Februari', '03': 'Maret', '04': 'April',
+            '05': 'Mei', '06': 'Juni', '07': 'Juli', '08': 'Agustus',
+            '09': 'September', '10': 'Oktober', '11': 'November', '12': 'Desember'
+        };
+        function t2BulanLabel(bulanKey) {
+            const p = String(bulanKey || '').split('-');
+            if (p.length < 2) return bulanKey || '—';
+            return (T2_BULAN_NAMA[p[1]] || p[1]) + ' ' + p[0];
+        }
+        function t2Status(ket) {
+            const k = String(ket || '').toUpperCase();
+            if (k.includes('LUNAS')) return 'LUNAS';
+            if (k.includes('TITIP')) return 'TITIP';
+            if (k.includes('TF') || k.includes('TRANSFER')) return 'TF';
+            if (k.includes('RETUR')) return 'RETUR';
+            if (ket) return ket;
+            return '—';
+        }
+        function t2BuildAllRows() {
+            const rows = [];
+            Object.keys(cashDataMap).sort().forEach(bulanKey => {
+                const days = cashDataMap[bulanKey] || [];
+                days.forEach(day => {
+                    const tglDisplay = fmtTanggalHarianYY(day.tanggal, bulanKey);
+                    const monthLabel = t2BulanLabel(bulanKey);
+                    (day.piutangDetail || []).forEach(d => {
+                        rows.push({
+                            sheet: bulanKey + '|' + day.tanggal,
+                            date: tglDisplay,
+                            month: bulanKey,
+                            monthLabel,
+                            section: 'PIUTANG TEMPO',
+                            sales: d.sales || '—',
+                            faktur: d.noFaktur,
+                            toko: d.namaToko || '—',
+                            alamat: d.alamat || '—',
+                            tagihan: d.tagihan || 0,
+                            minyakCash: d.minyakCash || 0,
+                            minyakTf: d.minyakTransfer || 0,
+                            rupaCash: d.rupaCash || 0,
+                            rupaTf: d.rupaTransfer || 0,
+                            ket: d.ket || '—',
+                            status: t2Status(d.ket)
+                        });
+                    });
+                    (day.cashDroppingDetail || []).forEach(d => {
+                        rows.push({
+                            sheet: bulanKey + '|' + day.tanggal,
+                            date: tglDisplay,
+                            month: bulanKey,
+                            monthLabel,
+                            section: 'CASH DROPPING',
+                            sales: d.sales || '—',
+                            faktur: d.noFaktur,
+                            toko: d.namaToko || '—',
+                            alamat: d.alamat || '—',
+                            tagihan: d.tagihan || 0,
+                            minyakCash: d.minyakCash || 0,
+                            minyakTf: d.minyakTransfer || 0,
+                            rupaCash: d.rupaCash || 0,
+                            rupaTf: d.rupaTransfer || 0,
+                            ket: d.ket || '—',
+                            status: t2Status(d.ket)
+                        });
+                    });
+                });
+            });
+            return rows;
+        }
+        function t2Fmt(n) { return !n ? '—' : Math.round(n).toLocaleString('id-ID'); }
+        function t2Esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+        function t2StatusBadge(s) {
+            if (s === 'LUNAS') return '<span class="t2-badge t2-badge-lunas">LUNAS</span>';
+            if (s === 'TITIP') return '<span class="t2-badge t2-badge-titip">TITIP</span>';
+            if (s === 'TF') return '<span class="t2-badge t2-badge-tf">TF</span>';
+            if (s === 'RETUR') return '<span class="t2-badge t2-badge-retur">RETUR</span>';
+            return '<span class="t2-muted">' + t2Esc(s) + '</span>';
+        }
+        function t2SectionBadge(s) {
+            return '<span class="t2-badge t2-badge-section">' + (s === 'PIUTANG TEMPO' ? 'PIUTANG' : 'DROPPING') + '</span>';
+        }
+        function t2DateSortKey(r) {
+            const m = String(r.date).match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);
+            if (m) {
+                let y = m[3] ? parseInt(m[3]) : parseInt(String(r.month || '2000').split('-')[0]);
+                if (y < 100) y += 2000;
+                return y * 10000 + parseInt(m[2]) * 100 + parseInt(m[1]);
+            }
+            return 0;
+        }
+        function t2UpdateMiniCards(rows) {
+            const data = rows || t2AllRows;
+            document.getElementById('t2sTotal').textContent = data.length.toLocaleString('id-ID');
+            document.getElementById('t2sPiutang').textContent = data.filter(r => r.section === 'PIUTANG TEMPO').length.toLocaleString('id-ID');
+            document.getElementById('t2sDropping').textContent = data.filter(r => r.section === 'CASH DROPPING').length.toLocaleString('id-ID');
+            document.getElementById('t2sLunas').textContent = data.filter(r => r.status === 'LUNAS').length.toLocaleString('id-ID');
+            document.getElementById('t2sTitip').textContent = data.filter(r => r.status === 'TITIP').length.toLocaleString('id-ID');
+            document.getElementById('t2sSheets').textContent = new Set(data.map(r => r.sheet)).size;
+            let cash = 0, tf = 0;
+            data.forEach(r => { cash += (r.minyakCash || 0) + (r.rupaCash || 0); tf += (r.minyakTf || 0) + (r.rupaTf || 0); });
+            document.getElementById('t2sCash').textContent = fmtRp(cash);
+            document.getElementById('t2sTransfer').textContent = fmtRp(tf);
+            document.getElementById('badgeCash').textContent = data.length;
+        }
+        function t2BuildDailySummary(rows) {
+            const body = document.getElementById('t2DailyBody');
+            const panel = document.getElementById('t2DailyPanel');
+            if (!rows || !rows.length) {
+                panel.style.display = 'none';
+                return;
+            }
+            const map = {};
+            rows.forEach(r => {
+                if (!map[r.sheet]) map[r.sheet] = { sheet: r.sheet, date: r.date, month: r.month, count: 0, piutang: 0, dropping: 0, tagihan: 0, cash: 0, tf: 0 };
+                const g = map[r.sheet];
+                g.count++;
+                g.tagihan += r.tagihan || 0;
+                const bc = (r.minyakCash || 0) + (r.rupaCash || 0);
+                const bt = (r.minyakTf || 0) + (r.rupaTf || 0);
+                g.cash += bc; g.tf += bt;
+                if (r.section === 'PIUTANG TEMPO') g.piutang += bc + bt; else g.dropping += bc + bt;
+            });
+            const list = Object.values(map).sort((a, b) => {
+                const ka = (a.month || '') + '-' + a.date, kb = (b.month || '') + '-' + b.date;
+                const pa = a.date.match(/(\d{1,2})\/(\d{1,2})/), pb = b.date.match(/(\d{1,2})\/(\d{1,2})/);
+                if (a.month !== b.month) return String(a.month).localeCompare(String(b.month));
+                if (pa && pb) return parseInt(pa[1]) - parseInt(pb[1]);
+                return ka.localeCompare(kb);
+            });
+            let sumC = 0, sumP = 0, sumD = 0, sumT = 0, sumCash = 0, sumTf = 0;
+            body.innerHTML = list.map(g => {
+                const total = g.cash + g.tf;
+                sumC += g.count; sumP += g.piutang; sumD += g.dropping; sumT += g.tagihan; sumCash += g.cash; sumTf += g.tf;
+                return '<tr data-sheet="' + t2Esc(g.sheet) + '" onclick="t2FilterBySheet(\'' + t2Esc(g.sheet).replace(/'/g, "\\'") + '\')">' +
+                    '<td><strong>' + t2Esc(g.date) + '</strong> <span class="t2-muted" style="font-size:0.65rem">' + t2Esc(t2BulanLabel(g.month)) + '</span></td>' +
+                    '<td class="t2-num">' + g.count.toLocaleString('id-ID') + '</td>' +
+                    '<td class="t2-num">' + t2Fmt(g.piutang) + '</td>' +
+                    '<td class="t2-num">' + t2Fmt(g.dropping) + '</td>' +
+                    '<td class="t2-num">' + t2Fmt(g.tagihan) + '</td>' +
+                    '<td class="t2-num">' + t2Fmt(g.cash) + '</td>' +
+                    '<td class="t2-num">' + t2Fmt(g.tf) + '</td>' +
+                    '<td class="t2-num"><strong>' + t2Fmt(total) + '</strong></td>' +
+                '</tr>';
+            }).join('') +
+            '<tr class="t2-total-row">' +
+                '<td>TOTAL (' + list.length + ' hari)</td>' +
+                '<td class="t2-num">' + sumC.toLocaleString('id-ID') + '</td>' +
+                '<td class="t2-num">' + t2Fmt(sumP) + '</td>' +
+                '<td class="t2-num">' + t2Fmt(sumD) + '</td>' +
+                '<td class="t2-num">' + t2Fmt(sumT) + '</td>' +
+                '<td class="t2-num">' + t2Fmt(sumCash) + '</td>' +
+                '<td class="t2-num">' + t2Fmt(sumTf) + '</td>' +
+                '<td class="t2-num">' + t2Fmt(sumCash + sumTf) + '</td>' +
+            '</tr>';
+            panel.style.display = 'block';
+        }
+        function t2BuildLastPayMap() {
+            const map = {};
+            t2AllRows.forEach(r => {
+                const key = r.faktur;
+                const sk = t2DateSortKey(r);
+                if (!map[key] || sk >= map[key].sort) map[key] = { date: r.date, sheet: r.sheet, sort: sk };
+            });
+            return map;
+        }
+        function t2BuildRowHtml(r, lastPay) {
+            const lp = lastPay[r.faktur];
+            const lastDate = lp ? lp.date : r.date;
+            const isSame = lastDate === r.date;
+            return '<tr>' +
+                '<td>' + t2Esc(r.date) + '<br><span class="t2-muted" style="font-size:0.7rem">' + t2Esc(r.monthLabel) + '</span></td>' +
+                '<td>' + t2SectionBadge(r.section) + '</td>' +
+                '<td>' + t2Esc(r.sales) + '</td>' +
+                '<td class="t2-faktur"><span class="t2-faktur-link" onclick="t2OpenFakturModal(\'' + t2Esc(r.faktur).replace(/'/g, "\\'") + '\')" title="Lihat riwayat pembayaran">' + t2Esc(r.faktur) + '</span></td>' +
+                '<td class="t2-toko">' + t2Esc(r.toko) + '</td>' +
+                '<td class="t2-muted">' + t2Esc(r.alamat) + '</td>' +
+                '<td class="t2-num">' + t2Fmt(r.tagihan) + '</td>' +
+                '<td class="t2-num">' + t2Fmt(r.minyakCash) + '</td>' +
+                '<td class="t2-num">' + t2Fmt(r.minyakTf) + '</td>' +
+                '<td class="t2-num">' + t2Fmt(r.rupaCash) + '</td>' +
+                '<td class="t2-num">' + t2Fmt(r.rupaTf) + '</td>' +
+                '<td style="white-space:nowrap">' +
+                    (isSame ? '<span class="t2-muted">' + t2Esc(lastDate) + '</span>' : '<strong style="color:var(--t2-accent)">' + t2Esc(lastDate) + '</strong>') +
+                '</td>' +
+                '<td>' + t2StatusBadge(r.status) +
+                    (r.ket && r.ket !== r.status && r.ket !== '—' ? '<br><span class="t2-muted" style="font-size:0.7rem">' + t2Esc(r.ket) + '</span>' : '') +
+                '</td>' +
+            '</tr>';
+        }
+
+        // ================================================================
+        // OPTIMASI PERFORMA TAB 2 (Data Uang Masuk): Virtual Rendering
+        // ----------------------------------------------------------------
+        // Pola sama seperti Tab 1/3/4: kalau baris hasil filter > VIRTUAL_ROW_THRESHOLD,
+        // hanya baris yang kelihatan di area scroll (+buffer atas-bawah) yang
+        // dibuat jadi <tr> asli; sisanya diwakili 1 baris spacer kosong di atas
+        // & bawah supaya tinggi scrollbar tetap pas.
+        // ================================================================
+        let t2VirtualDisplayRows = [];
+        let t2RowHeightPx = 46; // dikalibrasi otomatis dari baris asli
+
+        function t2RenderTableWindow() {
+            const tbody = document.getElementById('t2Tbody');
+            if (!tbody) return;
+            const rows = t2VirtualDisplayRows;
+            if (!rows || rows.length === 0) return;
+            const lastPay = t2BuildLastPayMap();
+            const total = rows.length;
+            if (total <= VIRTUAL_ROW_THRESHOLD) {
+                // Data sedikit: render biasa (tidak perlu virtualisasi).
+                tbody.innerHTML = rows.map(r => t2BuildRowHtml(r, lastPay)).join('');
+                const firstRow = tbody.querySelector('tr');
+                if (firstRow) {
+                    const h = firstRow.getBoundingClientRect().height;
+                    if (h > 10) t2RowHeightPx = h; // kalibrasi tinggi baris asli
+                }
+                return;
+            }
+            const wrap = document.getElementById('tab2TableWrap');
+            const scrollTop = wrap ? wrap.scrollTop : 0;
+            const viewH = (wrap ? wrap.clientHeight : 0) || 485;
+            let start = Math.floor(scrollTop / t2RowHeightPx) - VIRTUAL_BUFFER_ROWS;
+            if (start < 0) start = 0;
+            const count = Math.ceil(viewH / t2RowHeightPx) + VIRTUAL_BUFFER_ROWS * 2;
+            let end = start + count;
+            if (end > total) end = total;
+            if (start > end) start = end;
+            const topH = start * t2RowHeightPx;
+            const botH = (total - end) * t2RowHeightPx;
+            let html = '';
+            if (topH > 0) html +=
+                `<tr class="vrow-spacer" aria-hidden="true" style="height:${topH}px;"><td colspan="13" style="padding:0;border:0;background:transparent;"></td></tr>`;
+            for (let i = start; i < end; i++) html += t2BuildRowHtml(rows[i], lastPay);
+            if (botH > 0) html +=
+                `<tr class="vrow-spacer" aria-hidden="true" style="height:${botH}px;"><td colspan="13" style="padding:0;border:0;background:transparent;"></td></tr>`;
+            tbody.innerHTML = html;
+
+            // Kalibrasi ulang tinggi baris dari baris NYATA yang baru dirender,
+            // supaya spacer tetap akurat & scroll tidak "mantul".
+            const realRow = tbody.querySelector('tr:not(.vrow-spacer)');
+            if (realRow) {
+                const measured = realRow.getBoundingClientRect().height;
+                if (measured > 10 && Math.abs(measured - t2RowHeightPx) > 0.5) {
+                    t2RowHeightPx = measured;
+                }
+            }
+        }
+        (function initT2VirtualScroll() {
+            const wrap = document.getElementById('tab2TableWrap');
+            if (!wrap) return;
+            let raf = null;
+            wrap.addEventListener('scroll', function() {
+                if (t2VirtualDisplayRows.length <= VIRTUAL_ROW_THRESHOLD) return;
+                if (raf) return;
+                raf = requestAnimationFrame(function() {
+                    raf = null;
+                    t2RenderTableWindow();
+                });
+            });
+        })();
+
+        function t2RenderTable(rows) {
+            const info = document.getElementById('t2ResultInfo');
+            const tbody = document.getElementById('t2Tbody');
+            info.innerHTML = 'Menampilkan <strong>' + rows.length.toLocaleString('id-ID') + '</strong> dari <strong>' + t2AllRows.length.toLocaleString('id-ID') + '</strong> faktur';
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:32px;color:var(--t2-muted)">Tidak ada data yang cocok.</td></tr>';
+                t2VirtualDisplayRows = [];
+                return;
+            }
+            t2VirtualDisplayRows = rows;
+            const wrap = document.getElementById('tab2TableWrap');
+            if (wrap) wrap.scrollTop = 0; // data berganti -> mulai dari atas lagi
+            t2RenderTableWindow();
+        }
+        function t2DoSearch() {
+            const q = document.getElementById('t2SearchInput').value.trim().toLowerCase();
+            const mon = document.getElementById('t2FilterMonth').value;
+            const sec = document.getElementById('t2FilterSection').value;
+            const st = document.getElementById('t2FilterStatus').value;
+            let filtered = t2AllRows;
+            if (mon !== 'all') filtered = filtered.filter(r => r.month === mon);
+            if (sec !== 'all') filtered = filtered.filter(r => r.section === sec);
+            if (st !== 'all') filtered = filtered.filter(r => r.status === st);
+            t2UpdateMiniCards(filtered);
+            t2BuildDailySummary(filtered);
+            if (q) {
+                filtered = filtered.filter(r =>
+                    String(r.faktur).toLowerCase().includes(q) ||
+                    r.toko.toLowerCase().includes(q) ||
+                    r.alamat.toLowerCase().includes(q) ||
+                    r.sales.toLowerCase().includes(q) ||
+                    r.date.toLowerCase().includes(q) ||
+                    r.monthLabel.toLowerCase().includes(q)
+                );
+            }
+            t2RenderTable(filtered);
+        }
+        function t2ResetSearch() {
+            document.getElementById('t2SearchInput').value = '';
+            document.getElementById('t2FilterMonth').value = cashBulan;
+            document.getElementById('t2FilterSection').value = 'all';
+            document.getElementById('t2FilterStatus').value = 'all';
+            t2DoSearch();
+        }
+        window.t2FilterBySheet = function(sheet) {
+            document.getElementById('t2SearchInput').value = '';
+            const row = t2AllRows.find(r => r.sheet === sheet);
+            document.getElementById('t2FilterMonth').value = row ? row.month : 'all';
+            document.getElementById('t2FilterSection').value = 'all';
+            document.getElementById('t2FilterStatus').value = 'all';
+            const filtered = t2AllRows.filter(r => r.sheet === sheet);
+            t2UpdateMiniCards(filtered);
+            t2RenderTable(filtered);
+            document.querySelectorAll('#t2DailyBody tr').forEach(tr => tr.classList.toggle('t2-active', tr.getAttribute('data-sheet') === sheet));
+            document.querySelector('.t2-table-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+        window.t2OpenFakturModal = function(faktur) {
+            const rows = t2AllRows.filter(r => r.faktur === faktur);
+            if (!rows.length) return;
+            rows.sort((a, b) => t2DateSortKey(a) - t2DateSortKey(b));
+            const first = rows[0], last = rows[rows.length - 1];
+            let totalCash = 0, totalTf = 0, maxTagihan = 0;
+            rows.forEach(r => {
+                totalCash += (r.minyakCash || 0) + (r.rupaCash || 0);
+                totalTf += (r.minyakTf || 0) + (r.rupaTf || 0);
+                if ((r.tagihan || 0) > maxTagihan) maxTagihan = r.tagihan || 0;
+            });
+            const totalBayar = totalCash + totalTf;
+            const sisa = Math.max(0, maxTagihan - totalBayar);
+            document.getElementById('t2ModalTitle').textContent = faktur;
+            document.getElementById('t2ModalSub').textContent = (first.toko || '') + (first.alamat && first.alamat !== '—' ? ' · ' + first.alamat : '');
+            document.getElementById('t2ModalStats').innerHTML =
+                '<div class="t2-modal-stat"><div class="t2-l">Tagihan (max)</div><div class="t2-v">' + t2Fmt(maxTagihan) + '</div></div>' +
+                '<div class="t2-modal-stat"><div class="t2-l">Total Bayar</div><div class="t2-v" style="color:var(--t2-green)">' + t2Fmt(totalBayar) + '</div></div>' +
+                '<div class="t2-modal-stat"><div class="t2-l">Cash</div><div class="t2-v">' + t2Fmt(totalCash) + '</div></div>' +
+                '<div class="t2-modal-stat"><div class="t2-l">Transfer</div><div class="t2-v">' + t2Fmt(totalTf) + '</div></div>' +
+                '<div class="t2-modal-stat"><div class="t2-l">Sisa</div><div class="t2-v" style="color:' + (sisa > 0 ? 'var(--t2-yellow)' : 'var(--t2-green)') + '">' + (sisa > 0 ? t2Fmt(sisa) : '0 (lunas)') + '</div></div>' +
+                '<div class="t2-modal-stat"><div class="t2-l">x Bayar</div><div class="t2-v">' + rows.length + 'x</div></div>' +
+                '<div class="t2-modal-stat"><div class="t2-l">Bayar pertama</div><div class="t2-v" style="font-size:0.8rem">' + t2Esc(first.date) + '</div></div>' +
+                '<div class="t2-modal-stat"><div class="t2-l">Bayar terakhir</div><div class="t2-v" style="font-size:0.8rem">' + t2Esc(last.date) + '</div></div>';
+            document.getElementById('t2ModalHist').innerHTML = rows.map(r => {
+                const bayar = (r.minyakCash || 0) + (r.rupaCash || 0) + (r.minyakTf || 0) + (r.rupaTf || 0);
+                return '<tr>' +
+                    '<td><strong>' + t2Esc(r.date) + '</strong></td>' +
+                    '<td>' + t2SectionBadge(r.section) + '</td>' +
+                    '<td>' + t2Esc(r.sales) + '</td>' +
+                    '<td class="t2-num">' + t2Fmt(r.tagihan) + '</td>' +
+                    '<td class="t2-num">' + t2Fmt((r.minyakCash || 0) + (r.rupaCash || 0)) + '</td>' +
+                    '<td class="t2-num">' + t2Fmt((r.minyakTf || 0) + (r.rupaTf || 0)) + '</td>' +
+                    '<td class="t2-num"><strong>' + t2Fmt(bayar) + '</strong></td>' +
+                    '<td>' + t2StatusBadge(r.status) + '</td>' +
+                '</tr>';
+            }).join('');
+            document.getElementById('t2FakturModal').classList.add('t2-open');
+        };
+        window.t2CloseFakturModal = function() {
+            document.getElementById('t2FakturModal').classList.remove('t2-open');
+        };
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') t2CloseFakturModal(); });
+        document.getElementById('t2SearchBtn').addEventListener('click', t2DoSearch);
+        document.getElementById('t2ResetBtn').addEventListener('click', t2ResetSearch);
+        document.getElementById('t2SearchInput').addEventListener('keydown', e => { if (e.key === 'Enter') t2DoSearch(); });
+        document.getElementById('t2SearchInput').addEventListener('input', debounce(t2DoSearch, 350));
+        document.getElementById('t2FilterSection').addEventListener('change', t2DoSearch);
+        document.getElementById('t2FilterStatus').addEventListener('change', t2DoSearch);
+
+        // ================================================================
+        // TAB 9 – Kotak upload bisa dibuka/tutup (collapsible)
+        // ----------------------------------------------------------------
+        // Supaya tidak makan tempat besar setiap buka tab, kotak upload
+        // otomatis mengecil jadi 1 baris kalau datanya sudah ada, dan
+        // otomatis mengecil lagi setelah user selesai upload. User tetap
+        // bisa klik bar-nya kapan saja untuk buka/tutup manual. Pilihan
+        // terakhir user disimpan di localStorage supaya tidak berubah-ubah
+        // tiap kali buka tab.
+        // ================================================================
+        const UM_COLLAPSE_KEY = 'um_upload_box_collapsed';
+
+        function umSetCollapsed(collapsed, opts) {
+            opts = opts || {};
+            const body = document.getElementById('umCollapsibleBody');
+            const chevron = document.getElementById('umToggleChevron');
+            const status = document.getElementById('umToggleStatus');
+            if (!body) return;
+            body.style.display = collapsed ? 'none' : '';
+            if (chevron) chevron.textContent = collapsed ? '▶ Buka' : '▼ Tutup';
+            if (status) {
+                const totalHari = (t2AllRows || []).length ?
+                    new Set((t2AllRows || []).map(r => r.sheet)).size : 0;
+                status.textContent = collapsed && totalHari > 0 ?
+                    totalHari.toLocaleString('id-ID') + ' entri data tersimpan • klik untuk upload lagi' :
+                    'dari file Excel laporan harian';
+            }
+            if (!opts.skipSave) {
+                try { localStorage.setItem(UM_COLLAPSE_KEY, collapsed ? '1' : '0'); } catch (e) {}
+            }
+        }
+
+        function umAutoCollapseOnOpen() {
+            let stored = null;
+            try { stored = localStorage.getItem(UM_COLLAPSE_KEY); } catch (e) {}
+            if (stored === '1' || stored === '0') {
+                umSetCollapsed(stored === '1', { skipSave: true });
+            } else {
+                // Belum pernah ada pilihan tersimpan: buka otomatis kalau belum
+                // ada data sama sekali (biar user pertama kali langsung lihat cara upload),
+                // tutup otomatis kalau data sudah ada.
+                const adaData = (t2AllRows || []).length > 0;
+                umSetCollapsed(adaData, { skipSave: true });
+            }
+        }
+
+        (function initUmToggleBar() {
+            const bar = document.getElementById('umToggleBar');
+            if (!bar) return;
+            bar.addEventListener('click', function() {
+                const body = document.getElementById('umCollapsibleBody');
+                const isCollapsed = body && body.style.display === 'none';
+                umSetCollapsed(!isCollapsed);
+            });
+        })();
+
         function renderPemasukan() {
             const data = getCashData();
             cashFiltered = [...data];
-            cashFiltered.sort((a, b) => {
-                const da = a.tanggal.split('-'),
-                    db = b.tanggal.split('-');
-                const dayA = parseInt(da[0]),
-                    monA = parseInt(da[1]);
-                const dayB = parseInt(db[0]),
-                    monB = parseInt(db[1]);
-                if (monA !== monB) return monA - monB;
-                return dayA - dayB;
-            });
-            if (cashPage > Math.ceil(cashFiltered.length / cashRowsPerPage) && cashFiltered.length > 0) cashPage = 1;
-            renderPemasukanTable();
-            updatePemasukanPagination();
-            renderPemasukanCards();
-            document.getElementById('pemasukanTotalDays').textContent = cashFiltered.length;
-            document.getElementById('badgeCash').textContent = cashFiltered.length;
+            t2AllRows = t2BuildAllRows();
+            const sel = document.getElementById('t2FilterMonth');
+            if (sel) sel.value = cashBulan;
+            t2DoSearch();
+            umAutoCollapseOnOpen();
         }
 
-        function renderPemasukanTable() {
-            const tbody = document.getElementById('pemasukanTableBody');
-            const start = (cashPage - 1) * cashRowsPerPage;
-            const end = start + cashRowsPerPage;
-            const pageData = cashFiltered.slice(start, end);
-            if (pageData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" class="empty-msg">Tidak ada data.</td></tr>';
+        // ================================================================
+        // TAB 9 – UPLOAD DATA UANG MASUK (EXCEL, multi-file & multi-bulan)
+        // ----------------------------------------------------------------
+        // Memakai ULANG fungsi ekstraksi yang sudah ada & teruji untuk Tab 2
+        // (cariBaris, cariBarisDari, ekstrakDetailFaktur, ambilAngka) — supaya
+        // hasil parsingnya konsisten dengan format Excel yang sama seperti
+        // yang selama ini dipakai. Bedanya di sini: bisa banyak file & banyak
+        // bulan sekaligus dalam 1 upload, ada pratinjau dulu sebelum disimpan,
+        // dan tidak terikat ke satu "cashBulan" yang sedang dipilih di Tab 7.
+        // ================================================================
+        let umParsed = {}; // { 'YYYY-MM': [dayRecord, dayRecord, ...] }
+
+        // Ekstrak 1 sheet (1 hari) jadi { bulanKey, dayRecord } atau null kalau
+        // sheet itu tidak berisi data yang bisa dikenali (misal sheet kosong/template).
+        function umEkstrakSheet(rows, fallbackYear) {
+            let tanggalKey = null,
+                bulanKey = null;
+            for (let i = 0; i < Math.min(5, rows.length) && !tanggalKey; i++) {
+                const row = rows[i];
+                if (!Array.isArray(row)) continue;
+                for (let j = 0; j < row.length; j++) {
+                    const cell = row[j];
+                    if (typeof cell === 'string') {
+                        const m = cell.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+                        if (m) { tanggalKey = m[1] + '-' + m[2];
+                            bulanKey = m[3] + '-' + m[2];
+                            break; }
+                    }
+                }
+            }
+            if (!tanggalKey) return null; // tidak ketemu tanggal -> sheet dilewati
+            if (!bulanKey) bulanKey = fallbackYear + '-' + tanggalKey.split('-')[1];
+
+            let idxPiutangStart = cariBaris(rows, "PIUTANG TEMPO");
+            let idxPiutangEnd = idxPiutangStart !== -1 ? cariBarisDari(rows, "UANG MASUK DARI PIUTANG",
+                idxPiutangStart + 1) : -1;
+            const piutangDetail = ekstrakDetailFaktur(rows, idxPiutangStart, idxPiutangEnd);
+
+            let cariMulaiDropping = idxPiutangEnd !== -1 ? idxPiutangEnd + 1 : 0;
+            let idxDroppingStart = cariBarisDari(rows, "CASH DROPPING", cariMulaiDropping);
+            let idxDroppingEnd = idxDroppingStart !== -1 ? cariBarisDari(rows, "UANG MASUK PENJUALAN CASH",
+                idxDroppingStart + 1) : -1;
+            if (idxDroppingEnd === -1 && idxDroppingStart !== -1) {
+                idxDroppingEnd = cariBarisDari(rows, "UANG MASUK CASH", idxDroppingStart + 1);
+            }
+            const cashDroppingDetail = ekstrakDetailFaktur(rows, idxDroppingStart, idxDroppingEnd);
+
+            if (piutangDetail.length === 0 && cashDroppingDetail.length === 0) return null;
+
+            const sum = (arr, key) => arr.reduce((s, it) => s + (it[key] || 0), 0);
+            const piutangCash = sum(piutangDetail, 'bayarCash');
+            const piutangTransfer = sum(piutangDetail, 'bayarTransfer');
+            const penjualanCash = sum(cashDroppingDetail, 'bayarCash');
+            const penjualanTransfer = sum(cashDroppingDetail, 'bayarTransfer');
+            const totalCash = piutangCash + penjualanCash;
+            const totalTransfer = piutangTransfer + penjualanTransfer;
+            const grandTotal = totalCash + totalTransfer;
+
+            return { bulanKey, dayRecord: { tanggal: tanggalKey, piutangCash, piutangTransfer, penjualanCash,
+                penjualanTransfer, totalCash, totalTransfer, grandTotal, piutangDetail, cashDroppingDetail } };
+        }
+
+        async function umProcessFiles(fileList) {
+            const files = Array.from(fileList).filter(f => /\.(xlsx|xls)$/i.test(f.name));
+            if (!files.length) { showToast('File harus .xlsx atau .xls', 'warning'); return; }
+            const fallbackYear = document.getElementById('umTahunFallback').value || String(new Date()
+                .getFullYear());
+            umParsed = {};
+            const namaFile = [];
+            for (const file of files) {
+                namaFile.push(file.name);
+                try {
+                    const buf = await file.arrayBuffer();
+                    const wb = XLSX.read(new Uint8Array(buf), { type: 'array', cellDates: true });
+                    for (const sheetName of wb.SheetNames) {
+                        if (/^sheet2$/i.test(sheetName) || /template/i.test(sheetName)) continue;
+                        const sheet = wb.Sheets[sheetName];
+                        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: true });
+                        if (!rows || rows.length < 5) continue;
+                        const hasil = umEkstrakSheet(rows, fallbackYear);
+                        if (!hasil) continue;
+                        if (!umParsed[hasil.bulanKey]) umParsed[hasil.bulanKey] = [];
+                        const idx = umParsed[hasil.bulanKey].findIndex(d => normDDMM(d.tanggal) === normDDMM(
+                            hasil.dayRecord.tanggal));
+                        // Kalau ada 2 sheet dgn tanggal sama DI DALAM upload ini sendiri, ambil yang belakangan.
+                        if (idx >= 0) umParsed[hasil.bulanKey][idx] = hasil.dayRecord;
+                        else umParsed[hasil.bulanKey].push(hasil.dayRecord);
+                    }
+                } catch (err) {
+                    showToast('❌ Gagal baca ' + file.name + ': ' + err.message, 'warning');
+                }
+            }
+            document.getElementById('umFileNames').textContent = namaFile.length ? '📎 ' + namaFile.join(', ') : '';
+
+            const totalHari = Object.values(umParsed).reduce((s, arr) => s + arr.length, 0);
+            if (totalHari === 0) {
+                showToast(
+                    '⚠️ Tidak ada data ditemukan di file yang diupload. Pastikan formatnya sesuai laporan harian (section PIUTANG TEMPO / CASH DROPPING).',
+                    'warning');
+                document.getElementById('umPreviewWrap').style.display = 'none';
+                document.getElementById('umEmptyState').style.display = 'block';
                 return;
             }
-            let html = '';
-            pageData.forEach(item => {
-                const jmlFaktur = (item.piutangDetail ? item.piutangDetail.length : 0) + (item.cashDroppingDetail ?
-                    item.cashDroppingDetail.length : 0);
-                html +=
-                    `<tr><td>${fmtTanggalHarianYY(item.tanggal, cashBulan)}</td><td>${fmtRp(item.piutangCash)}</td><td>${fmtRp(item.piutangTransfer)}</td><td>${fmtRp(item.penjualanCash)}</td><td>${fmtRp(item.penjualanTransfer)}</td><td><strong>${fmtRp(item.totalCash)}</strong></td><td><strong>${fmtRp(item.totalTransfer)}</strong></td><td><strong>${fmtRp(item.grandTotal)}</strong></td><td><button class="btn-faktur" onclick="bukaFakturModalTab1('${item.tanggal}')">🧾 ${jmlFaktur}</button></td></tr>`;
-            });
-            tbody.innerHTML = html;
+            await umRenderPreview();
         }
 
-        function updatePemasukanPagination() {
-            const total = cashFiltered.length;
-            const totalPages = Math.ceil(total / cashRowsPerPage) || 1;
-            document.getElementById('pemPageInfo').textContent = 'Halaman ' + cashPage + ' dari ' + totalPages;
-            document.getElementById('pemPrevPage').disabled = (cashPage <= 1);
-            document.getElementById('pemNextPage').disabled = (cashPage >= totalPages);
-            document.getElementById('pemTotalData').textContent = total + ' data';
-        }
+        async function umRenderPreview() {
+            // Muat data yang SUDAH ADA di semua bulan dulu, supaya bisa deteksi
+            // tanggal mana yang bakal ditimpa oleh upload ini.
+            await loadAllCashDataBeforePtRefresh();
 
-        function renderPemasukanCards() {
-            let cash = 0,
-                transfer = 0,
-                grand = 0,
-                minyak = 0,
-                rupa = 0;
-            cashFiltered.forEach(item => { cash += item.totalCash || 0;
-                transfer += item.totalTransfer || 0;
-                grand += item.grandTotal || 0;
-                // Uang Masuk Minyak & Rupa-Rupa: dijumlah dari rincian per faktur
-                // (piutangDetail + cashDroppingDetail), baik dari hasil upload Excel
-                // (Tab 2) maupun input manual (Tab Pembayaran), karena keduanya sudah
-                // menyimpan split Minyak/Rupa-Rupa per faktur secara terpisah.
-                (item.piutangDetail || []).forEach(d => {
-                    minyak += (d.minyakCash || 0) + (d.minyakTransfer || 0);
-                    rupa += (d.rupaCash || 0) + (d.rupaTransfer || 0);
+            document.getElementById('umEmptyState').style.display = 'none';
+            document.getElementById('umPreviewWrap').style.display = 'block';
+
+            let totalHari = 0,
+                totalTimpa = 0,
+                totalPiutangFaktur = 0,
+                totalDroppingFaktur = 0,
+                totalGrand = 0;
+            const bulanKeys = Object.keys(umParsed).sort();
+            let rowsHtml = '';
+            bulanKeys.forEach(bulanKey => {
+                const existingList = cashDataMap[bulanKey] || [];
+                const days = [...umParsed[bulanKey]].sort((a, b) => {
+                    const [da, ma] = a.tanggal.split('-').map(Number);
+                    const [db, mb] = b.tanggal.split('-').map(Number);
+                    return ma - mb || da - db;
                 });
-                (item.cashDroppingDetail || []).forEach(d => {
-                    minyak += (d.minyakCash || 0) + (d.minyakTransfer || 0);
-                    rupa += (d.rupaCash || 0) + (d.rupaTransfer || 0);
+                days.forEach(d => {
+                    totalHari++;
+                    totalPiutangFaktur += d.piutangDetail.length;
+                    totalDroppingFaktur += d.cashDroppingDetail.length;
+                    totalGrand += d.grandTotal;
+                    const akanTimpa = existingList.some(it => normDDMM(it.tanggal) === normDDMM(d.tanggal));
+                    if (akanTimpa) totalTimpa++;
+                    rowsHtml += `<tr>
+                        <td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;">${escapeHtml(bulanKey)}</td>
+                        <td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;">${fmtTanggalHarianYY(d.tanggal, bulanKey)}</td>
+                        <td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;text-align:right;">${d.piutangDetail.length} faktur</td>
+                        <td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;text-align:right;">${d.cashDroppingDetail.length} faktur</td>
+                        <td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;text-align:right;font-weight:700;">${fmtRp(d.grandTotal)}</td>
+                        <td style="padding:6px 10px;border-bottom:1px solid #f1f5f9;text-align:center;">${akanTimpa ? '<span style="color:#d97706;font-weight:700;">🔁 Timpa data lama</span>' : '<span style="color:#16a34a;font-weight:700;">🆕 Baru</span>'}</td>
+                    </tr>`;
                 });
             });
-            document.getElementById('pemTotalCash').textContent = fmtRp(cash);
-            document.getElementById('pemTotalTransfer').textContent = fmtRp(transfer);
-            document.getElementById('pemTotalMinyak').textContent = fmtRp(minyak);
-            document.getElementById('pemTotalRupa').textContent = fmtRp(rupa);
-            document.getElementById('pemGrandTotal').textContent = fmtRp(grand);
+            document.getElementById('umPreviewBody').innerHTML = rowsHtml;
+            document.getElementById('umTotalHariLabel').textContent = totalHari + ' hari · ' + bulanKeys.length +
+                ' bulan';
+            document.getElementById('umSummaryCards').innerHTML = `
+                <div class="card"><span style="font-size:10px;opacity:.85;">TOTAL HARI</span><span style="font-size:20px;font-weight:800;">${totalHari}</span></div>
+                <div class="card"><span style="font-size:10px;opacity:.85;">FAKTUR PIUTANG</span><span style="font-size:20px;font-weight:800;">${totalPiutangFaktur}</span></div>
+                <div class="card"><span style="font-size:10px;opacity:.85;">FAKTUR DROPPING</span><span style="font-size:20px;font-weight:800;">${totalDroppingFaktur}</span></div>
+                <div class="card"><span style="font-size:10px;opacity:.85;">GRAND TOTAL</span><span style="font-size:20px;font-weight:800;">${fmtRp(totalGrand)}</span></div>
+            `;
+            const warnBox = document.getElementById('umWarningBox');
+            if (totalTimpa > 0) {
+                warnBox.style.display = 'block';
+                warnBox.innerHTML = `⚠️ <b>${totalTimpa} dari ${totalHari} hari</b> SUDAH ADA datanya sebelumnya (dari upload lain maupun input manual di tab Pembayaran). Kalau kamu klik "Simpan", data lama di hari-hari itu akan <b>ditimpa/diganti</b> dengan data dari file ini.`;
+            } else {
+                warnBox.style.display = 'none';
+            }
         }
+
+        function umResetState() {
+            umParsed = {};
+            document.getElementById('umPreviewWrap').style.display = 'none';
+            document.getElementById('umEmptyState').style.display = 'block';
+            document.getElementById('umFileNames').textContent = '';
+            document.getElementById('umFileInput').value = '';
+        }
+
+        (function initUploadUangMasukTab() {
+            const dropzone = document.getElementById('umDropzone');
+            const fileInput = document.getElementById('umFileInput');
+            if (!dropzone || !fileInput) return;
+            dropzone.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files.length) umProcessFiles(this.files);
+            });
+            ['dragenter', 'dragover'].forEach(evt => dropzone.addEventListener(evt, function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.style.background = '#eef2ff';
+                dropzone.style.borderColor = '#818cf8';
+            }));
+            ['dragleave', 'drop'].forEach(evt => dropzone.addEventListener(evt, function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.style.background = '#f8fafc';
+                dropzone.style.borderColor = '#c7d2fe';
+            }));
+            dropzone.addEventListener('drop', function(e) {
+                if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+                    umProcessFiles(e.dataTransfer.files);
+                }
+            });
+        })();
+
+        document.getElementById('umBtnBatal').addEventListener('click', umResetState);
+
+        document.getElementById('umBtnSimpan').addEventListener('click', async function() {
+            const bulanKeys = Object.keys(umParsed);
+            if (bulanKeys.length === 0) return;
+            const btn = this;
+            const teksAsli = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Menyimpan...';
+            try {
+                for (const bulanKey of bulanKeys) {
+                    let list;
+                    try {
+                        const rec = await db.cashIncome.where('bulan').equals(bulanKey).first();
+                        list = rec ? (rec.data || []) : (cashDataMap[bulanKey] || []);
+                    } catch (e) { list = cashDataMap[bulanKey] || []; }
+                    umParsed[bulanKey].forEach(dayRecord => {
+                        const idx = list.findIndex(it => normDDMM(it.tanggal) === normDDMM(dayRecord.tanggal));
+                        // Sesuai keputusan: tanggal yang sama -> TIMPA (ganti), bukan digabung.
+                        if (idx >= 0) list[idx] = dayRecord;
+                        else list.push(dayRecord);
+                    });
+                    cashDataMap[bulanKey] = list;
+                    const existing = await db.cashIncome.where('bulan').equals(bulanKey).first();
+                    if (existing) { await db.cashIncome.update(existing.id, { data: list, tanggal: new Date()
+                            .toISOString() }); } else {
+                        await db.cashIncome.add({ bulan: bulanKey, data: list, tanggal: new Date().toISOString() });
+                    }
+                }
+                _cashAllCacheTime = 0; // invalidate cache 30 detik supaya tab lain baca data fresh
+
+                await loadAllCashDataBeforePtRefresh();
+                if (bulanKeys.includes(cashBulan)) { await loadCashData(); }
+                renderPemasukan(); // refresh tabel "Data Uang Masuk" di tab ini supaya langsung terlihat
+                const tab3Aktif = document.getElementById('tab3').classList.contains('active');
+                const tab4Aktif = document.getElementById('tab4').classList.contains('active');
+                if (tab3Aktif) renderCek();
+                else tampilkanNotifDataBaru('cash');
+                if (tab4Aktif) await ptRefresh(false);
+                else tampilkanNotifDataBaru('piutang');
+
+                const totalHari = Object.values(umParsed).reduce((s, arr) => s + arr.length, 0);
+                showToast('✅ ' + totalHari + ' hari dari ' + bulanKeys.length +
+                    ' bulan berhasil disimpan ke Data Uang Masuk!', 'success');
+                umResetState();
+                umSetCollapsed(true); // sudah selesai upload -> kotaknya otomatis dikecilkan
+                // Auto-scroll ke bagian tabel "Data Uang Masuk" (gaya Uang Masuk.html) di bawah
+                // supaya hasil upload langsung kelihatan tanpa perlu scroll manual.
+                setTimeout(() => {
+                    const target = document.getElementById('umDataSectionDivider');
+                    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 150);
+            } catch (err) {
+                showToast('❌ Gagal menyimpan: ' + err.message, 'warning');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = teksAsli;
+            }
+        });
 
         // Event handler Tab 2 (disingkat)
         document.getElementById('pemasukanFileInput').addEventListener('change', function() {
@@ -7150,7 +8222,8 @@
             renderCek();
             showToast('Data telah dihapus.', 'info');
         });
-        document.getElementById('bulanPemasukan').addEventListener('change', async function() {
+        document.getElementById('t2FilterMonth').addEventListener('change', async function() {
+            if (this.value === 'all') { t2DoSearch(); return; }
             cashBulan = this.value;
             await loadCashData();
             renderPemasukan();
@@ -7168,16 +8241,10 @@
             if (activeTab && activeTab.id === 'tab4') { ptPage = 1;
                 ptRefresh(false); }
         });
-        document.getElementById('pemPrevPage').addEventListener('click', function() { if (cashPage > 1) { cashPage--;
-                renderPemasukan(); } });
-        document.getElementById('pemNextPage').addEventListener('click', function() {
-            const totalPages = Math.ceil(cashFiltered.length / cashRowsPerPage);
-            if (cashPage < totalPages) { cashPage++;
-                renderPemasukan(); }
-        });
 
         // Cari faktur di SEMUA periode data (dari bulan paling awal sampai paling akhir yang ada di database),
-        // tidak terpengaruh oleh filter bulan yang sedang aktif di layar.
+        // tidak terpengaruh oleh filter bulan yang sedang aktif di layar. Dipakai oleh tab lain
+        // (mis. modal faktur harian Tab 1) yang masih mengandalkan fungsi ini.
         async function cariFakturDiSemuaData(query) {
             const target = query.trim();
             const targetLower = target.toLowerCase();
@@ -7218,35 +8285,6 @@
             }
             return terbaru ? { sumber: terbaru.sumber, tanggalHari: terbaru.tanggalHari, bulan: terbaru.bulan, detail: terbaru.detail } : null;
         }
-        document.getElementById('cariFakturBtn').addEventListener('click', async function() {
-            const input = document.getElementById('cariFakturInput');
-            const noFaktur = input.value.trim();
-            if (!noFaktur) { showToast('Masukkan nomor faktur atau nama toko.', 'warning'); return; }
-            const result = await cariFakturDiSemuaData(noFaktur);
-            if (!result) { showToast('Faktur/toko "' + noFaktur + '" tidak ditemukan.', 'warning'); return; }
-            const item = { tanggal: result.tanggalHari, piutangDetail: [], cashDroppingDetail: [] };
-            if (result.sumber === 'piutang') { item.piutangDetail = [result.detail]; } else { item.cashDroppingDetail = [
-                    result.detail
-                ]; }
-            fakturActiveItemTab1 = item;
-            fakturActiveTabTab1 = result.sumber === 'piutang' ? 'piutang' : 'dropping';
-            fakturSearchTermTab1 = '';
-            document.getElementById('fakturModalTitleTab1').textContent = '🧾 Detail Faktur - ' + result.detail.noFaktur +
-                ' (' + fmtTanggalHarianYY(result.tanggalHari, result.bulan) + ')';
-            document.getElementById('tabPiutangTab1').classList.toggle('active', fakturActiveTabTab1 === 'piutang');
-            document.getElementById('tabDroppingTab1').classList.toggle('active', fakturActiveTabTab1 === 'dropping');
-            document.getElementById('tabPiutangTab1').textContent = 'Piutang Tempo (' + item.piutangDetail.length + ')';
-            document.getElementById('tabDroppingTab1').textContent = 'Cash Dropping (' + item.cashDroppingDetail.length +
-            ')';
-            renderFakturModalTab1();
-            document.getElementById('fakturModalTab1').classList.add('show');
-        });
-        document.getElementById('resetCariBtn').addEventListener('click', function() { document.getElementById(
-                'cariFakturInput').value = ''; });
-        const debouncedCariFaktur = debounce(() => { document.getElementById('cariFakturBtn').click(); }, 400);
-        document.getElementById('cariFakturInput').addEventListener('input', debouncedCariFaktur);
-        document.getElementById('cariFakturInput').addEventListener('keydown', function(e) { if (e.key === 'Enter')
-                document.getElementById('cariFakturBtn').click(); });
 
         let fakturActiveItemTab1 = null;
         let fakturActiveTabTab1 = 'piutang';
@@ -7465,6 +8503,143 @@
             return `<button type="button" class="btn-lihat-riwayat-cetak" data-id="${r.id}" style="font-size:10px;padding:3px 10px;border:1px solid #1f4e78;background:#eaf1fa;color:#1f4e78;border-radius:4px;cursor:pointer;white-space:nowrap;">🔍 Lihat Detail</button>`;
         }
 
+        // ================================================================
+        // OPTIMASI PERFORMA: Virtual Rendering untuk Riwayat Cetak
+        // ----------------------------------------------------------------
+        // Pola sama seperti Tab 1/2/3/4: kalau baris log > VIRTUAL_ROW_THRESHOLD,
+        // hanya baris yang kelihatan di area scroll (+buffer atas-bawah) yang
+        // dibuat jadi <tr> asli; sisanya diwakili 1 baris spacer kosong di atas
+        // & bawah supaya tinggi scrollbar tetap pas. Berlaku untuk 2 tabel:
+        //   1) riwayatCetakTableBody  (Tab 8 — semua jenis cetakan)
+        //   2) tagihanRiwayatCetakBody (Tab 6 — khusus jenis "Cetak Tagihan")
+        // ================================================================
+        let rcVirtualRows = [];
+        let rcRowHeightPx = 26; // dikalibrasi otomatis dari baris asli
+
+        function rcBuildRowHtml(r) {
+            return `
+                <tr>
+                    <td>${fmtWaktuRiwayatCetak(r.waktu)}</td>
+                    <td>${escHtmlRiwayatCetak(r.jenis)}</td>
+                    <td>${escHtmlRiwayatCetak(r.detail)}</td>
+                    <td class="text-center">${tombolLihatDetailRiwayatCetak(r)}</td>
+                </tr>
+            `;
+        }
+
+        function rcRenderTableWindow() {
+            const tbody = document.getElementById('riwayatCetakTableBody');
+            if (!tbody) return;
+            const rows = rcVirtualRows;
+            if (!rows || rows.length === 0) return;
+            const total = rows.length;
+            if (total <= VIRTUAL_ROW_THRESHOLD) {
+                tbody.innerHTML = rows.map(rcBuildRowHtml).join('');
+                const firstRow = tbody.querySelector('tr');
+                if (firstRow) {
+                    const h = firstRow.getBoundingClientRect().height;
+                    if (h > 5) rcRowHeightPx = h;
+                }
+                return;
+            }
+            const wrap = document.getElementById('riwayatCetakWrap');
+            const scrollTop = wrap ? wrap.scrollTop : 0;
+            const viewH = (wrap ? wrap.clientHeight : 0) || 480;
+            let start = Math.floor(scrollTop / rcRowHeightPx) - VIRTUAL_BUFFER_ROWS;
+            if (start < 0) start = 0;
+            const count = Math.ceil(viewH / rcRowHeightPx) + VIRTUAL_BUFFER_ROWS * 2;
+            let end = start + count;
+            if (end > total) end = total;
+            if (start > end) start = end;
+            const topH = start * rcRowHeightPx;
+            const botH = (total - end) * rcRowHeightPx;
+            let html = '';
+            if (topH > 0) html +=
+                `<tr class="vrow-spacer" aria-hidden="true" style="height:${topH}px;"><td colspan="4" style="padding:0;border:0;background:transparent;"></td></tr>`;
+            for (let i = start; i < end; i++) html += rcBuildRowHtml(rows[i]);
+            if (botH > 0) html +=
+                `<tr class="vrow-spacer" aria-hidden="true" style="height:${botH}px;"><td colspan="4" style="padding:0;border:0;background:transparent;"></td></tr>`;
+            tbody.innerHTML = html;
+            const realRow = tbody.querySelector('tr:not(.vrow-spacer)');
+            if (realRow) {
+                const measured = realRow.getBoundingClientRect().height;
+                if (measured > 5 && Math.abs(measured - rcRowHeightPx) > 0.5) rcRowHeightPx = measured;
+            }
+        }
+        (function initRcVirtualScroll() {
+            const wrap = document.getElementById('riwayatCetakWrap');
+            if (!wrap) return;
+            let raf = null;
+            wrap.addEventListener('scroll', function() {
+                if (rcVirtualRows.length <= VIRTUAL_ROW_THRESHOLD) return;
+                if (raf) return;
+                raf = requestAnimationFrame(function() { raf = null; rcRenderTableWindow(); });
+            });
+        })();
+
+        let tgRcVirtualRows = [];
+        let tgRcRowHeightPx = 30; // dikalibrasi otomatis dari baris asli
+
+        function tgRcBuildRowHtml(r) {
+            return `
+                <tr>
+                    <td style="padding:5px 10px;border-bottom:1px solid #f1f5f9;white-space:nowrap;">${fmtWaktuRiwayatCetak(r.waktu)}</td>
+                    <td style="padding:5px 10px;border-bottom:1px solid #f1f5f9;">${escHtmlRiwayatCetak(r.detail)}</td>
+                    <td style="padding:5px 10px;border-bottom:1px solid #f1f5f9;text-align:center;white-space:nowrap;">${tombolLihatDetailRiwayatCetak(r)}</td>
+                </tr>
+            `;
+        }
+
+        function tgRcRenderTableWindow() {
+            const tbody = document.getElementById('tagihanRiwayatCetakBody');
+            if (!tbody) return;
+            const rows = tgRcVirtualRows;
+            if (!rows || rows.length === 0) return;
+            const total = rows.length;
+            if (total <= VIRTUAL_ROW_THRESHOLD) {
+                tbody.innerHTML = rows.map(tgRcBuildRowHtml).join('');
+                const firstRow = tbody.querySelector('tr');
+                if (firstRow) {
+                    const h = firstRow.getBoundingClientRect().height;
+                    if (h > 5) tgRcRowHeightPx = h;
+                }
+                return;
+            }
+            const wrap = document.getElementById('tagihanRiwayatCetakWrap');
+            const scrollTop = wrap ? wrap.scrollTop : 0;
+            const viewH = (wrap ? wrap.clientHeight : 0) || 208;
+            let start = Math.floor(scrollTop / tgRcRowHeightPx) - VIRTUAL_BUFFER_ROWS;
+            if (start < 0) start = 0;
+            const count = Math.ceil(viewH / tgRcRowHeightPx) + VIRTUAL_BUFFER_ROWS * 2;
+            let end = start + count;
+            if (end > total) end = total;
+            if (start > end) start = end;
+            const topH = start * tgRcRowHeightPx;
+            const botH = (total - end) * tgRcRowHeightPx;
+            let html = '';
+            if (topH > 0) html +=
+                `<tr class="vrow-spacer" aria-hidden="true" style="height:${topH}px;"><td colspan="3" style="padding:0;border:0;background:transparent;"></td></tr>`;
+            for (let i = start; i < end; i++) html += tgRcBuildRowHtml(rows[i]);
+            if (botH > 0) html +=
+                `<tr class="vrow-spacer" aria-hidden="true" style="height:${botH}px;"><td colspan="3" style="padding:0;border:0;background:transparent;"></td></tr>`;
+            tbody.innerHTML = html;
+            const realRow = tbody.querySelector('tr:not(.vrow-spacer)');
+            if (realRow) {
+                const measured = realRow.getBoundingClientRect().height;
+                if (measured > 5 && Math.abs(measured - tgRcRowHeightPx) > 0.5) tgRcRowHeightPx = measured;
+            }
+        }
+        (function initTgRcVirtualScroll() {
+            const wrap = document.getElementById('tagihanRiwayatCetakWrap');
+            if (!wrap) return;
+            let raf = null;
+            wrap.addEventListener('scroll', function() {
+                if (tgRcVirtualRows.length <= VIRTUAL_ROW_THRESHOLD) return;
+                if (raf) return;
+                raf = requestAnimationFrame(function() { raf = null; tgRcRenderTableWindow(); });
+            });
+        })();
+
         async function renderRiwayatCetak() {
             let rows = [];
             try { rows = await db.printHistory.toArray(); } catch (e) { rows = []; }
@@ -7478,15 +8653,12 @@
             if (tbody) {
                 if (!rows.length) {
                     tbody.innerHTML = '<tr><td colspan="4" class="empty-msg">🖨️ Belum ada riwayat cetak.</td></tr>';
+                    rcVirtualRows = [];
                 } else {
-                    tbody.innerHTML = rows.map(r => `
-                        <tr>
-                            <td>${fmtWaktuRiwayatCetak(r.waktu)}</td>
-                            <td>${escHtmlRiwayatCetak(r.jenis)}</td>
-                            <td>${escHtmlRiwayatCetak(r.detail)}</td>
-                            <td class="text-center">${tombolLihatDetailRiwayatCetak(r)}</td>
-                        </tr>
-                    `).join('');
+                    rcVirtualRows = rows;
+                    const wrap = document.getElementById('riwayatCetakWrap');
+                    if (wrap) wrap.scrollTop = 0; // data berganti -> mulai dari atas lagi
+                    rcRenderTableWindow();
                 }
             }
 
@@ -7498,14 +8670,12 @@
                 if (tgCountEl) tgCountEl.textContent = rowsTagihan.length + ' log';
                 if (!rowsTagihan.length) {
                     tgBody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:10px;color:#94a3b8;">Belum ada riwayat cetak.</td></tr>';
+                    tgRcVirtualRows = [];
                 } else {
-                    tgBody.innerHTML = rowsTagihan.map(r => `
-                        <tr>
-                            <td style="padding:5px 10px;border-bottom:1px solid #f1f5f9;white-space:nowrap;">${fmtWaktuRiwayatCetak(r.waktu)}</td>
-                            <td style="padding:5px 10px;border-bottom:1px solid #f1f5f9;">${escHtmlRiwayatCetak(r.detail)}</td>
-                            <td style="padding:5px 10px;border-bottom:1px solid #f1f5f9;text-align:center;white-space:nowrap;">${tombolLihatDetailRiwayatCetak(r)}</td>
-                        </tr>
-                    `).join('');
+                    tgRcVirtualRows = rowsTagihan;
+                    const wrap = document.getElementById('tagihanRiwayatCetakWrap');
+                    if (wrap) wrap.scrollTop = 0; // data berganti -> mulai dari atas lagi
+                    tgRcRenderTableWindow();
                 }
             }
         }
@@ -9607,31 +10777,34 @@
             renderCashTable();
         }
 
-        function renderCashTable() {
-            const tbody = document.getElementById('cekCashSalesBody');
-            const total = cashTableFiltered.length;
-            const totalPages = Math.max(1, Math.ceil(total / cashTableRowsPerPage));
-            if (cashTablePage > totalPages) cashTablePage = totalPages;
-            if (cashTablePage < 1) cashTablePage = 1;
-            const start = (cashTablePage - 1) * cashTableRowsPerPage;
-            const pageRows = cashTableFiltered.slice(start, start + cashTableRowsPerPage);
+        // ================================================================
+        // OPTIMASI PERFORMA TAB 3 (Cek Cash): Virtual Rendering
+        // ----------------------------------------------------------------
+        // Sama seperti Tab 1 (lihat renderSalesTableWindow/renderSalesCardsWindow
+        // di atas): dulu Tab 3 dibatasi pakai pagination (25 baris/halaman) supaya
+        // tidak berat. Sekarang SEMUA data yang lolos filter langsung ditampilkan
+        // dalam 1 area scroll, tapi hanya baris/kartu yang kelihatan di layar
+        // (+ buffer) yang benar-benar dibuat jadi elemen DOM — sisanya diwakili
+        // 1 elemen "spacer" kosong supaya tinggi scrollbar tetap pas.
+        // ================================================================
+        let cashVirtualDisplayRows = [];
+        let cashRowHeightPx = 33; // dikalibrasi otomatis dari baris asli saat data sedikit
+        let cashVirtualCardGroups = [];
+        let cashCardPitchPx = 150; // tinggi 1 kartu + gap, dikalibrasi otomatis dari kartu asli
 
-            if (pageRows.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="empty-msg">Tidak ada data cash.</td></tr>';
-            } else {
-                tbody.innerHTML = pageRows.map((d, idx) => {
-                    const noFaktur = d['No.Faktur'] || '';
-                    const cbChecked = cashChecked[noFaktur] ? 'checked' : '';
-                    const statusLabel = d._status === 'cocok' ? '✅ Lunas' : '❌ Belum Lunas';
-                    const badgeClass = d._status === 'cocok' ? 'cocok' : 'tidak';
-                    const stempel = d._status === 'cocok' ? '<span class="stempel-lunas">Lunas</span>' :
-                        `<span class="badge ${badgeClass}">${statusLabel}</span>`;
-                    const viaBadge = d._viaPiutangTempo ? '<br><span title="Pembayarannya masuk lewat kolom Piutang Tempo, bukan Cash Dropping — bukan error, cuma beda jalur." style="display:inline-block; margin-top:3px; font-size:9.5px; font-weight:700; color:#92400e; background:#fef3c7; border:1px solid #fde68a; border-radius:20px; padding:1px 7px; cursor:help;">📇 via Piutang Tempo</span>' : '';
-                    const kategori = (d.Produk || '').toLowerCase().includes('fitri') ? 'Minyak Fitri' : 'Rupa Rupa';
-                    const fakturLinkStyle = 'color:#1f4e78;font-weight:700;text-decoration:underline;';
-                    return `<tr>
+        function buildCashRowHtml(d, idx) {
+            const noFaktur = d['No.Faktur'] || '';
+            const cbChecked = cashChecked[noFaktur] ? 'checked' : '';
+            const statusLabel = d._status === 'cocok' ? '✅ Lunas' : '❌ Belum Lunas';
+            const badgeClass = d._status === 'cocok' ? 'cocok' : 'tidak';
+            const stempel = d._status === 'cocok' ? '<span class="stempel-lunas">Lunas</span>' :
+                `<span class="badge ${badgeClass}">${statusLabel}</span>`;
+            const viaBadge = d._viaPiutangTempo ? '<br><span title="Pembayarannya masuk lewat kolom Piutang Tempo, bukan Cash Dropping — bukan error, cuma beda jalur." style="display:inline-block; margin-top:3px; font-size:9.5px; font-weight:700; color:#92400e; background:#fef3c7; border:1px solid #fde68a; border-radius:20px; padding:1px 7px; cursor:help;">📇 via Piutang Tempo</span>' : '';
+            const kategori = (d.Produk || '').toLowerCase().includes('fitri') ? 'Minyak Fitri' : 'Rupa Rupa';
+            const fakturLinkStyle = 'color:#1f4e78;font-weight:700;text-decoration:underline;';
+            return `<tr>
                         <td><input type="checkbox" class="cash-row-checkbox" data-faktur="${noFaktur}" ${cbChecked}></td>
-                        <td><span class="faktur-link" data-idx="${start+idx}" data-src="cekCash" style="${fakturLinkStyle}">${cashNotesMap[noFaktur] ? '📝 ' : ''}${noFaktur}</span></td>
+                        <td><span class="faktur-link" data-idx="${idx}" data-src="cekCash" style="${fakturLinkStyle}">${cashNotesMap[noFaktur] ? '📝 ' : ''}${noFaktur}</span></td>
                         <td>${fmtTanggal(d.Tanggal)}</td>
                         <td>${d.Customer || ''}</td>
                         <td>${d.Alamat || ''}</td>
@@ -9640,13 +10813,78 @@
                         <td class="num">${fmtRp(d.Total || 0)}</td>
                         <td>${stempel}${viaBadge}</td>
                     </tr>`;
-                }).join('');
-            }
+        }
 
-            // Pagination controls
-            document.getElementById('cashPageLabel').textContent = `Halaman ${cashTablePage} dari ${totalPages}`;
-            document.getElementById('cashPrevPage').disabled = cashTablePage <= 1;
-            document.getElementById('cashNextPage').disabled = cashTablePage >= totalPages;
+        function renderCashTableWindow() {
+            const tbody = document.getElementById('cekCashSalesBody');
+            if (!tbody) return;
+            const rows = cashVirtualDisplayRows;
+            if (!rows || rows.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="empty-msg">Tidak ada data cash.</td></tr>';
+                return;
+            }
+            const total = rows.length;
+            if (total <= VIRTUAL_ROW_THRESHOLD) {
+                // Data sedikit: render biasa (tidak perlu virtualisasi).
+                tbody.innerHTML = rows.map((d, idx) => buildCashRowHtml(d, idx)).join('');
+                const firstRow = tbody.querySelector('tr');
+                if (firstRow) {
+                    const h = firstRow.getBoundingClientRect().height;
+                    if (h > 10) cashRowHeightPx = h; // kalibrasi tinggi baris asli
+                }
+                return;
+            }
+            const wrap = document.getElementById('tab3TableWrap');
+            const scrollTop = wrap ? wrap.scrollTop : 0;
+            const viewH = (wrap ? wrap.clientHeight : 0) || 485;
+            let start = Math.floor(scrollTop / cashRowHeightPx) - VIRTUAL_BUFFER_ROWS;
+            if (start < 0) start = 0;
+            const count = Math.ceil(viewH / cashRowHeightPx) + VIRTUAL_BUFFER_ROWS * 2;
+            let end = start + count;
+            if (end > total) end = total;
+            if (start > end) start = end;
+            const topH = start * cashRowHeightPx;
+            const botH = (total - end) * cashRowHeightPx;
+            let html = '';
+            if (topH > 0) html +=
+                `<tr class="vrow-spacer" aria-hidden="true" style="height:${topH}px;"><td colspan="9" style="padding:0;border:0;background:transparent;"></td></tr>`;
+            for (let i = start; i < end; i++) html += buildCashRowHtml(rows[i], i);
+            if (botH > 0) html +=
+                `<tr class="vrow-spacer" aria-hidden="true" style="height:${botH}px;"><td colspan="9" style="padding:0;border:0;background:transparent;"></td></tr>`;
+            tbody.innerHTML = html;
+
+            const realRow = tbody.querySelector('tr:not(.vrow-spacer)');
+            if (realRow) {
+                const measured = realRow.getBoundingClientRect().height;
+                if (measured > 10 && Math.abs(measured - cashRowHeightPx) > 0.5) {
+                    cashRowHeightPx = measured;
+                }
+            }
+        }
+        (function initCashVirtualScroll() {
+            const wrap = document.getElementById('tab3TableWrap');
+            if (!wrap) return;
+            let raf = null;
+            wrap.addEventListener('scroll', function() {
+                if (cashVirtualDisplayRows.length <= VIRTUAL_ROW_THRESHOLD) return;
+                if (raf) return;
+                raf = requestAnimationFrame(function() {
+                    raf = null;
+                    renderCashTableWindow();
+                });
+            });
+        })();
+
+        function renderCashTable() {
+            const total = cashTableFiltered.length;
+            cashVirtualDisplayRows = cashTableFiltered;
+            renderCashTableWindow();
+
+            // Info total data (pagination lama diganti scroll virtualisasi)
+            document.getElementById('cashPageLabel').textContent = total > 0 ?
+                `${total} data (scroll untuk lihat semua)` : 'Halaman 1 dari 1';
+            document.getElementById('cashPrevPage').style.display = 'none';
+            document.getElementById('cashNextPage').style.display = 'none';
             document.getElementById('cashTotalData').textContent = total + ' data';
 
             updateCashSelectedInfo();
@@ -9657,7 +10895,7 @@
             const checkedCbs = document.querySelectorAll('.cash-row-checkbox:checked');
             if (selectAll) selectAll.checked = (allCbs.length > 0 && checkedCbs.length === allCbs.length);
 
-            renderCashCards(pageRows, start);
+            renderCashCards(cashTableFiltered);
         }
 
         // Bangun tabel rincian produk (Produk / Qty / Harga Jual / Harga Beli / Disc)
@@ -9729,42 +10967,22 @@
             return { html, totalQty, totalJual, itemCount: sumber.length };
         }
 
-        function renderCashCards(pageRows, start) {
-            const wrap = document.getElementById('cashCardList');
-            if (!wrap) return;
-            if (!pageRows || pageRows.length === 0) {
-                wrap.innerHTML = `<div class="sales-card-empty">📂 Tidak ada data cash.</div>`;
-                return;
-            }
-            // Gabungkan baris2 yang No.Fakturnya sama (1 faktur bisa punya >1 baris
-            // produk di Bank Data Penjualan) supaya tampil sebagai 1 KARTU per faktur,
-            // dengan rincian semua produknya di dalam kartu itu — sama seperti modal
-            // Detail Faktur. Baris ke-2, ke-3, dst dari faktur yang sama dilewati di
-            // sini (bukan dihapus datanya, cuma tidak dirender jadi kartu terpisah).
-            const seenFaktur = new Set();
-            const groups = [];
-            pageRows.forEach((d, idx) => {
-                const key = normFaktur(d['No.Faktur']);
-                if (seenFaktur.has(key)) return;
-                seenFaktur.add(key);
-                groups.push({ row: d, idx });
-            });
-
-            wrap.innerHTML = groups.map(({ row: d, idx }) => {
-                const noFaktur = d['No.Faktur'] || '';
-                const cbChecked = cashChecked[noFaktur] ? 'checked' : '';
-                const statusLabel = d._status === 'cocok' ? '✅ Lunas' : '❌ Belum Lunas';
-                const kategori = (d.Produk || '').toLowerCase().includes('fitri') ? 'Minyak Fitri' : 'Rupa Rupa';
-                const noFakturSafe = escapeHtml(String(noFaktur));
-                const rincian = buildCashCardRincian(noFaktur, d);
-                const multiTag = rincian.itemCount > 1 ?
-                    ' <span title="Faktur ini punya beberapa item produk">🔗</span>' : '';
-                return `<div class="sales-card${cbChecked ? ' selected' : ''}">
+        function buildCashCardHtml(group) {
+            const d = group.row, idx = group.idx;
+            const noFaktur = d['No.Faktur'] || '';
+            const cbChecked = cashChecked[noFaktur] ? 'checked' : '';
+            const statusLabel = d._status === 'cocok' ? '✅ Lunas' : '❌ Belum Lunas';
+            const kategori = (d.Produk || '').toLowerCase().includes('fitri') ? 'Minyak Fitri' : 'Rupa Rupa';
+            const noFakturSafe = escapeHtml(String(noFaktur));
+            const rincian = buildCashCardRincian(noFaktur, d);
+            const multiTag = rincian.itemCount > 1 ?
+                ' <span title="Faktur ini punya beberapa item produk">🔗</span>' : '';
+            return `<div class="sales-card${cbChecked ? ' selected' : ''}">
                     ${d._status === 'cocok' ? '<div class="sales-card-stempel-lunas">Lunas</div>' : ''}
                     <div class="sales-card-top">
                         <div class="sales-card-top-left">
                             <input type="checkbox" class="cash-row-checkbox" data-faktur="${noFakturSafe}" ${cbChecked}>
-                            <span class="faktur-link sales-card-faktur" data-idx="${start+idx}" data-src="cekCash" style="cursor:pointer;">${cashNotesMap[noFaktur] ? '📝 ' : ''}${noFakturSafe}${multiTag}</span>
+                            <span class="faktur-link sales-card-faktur" data-idx="${idx}" data-src="cekCash" style="cursor:pointer;">${cashNotesMap[noFaktur] ? '📝 ' : ''}${noFakturSafe}${multiTag}</span>
                         </div>
                         <span class="sales-card-date">${fmtTanggal(d.Tanggal)}</span>
                     </div>
@@ -9779,7 +10997,88 @@
                         <span><b>${escapeHtml(d.Sales || '-')}</b></span>
                     </div>
                 </div>`;
-            }).join('');
+        }
+
+        function calibrateCashCardPitch(wrap) {
+            const cards = wrap.querySelectorAll('.sales-card');
+            if (cards.length >= 2) {
+                const pitch = cards[1].offsetTop - cards[0].offsetTop;
+                if (pitch > 20) cashCardPitchPx = pitch;
+            } else if (cards.length === 1) {
+                const h = cards[0].getBoundingClientRect().height;
+                if (h > 20) cashCardPitchPx = h + 8; // + perkiraan gap antar kartu
+            }
+        }
+
+        function renderCashCardsWindow() {
+            const wrap = document.getElementById('cashCardList');
+            if (!wrap) return;
+            const groups = cashVirtualCardGroups;
+            if (!groups || groups.length === 0) return;
+            const total = groups.length;
+            if (total <= VIRTUAL_CARD_THRESHOLD) {
+                // Data sedikit: render biasa (tidak perlu virtualisasi).
+                wrap.innerHTML = groups.map(g => buildCashCardHtml(g)).join('');
+                calibrateCashCardPitch(wrap);
+                return;
+            }
+            const scrollTop = wrap.scrollTop;
+            const viewH = wrap.clientHeight || 485;
+            let start = Math.floor(scrollTop / cashCardPitchPx) - VIRTUAL_CARD_BUFFER;
+            if (start < 0) start = 0;
+            const count = Math.ceil(viewH / cashCardPitchPx) + VIRTUAL_CARD_BUFFER * 2;
+            let end = start + count;
+            if (end > total) end = total;
+            if (start > end) start = end;
+            const topH = start * cashCardPitchPx;
+            const botH = (total - end) * cashCardPitchPx;
+            let html = '';
+            if (topH > 0) html +=
+                `<div class="vcard-spacer" aria-hidden="true" style="height:${topH}px;flex:0 0 auto;width:100%;"></div>`;
+            for (let i = start; i < end; i++) html += buildCashCardHtml(groups[i]);
+            if (botH > 0) html +=
+                `<div class="vcard-spacer" aria-hidden="true" style="height:${botH}px;flex:0 0 auto;width:100%;"></div>`;
+            wrap.innerHTML = html;
+        }
+        (function initCashCardVirtualScroll() {
+            const wrap = document.getElementById('cashCardList');
+            if (!wrap) return;
+            let raf = null;
+            wrap.addEventListener('scroll', function() {
+                if (typeof tab3ViewMode !== 'undefined' && tab3ViewMode !== 'card') return;
+                if (cashVirtualCardGroups.length <= VIRTUAL_CARD_THRESHOLD) return;
+                if (raf) return;
+                raf = requestAnimationFrame(function() {
+                    raf = null;
+                    renderCashCardsWindow();
+                });
+            });
+        })();
+
+        function renderCashCards(displayRows) {
+            const wrap = document.getElementById('cashCardList');
+            if (!wrap) return;
+            if (!displayRows || displayRows.length === 0) {
+                cashVirtualCardGroups = [];
+                wrap.innerHTML = `<div class="sales-card-empty">📂 Tidak ada data cash.</div>`;
+                return;
+            }
+            // Gabungkan baris2 yang No.Fakturnya sama (1 faktur bisa punya >1 baris
+            // produk di Bank Data Penjualan) supaya tampil sebagai 1 KARTU per faktur,
+            // dengan rincian semua produknya di dalam kartu itu — sama seperti modal
+            // Detail Faktur. Baris ke-2, ke-3, dst dari faktur yang sama dilewati di
+            // sini (bukan dihapus datanya, cuma tidak dirender jadi kartu terpisah).
+            const seenFaktur = new Set();
+            const groups = [];
+            displayRows.forEach((d, idx) => {
+                const key = normFaktur(d['No.Faktur']);
+                if (seenFaktur.has(key)) return;
+                seenFaktur.add(key);
+                groups.push({ row: d, idx });
+            });
+            cashVirtualCardGroups = groups;
+            if (groups.length > VIRTUAL_CARD_THRESHOLD) wrap.scrollTop = 0; // data berganti -> mulai dari atas
+            renderCashCardsWindow();
         }
 
         let tab3ViewMode = localStorage.getItem('tab3ViewMode') === 'card' ? 'card' : 'table';
@@ -9861,11 +11160,18 @@
             showToast('↺ Filter direset', 'info');
         });
 
-        document.getElementById('cekBtnRefresh').addEventListener('click', function() {
+        document.getElementById('cekBtnRefresh').addEventListener('click', async function() {
+            // Kalau sync-cash-income-supabase.js sudah termuat, panggil sync
+            // cloud yang SESUNGGUHNYA (pull+push ke Supabase) dan TUNGGU
+            // sampai selesai -- bukan cuma baca ulang IndexedDB lokal.
+            if (window.gamasCashSync && typeof window.gamasCashSync.runFullSync === 'function') {
+                try { await window.gamasCashSync.runFullSync(false); } catch (e) { console.warn('Sync cash gagal:', e); }
+            }
+            await ambilSemuaCashIncomeCached(true); // true = paksa ambil data segar dari server, lewati cache 30 detik
             cashTablePage = 1;
-            renderCek();
+            await renderCek();
             sembunyikanNotifDataBaru('cash');
-            showToast('🔄 Data dimuat ulang.', 'success');
+            showToast('🔄 Data cash disinkronkan dari server.', 'success');
         });
         document.getElementById('cashDataBaruNotif').addEventListener('click', function() {
             document.getElementById('cekBtnRefresh').click();
@@ -9910,11 +11216,10 @@
 
         document.getElementById('cashSelectAll').addEventListener('change', function() {
             const checked = this.checked;
-            document.querySelectorAll('.cash-row-checkbox').forEach(cb => {
-                cb.checked = checked;
-                cashChecked[cb.dataset.faktur] = checked;
-            });
-            updateCashSelectedInfo();
+            // Terapkan ke SEMUA data yang lolos filter (bukan cuma baris yang
+            // sedang dirender di layar), supaya konsisten dengan virtualisasi.
+            cashTableFiltered.forEach(d => { cashChecked[d['No.Faktur']] = checked; });
+            renderCashTable();
             if (checked) sendSelectedToTab6();
         });
 
@@ -10512,27 +11817,25 @@
             });
         }
 
-        function ptRenderTempoTable() {
-            const rows = ptGetFilteredTempo();
-            const tbody = document.getElementById('ptTbody');
-            const totalRows = rows.length;
-            const totalPages = Math.ceil(totalRows / ptRowsPerPage) || 1;
-            if (ptPage > totalPages) ptPage = totalPages;
-            if (ptPage < 1) ptPage = 1;
-            const start = (ptPage - 1) * ptRowsPerPage;
-            const end = Math.min(start + ptRowsPerPage, totalRows);
-            const pageRows = rows.slice(start, end);
+        // ================================================================
+        // OPTIMASI PERFORMA TAB 4 (Cek Piutang): Virtual Rendering
+        // ----------------------------------------------------------------
+        // Sama seperti Tab 3 (Cek Cash) di atas: pagination lama (25 baris/
+        // halaman) diganti dengan 1 area scroll berisi SEMUA data yang lolos
+        // filter, tapi cuma baris/kartu yang kelihatan di layar (+ buffer)
+        // yang dibuat jadi elemen DOM sungguhan.
+        // ================================================================
+        let ptVirtualDisplayRows = [];
+        let ptRowHeightPx = 33; // dikalibrasi otomatis dari baris asli saat data sedikit
+        let ptVirtualCardGroups = [];
+        let ptCardPitchPx = 150; // tinggi 1 kartu + gap, dikalibrasi otomatis dari kartu asli
 
-            if (pageRows.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="16" class="empty-msg">📂 Belum ada data piutang tempo.</td></tr>';
-            } else {
-                tbody.innerHTML = pageRows.map((r, i) => {
-                    const realIdx = start + i;
-                    const checked = ptChecked[r.noFaktur] ? 'checked' : '';
-                    const sisaTagihan = ptSisaTagihanBaris(r);
-                    return `<tr class="${r.statusClass==='overdue' ? 'pt-row-overdue' : ''}">
+        function buildPtRowHtml(r, idx) {
+            const checked = ptChecked[r.noFaktur] ? 'checked' : '';
+            const sisaTagihan = ptSisaTagihanBaris(r);
+            return `<tr class="${r.statusClass==='overdue' ? 'pt-row-overdue' : ''}">
                                 <td><input type="checkbox" class="pt-row-checkbox" data-faktur="${r.noFaktur}" ${checked}></td>
-                                <td><a href="#" class="pt-faktur-link" data-idx="${realIdx}" style="color:#1f4e78; font-weight:700; text-decoration:underline;">${piutangNotesMap[r.noFaktur] ? '📝 ' : ''}${r.noFaktur||''}</a></td>
+                                <td><a href="#" class="pt-faktur-link" data-idx="${idx}" style="color:#1f4e78; font-weight:700; text-decoration:underline;">${piutangNotesMap[r.noFaktur] ? '📝 ' : ''}${r.noFaktur||''}</a></td>
                                 <td>${fmtTanggalYY(fmtTanggal(r.tanggal))}</td>
                                 <td>${r.customer||''}</td>
                                 <td>${r.alamat||''}</td>
@@ -10548,20 +11851,87 @@
                                 <td>${cetakTagihanMap[r.noFaktur] || '-'}</td>
                                 <td>${r.ketRaw || '-'}</td>
                             </tr>`;
-                }).join('');
+        }
+
+        function renderPtTableWindow() {
+            const tbody = document.getElementById('ptTbody');
+            if (!tbody) return;
+            const rows = ptVirtualDisplayRows;
+            if (!rows || rows.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="16" class="empty-msg">📂 Belum ada data piutang tempo.</td></tr>';
+                return;
             }
+            const total = rows.length;
+            if (total <= VIRTUAL_ROW_THRESHOLD) {
+                // Data sedikit: render biasa (tidak perlu virtualisasi).
+                tbody.innerHTML = rows.map((r, idx) => buildPtRowHtml(r, idx)).join('');
+                const firstRow = tbody.querySelector('tr');
+                if (firstRow) {
+                    const h = firstRow.getBoundingClientRect().height;
+                    if (h > 10) ptRowHeightPx = h; // kalibrasi tinggi baris asli
+                }
+                return;
+            }
+            const wrap = document.getElementById('tab4TableWrap');
+            const scrollTop = wrap ? wrap.scrollTop : 0;
+            const viewH = (wrap ? wrap.clientHeight : 0) || 485;
+            let start = Math.floor(scrollTop / ptRowHeightPx) - VIRTUAL_BUFFER_ROWS;
+            if (start < 0) start = 0;
+            const count = Math.ceil(viewH / ptRowHeightPx) + VIRTUAL_BUFFER_ROWS * 2;
+            let end = start + count;
+            if (end > total) end = total;
+            if (start > end) start = end;
+            const topH = start * ptRowHeightPx;
+            const botH = (total - end) * ptRowHeightPx;
+            let html = '';
+            if (topH > 0) html +=
+                `<tr class="vrow-spacer" aria-hidden="true" style="height:${topH}px;"><td colspan="16" style="padding:0;border:0;background:transparent;"></td></tr>`;
+            for (let i = start; i < end; i++) html += buildPtRowHtml(rows[i], i);
+            if (botH > 0) html +=
+                `<tr class="vrow-spacer" aria-hidden="true" style="height:${botH}px;"><td colspan="16" style="padding:0;border:0;background:transparent;"></td></tr>`;
+            tbody.innerHTML = html;
+
+            const realRow = tbody.querySelector('tr:not(.vrow-spacer)');
+            if (realRow) {
+                const measured = realRow.getBoundingClientRect().height;
+                if (measured > 10 && Math.abs(measured - ptRowHeightPx) > 0.5) {
+                    ptRowHeightPx = measured;
+                }
+            }
+        }
+        (function initPtVirtualScroll() {
+            const wrap = document.getElementById('tab4TableWrap');
+            if (!wrap) return;
+            let raf = null;
+            wrap.addEventListener('scroll', function() {
+                if (ptVirtualDisplayRows.length <= VIRTUAL_ROW_THRESHOLD) return;
+                if (raf) return;
+                raf = requestAnimationFrame(function() {
+                    raf = null;
+                    renderPtTableWindow();
+                });
+            });
+        })();
+
+        function ptRenderTempoTable() {
+            const rows = ptGetFilteredTempo();
+            const totalRows = rows.length;
 
             window._ptRowsCache = rows;
-            document.getElementById('ptPageInfo').textContent = `Halaman ${ptPage} dari ${totalPages}`;
+            ptVirtualDisplayRows = rows;
+            renderPtTableWindow();
+
+            document.getElementById('ptPageInfo').textContent = totalRows > 0 ?
+                `${totalRows} data (scroll untuk lihat semua)` : 'Halaman 1 dari 1';
             document.getElementById('ptTotalData').textContent = totalRows + ' data';
-            document.getElementById('ptPrevPage').disabled = (ptPage <= 1);
-            document.getElementById('ptNextPage').disabled = (ptPage >= totalPages);
+            document.getElementById('ptPrevPage').style.display = 'none';
+            document.getElementById('ptNextPage').style.display = 'none';
 
             const outstanding = rows.filter(r => r.statusClass !== 'lunas').length;
             document.getElementById('badgePiutang').textContent = outstanding;
 
             updateTab4ChipCounts();
-            renderPiutangCards(pageRows, start);
+            renderPiutangCards(rows);
             updatePiutangSelectedInfo();
         }
 
@@ -10742,39 +12112,20 @@
         }
 
         // ===== Mode Kartu untuk Cek Piutang (Tab 4) — sama seperti Cek Cash ===== //
-        function renderPiutangCards(pageRows, start) {
-            const wrap = document.getElementById('ptCardList');
-            if (!wrap) return;
-            if (!pageRows || pageRows.length === 0) {
-                wrap.innerHTML = `<div class="sales-card-empty">📂 Belum ada data piutang tempo.</div>`;
-                return;
-            }
-            // Gabungkan baris2 yang No.Fakturnya sama (1 faktur bisa punya >1 baris
-            // produk di Bank Data Penjualan) supaya tampil sebagai 1 KARTU per faktur,
-            // dengan rincian semua produknya + Total Tagihan gabungan di dalam kartu
-            // itu — sama seperti modal Detail Faktur (bukan per-baris seperti dulu).
-            const seenFaktur = new Set();
-            const groups = [];
-            pageRows.forEach((r, i) => {
-                const key = normFaktur(r.noFaktur);
-                if (seenFaktur.has(key)) return;
-                seenFaktur.add(key);
-                groups.push({ row: r, idx: i });
-            });
-
-            wrap.innerHTML = groups.map(({ row: r, idx: i }) => {
-                const realIdx = start + i;
-                const checked = ptChecked[r.noFaktur] ? 'checked' : '';
-                const noFakturSafe = escapeHtml(String(r.noFaktur || ''));
-                const rincian = buildPiutangCardRincian(r.noFaktur, r);
-                const sisaTagihan = r.statusClass === 'lunas' ? 0 : Math.max(0, rincian.totalJual - (r
-                    .totalBayar || 0));
-                const multiTag = rincian.itemCount > 1 ?
-                    ' <span title="Faktur ini punya beberapa item produk">🔗</span>' : '';
-                const statusBadge = r.statusClass === 'lunas' ?
-                    '<span class="badge lunas-mini">✅ Lunas</span>' :
-                    `<span class="badge pt-${r.statusClass}">${r.statusClass === 'overdue' && r.overdueDays != null ? `${r.overdueDays} hr/Overdue` : ptStatusLabel(r.statusClass)}</span>`;
-                return `<div class="sales-card${checked ? ' selected' : ''}">
+        function buildPtCardHtml(group) {
+            const r = group.row,
+                realIdx = group.idx;
+            const checked = ptChecked[r.noFaktur] ? 'checked' : '';
+            const noFakturSafe = escapeHtml(String(r.noFaktur || ''));
+            const rincian = buildPiutangCardRincian(r.noFaktur, r);
+            const sisaTagihan = r.statusClass === 'lunas' ? 0 : Math.max(0, rincian.totalJual - (r
+                .totalBayar || 0));
+            const multiTag = rincian.itemCount > 1 ?
+                ' <span title="Faktur ini punya beberapa item produk">🔗</span>' : '';
+            const statusBadge = r.statusClass === 'lunas' ?
+                '<span class="badge lunas-mini">✅ Lunas</span>' :
+                `<span class="badge pt-${r.statusClass}">${r.statusClass === 'overdue' && r.overdueDays != null ? `${r.overdueDays} hr/Overdue` : ptStatusLabel(r.statusClass)}</span>`;
+            return `<div class="sales-card${checked ? ' selected' : ''}">
                     ${r.statusClass === 'lunas' ? '<div class="sales-card-stempel-lunas">Lunas</div>' : ''}
                     <div class="sales-card-top">
                         <div class="sales-card-top-left">
@@ -10812,7 +12163,87 @@
                         <span>Jth Tempo: ${r.jt ? fmtTanggalYY(r.jt) : '-'}</span>
                     </div>
                 </div>`;
-            }).join('');
+        }
+
+        function calibratePtCardPitch(wrap) {
+            const cards = wrap.querySelectorAll('.sales-card');
+            if (cards.length >= 2) {
+                const pitch = cards[1].offsetTop - cards[0].offsetTop;
+                if (pitch > 20) ptCardPitchPx = pitch;
+            } else if (cards.length === 1) {
+                const h = cards[0].getBoundingClientRect().height;
+                if (h > 20) ptCardPitchPx = h + 8; // + perkiraan gap antar kartu
+            }
+        }
+
+        function renderPtCardsWindow() {
+            const wrap = document.getElementById('ptCardList');
+            if (!wrap) return;
+            const groups = ptVirtualCardGroups;
+            if (!groups || groups.length === 0) return;
+            const total = groups.length;
+            if (total <= VIRTUAL_CARD_THRESHOLD) {
+                // Data sedikit: render biasa (tidak perlu virtualisasi).
+                wrap.innerHTML = groups.map(g => buildPtCardHtml(g)).join('');
+                calibratePtCardPitch(wrap);
+                return;
+            }
+            const scrollTop = wrap.scrollTop;
+            const viewH = wrap.clientHeight || 485;
+            let start = Math.floor(scrollTop / ptCardPitchPx) - VIRTUAL_CARD_BUFFER;
+            if (start < 0) start = 0;
+            const count = Math.ceil(viewH / ptCardPitchPx) + VIRTUAL_CARD_BUFFER * 2;
+            let end = start + count;
+            if (end > total) end = total;
+            if (start > end) start = end;
+            const topH = start * ptCardPitchPx;
+            const botH = (total - end) * ptCardPitchPx;
+            let html = '';
+            if (topH > 0) html +=
+                `<div class="vcard-spacer" aria-hidden="true" style="height:${topH}px;flex:0 0 auto;width:100%;"></div>`;
+            for (let i = start; i < end; i++) html += buildPtCardHtml(groups[i]);
+            if (botH > 0) html +=
+                `<div class="vcard-spacer" aria-hidden="true" style="height:${botH}px;flex:0 0 auto;width:100%;"></div>`;
+            wrap.innerHTML = html;
+        }
+        (function initPtCardVirtualScroll() {
+            const wrap = document.getElementById('ptCardList');
+            if (!wrap) return;
+            let raf = null;
+            wrap.addEventListener('scroll', function() {
+                if (typeof tab4ViewMode !== 'undefined' && tab4ViewMode !== 'card') return;
+                if (ptVirtualCardGroups.length <= VIRTUAL_CARD_THRESHOLD) return;
+                if (raf) return;
+                raf = requestAnimationFrame(function() {
+                    raf = null;
+                    renderPtCardsWindow();
+                });
+            });
+        })();
+
+        function renderPiutangCards(displayRows) {
+            const wrap = document.getElementById('ptCardList');
+            if (!wrap) return;
+            if (!displayRows || displayRows.length === 0) {
+                ptVirtualCardGroups = [];
+                wrap.innerHTML = `<div class="sales-card-empty">📂 Belum ada data piutang tempo.</div>`;
+                return;
+            }
+            // Gabungkan baris2 yang No.Fakturnya sama (1 faktur bisa punya >1 baris
+            // produk di Bank Data Penjualan) supaya tampil sebagai 1 KARTU per faktur,
+            // dengan rincian semua produknya + Total Tagihan gabungan di dalam kartu
+            // itu — sama seperti modal Detail Faktur (bukan per-baris seperti dulu).
+            const seenFaktur = new Set();
+            const groups = [];
+            displayRows.forEach((r, i) => {
+                const key = normFaktur(r.noFaktur);
+                if (seenFaktur.has(key)) return;
+                seenFaktur.add(key);
+                groups.push({ row: r, idx: i });
+            });
+            ptVirtualCardGroups = groups;
+            if (groups.length > VIRTUAL_CARD_THRESHOLD) wrap.scrollTop = 0; // data berganti -> mulai dari atas
+            renderPtCardsWindow();
         }
 
         document.getElementById('ptCardList').addEventListener('change', function(e) {
@@ -10852,14 +12283,16 @@
 
         document.getElementById('ptSelectAll').addEventListener('change', function() {
             const checked = this.checked;
-            document.querySelectorAll('.pt-row-checkbox').forEach(cb => {
-                cb.checked = checked;
-                ptChecked[cb.dataset.faktur] = checked;
-            });
-            updatePiutangSelectedInfo();
+            // Terapkan ke SEMUA data yang lolos filter (bukan cuma baris yang
+            // sedang dirender di layar), supaya konsisten dengan virtualisasi.
+            (window._ptRowsCache || []).forEach(r => { ptChecked[r.noFaktur] = checked; });
+            ptRenderTempoTable();
             if (checked) sendSelectedToTab6();
         });
 
+        // Tombol Sebelumnya/Berikutnya sudah tidak dipakai lagi sejak Tab 4
+        // pakai virtualisasi scroll (disembunyikan di ptRenderTempoTable),
+        // tapi listener tetap dijaga aman kalau-kalau elemennya ditampilkan lagi.
         document.getElementById('ptPrevPage').addEventListener('click', function() { if (ptPage > 1) { ptPage--;
                 ptRenderTempoTable(); } });
         document.getElementById('ptNextPage').addEventListener('click', function() {
@@ -11379,7 +12812,7 @@
             if (statusEl) { statusEl.innerHTML =
                     `<span class="pt-status-dot ok"></span>${salesData.length} transaksi penjualan · ${jumlahBulanIncome} bulan data uang masuk`
                     ; }
-            if (showMsg) showToast('🔄 Data piutang dimuat ulang.', 'success');
+            if (showMsg) showToast('🔄 Data piutang disinkronkan dari server.', 'success');
             ptRebuildFilterOptions();
             ptPage = 1;
             ptRenderTempoTable();
@@ -11449,8 +12882,13 @@
         window.addEventListener('scroll', ptTutupBulanPanel, true);
         window.addEventListener('resize', ptTutupBulanPanel);
         document.getElementById('ptBtnRefresh').addEventListener('click', async () => { 
-            await loadAllCashDataBeforePtRefresh();
-            await ptRefresh(true);
+            // Sama seperti tombol Sinkronkan Data di Cek Cash: kalau file
+            // sync-nya termuat, panggil sync cloud sungguhan dulu & ditunggu.
+            if (window.gamasCashSync && typeof window.gamasCashSync.runFullSync === 'function') {
+                try { await window.gamasCashSync.runFullSync(false); } catch (e) { console.warn('Sync cash gagal:', e); }
+            }
+            await loadAllCashDataBeforePtRefresh(true); // true = paksa ambil data segar dari server, lewati cache 30 detik
+            await ptRefresh(true); // showMsg=true -> ptRefresh sendiri yang menampilkan toast sukses
             sembunyikanNotifDataBaru('piutang');
         });
         document.getElementById('ptBtnInputManual').addEventListener('click', function() {
@@ -15357,6 +16795,13 @@
             if (tabName === 'tab8') {
                 renderRingkasanSaveAll();
             }
+            if (tabName === 'tab9') {
+                if (!window._ptDataLoaded) {
+                    await loadAllCashDataBeforePtRefresh();
+                    window._ptDataLoaded = true;
+                }
+                renderPemasukan();
+            }
             if (tabName === 'tab10') {
                 if (!window._pengeluaranDataLoaded) {
                     await loadPengeluaranData();
@@ -15482,7 +16927,7 @@
 
                 rebuildSalesFilterOptions();
 
-                const bulanSelect = document.getElementById('bulanPemasukan');
+                const bulanSelect = document.getElementById('t2FilterMonth');
                 let found = false;
                 for (let opt of bulanSelect.options) {
                     if (opt.value === defaultBulan) { opt.selected = true;
@@ -15724,6 +17169,7 @@ html.gamas-dark-mode .tab-btn[data-tab="tab4"].active,
 html.gamas-dark-mode .tab-btn[data-tab="tab6"].active,
 html.gamas-dark-mode .tab-btn[data-tab="tab7"].active,
 html.gamas-dark-mode .tab-btn[data-tab="tab8"].active,
+html.gamas-dark-mode .tab-btn[data-tab="tab9"].active,
 html.gamas-dark-mode .tab-btn[data-tab="tab10"].active {
     background: #8b9bf5 !important;
 }

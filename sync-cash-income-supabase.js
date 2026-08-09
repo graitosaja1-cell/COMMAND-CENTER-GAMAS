@@ -272,6 +272,20 @@
                 if (typeof renderPemasukan === 'function') { try { renderPemasukan(); } catch (e) {} }
                 if (typeof refreshPiutangUangMasuk === 'function') { try { refreshPiutangUangMasuk(); } catch (e) {} }
                 if (typeof ptRefresh === 'function') { try { await ptRefresh(false); } catch (e) {} }
+                // Tab Cek Cash (tab3) sebelumnya tidak ikut di-refresh di sini,
+                // jadi data baru dari device lain baru kelihatan kalau user
+                // pindah tab lalu balik lagi / klik Sinkronkan Data 2x. Sekarang
+                // ikut disegarkan kalau tab3 sedang aktif, dan tetap kasih
+                // notif "Data baru masuk" kalau tab3 TIDAK sedang aktif.
+                try {
+                    const tab3El = document.getElementById('tab3');
+                    const tab3Aktif = tab3El && tab3El.classList.contains('active');
+                    if (tab3Aktif && typeof renderCek === 'function') {
+                        await renderCek();
+                    } else if (typeof tampilkanNotifDataBaru === 'function') {
+                        tampilkanNotifDataBaru('cash');
+                    }
+                } catch (e) {}
                 if (manual && typeof showToast === 'function') {
                     showToast('☁️ Data Uang Masuk diperbarui dari cloud (' + pullRes.bulans.length + ' bulan).', 'info');
                 }
@@ -294,6 +308,14 @@
             syncing = false;
         }
     }
+
+    // ── Dipanggil langsung dari tombol "🔄 Sinkronkan Data" di dashboard
+    //    (tab Cek Cash & Cek Piutang) supaya klik tombol itu benar-benar
+    //    menunggu pull+push ke Supabase selesai, bukan cuma baca ulang
+    //    IndexedDB lokal yang bisa saja belum ter-update. ──
+    window.gamasCashSync = {
+        runFullSync: runCashFullSync
+    };
 
     window.addEventListener('online', () => runCashFullSync(false));
 

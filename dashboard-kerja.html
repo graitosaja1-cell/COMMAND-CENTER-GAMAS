@@ -5222,6 +5222,24 @@
             </div>
         </div>
         <div class="pt-source-status" id="cashSourceStatus">0 transaksi cash · 0 faktur dipilih</div>
+        <div id="cashFakturTakCocokBanner" style="display:none;align-items:center;gap:8px;background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:8px 12px;margin-bottom:8px;cursor:pointer;font-size:11.5px;color:#92400e;font-weight:600;" title="Klik untuk lihat/sembunyikan daftar">
+            <span style="font-size:14px;">⚠️</span>
+            <span class="fk-count" style="flex:1;">0 No.Faktur tidak cocok</span>
+            <span style="font-size:10px;color:#b45309;">▼ Lihat Daftar</span>
+        </div>
+        <div id="cashFakturTakCocokBox" style="display:none;max-height:220px;overflow:auto;border:1px solid #fde68a;border-top:none;border-radius:0 0 8px 8px;margin:-10px 0 8px;background:#fffbeb;">
+            <table style="width:100%;border-collapse:collapse;font-size:11px;">
+                <thead><tr style="background:#fef3c7;position:sticky;top:0;">
+                    <th style="padding:5px 8px;text-align:left;">Bulan · Tanggal</th>
+                    <th style="padding:5px 8px;text-align:left;">Sumber</th>
+                    <th style="padding:5px 8px;text-align:left;">No.Faktur (di Data Uang Masuk)</th>
+                    <th style="padding:5px 8px;text-align:left;">Nama Toko</th>
+                    <th style="padding:5px 8px;text-align:left;">Sales</th>
+                    <th style="padding:5px 8px;text-align:right;">Nominal</th>
+                </tr></thead>
+                <tbody id="cashFakturTakCocokBody"></tbody>
+            </table>
+        </div>
         <div class="cash-filter-bar slim">
             <div class="filter-row-main">
                 <div class="fc-search"><input type="text" id="cekFilterFaktur" placeholder="No faktur atau nama toko..."></div>
@@ -5290,6 +5308,24 @@
             </div>
         </div>
         <div class="pt-source-status" id="ptSourceStatus">0 transaksi penjualan · 0 faktur dipilih</div>
+        <div id="ptFakturTakCocokBanner" style="display:none;align-items:center;gap:8px;background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:8px 12px;margin-bottom:8px;cursor:pointer;font-size:11.5px;color:#92400e;font-weight:600;" title="Klik untuk lihat/sembunyikan daftar">
+            <span style="font-size:14px;">⚠️</span>
+            <span class="fk-count" style="flex:1;">0 No.Faktur tidak cocok</span>
+            <span style="font-size:10px;color:#b45309;">▼ Lihat Daftar</span>
+        </div>
+        <div id="ptFakturTakCocokBox" style="display:none;max-height:220px;overflow:auto;border:1px solid #fde68a;border-top:none;border-radius:0 0 8px 8px;margin:-10px 0 8px;background:#fffbeb;">
+            <table style="width:100%;border-collapse:collapse;font-size:11px;">
+                <thead><tr style="background:#fef3c7;position:sticky;top:0;">
+                    <th style="padding:5px 8px;text-align:left;">Bulan · Tanggal</th>
+                    <th style="padding:5px 8px;text-align:left;">Sumber</th>
+                    <th style="padding:5px 8px;text-align:left;">No.Faktur (di Data Uang Masuk)</th>
+                    <th style="padding:5px 8px;text-align:left;">Nama Toko</th>
+                    <th style="padding:5px 8px;text-align:left;">Sales</th>
+                    <th style="padding:5px 8px;text-align:right;">Nominal</th>
+                </tr></thead>
+                <tbody id="ptFakturTakCocokBody"></tbody>
+            </table>
+        </div>
         <div class="filter-bar slim">
             <div class="filter-row-main">
                 <button type="button" class="fc-kolom-toggle" id="ptKolomBtn" title="Pilih kolom yang ingin ditampilkan di tabel">🧮 Kelola Kolom <span class="kolom-badge" id="ptKolomBadge">8</span> <span style="font-size:8px;">▼</span></button>
@@ -10693,6 +10729,86 @@
             });
         }
 
+        // ================================================================
+        // AUDIT: cari No.Faktur di Data Uang Masuk (Piutang Tempo & Cash
+        // Dropping, SEMUA bulan) yang TIDAK ADA di Bank Data Penjualan sama
+        // sekali. Ini sinyal paling kuat untuk salah ketik No.Faktur saat
+        // upload Excel / input manual -- karena normFaktur() sudah menoleransi
+        // beda format (nol di depan, spasi, tanda hubung), jadi kalau tetap
+        // tidak ketemu, kemungkinan besar angkanya sendiri yang beda/typo.
+        // Dipakai oleh banner peringatan di Cek Cash & Cek Piutang.
+        // ================================================================
+        function cariFakturUangMasukTakCocok() {
+            const validSet = new Set();
+            salesData.forEach(s => { const k = normFaktur(s['No.Faktur']); if (k) validSet.add(k); });
+            const hasil = [];
+            for (const bulan in cashDataMap) {
+                (cashDataMap[bulan] || []).forEach(day => {
+                    (day.piutangDetail || []).forEach(d => {
+                        const key = normFaktur(d.noFaktur);
+                        if (key && !validSet.has(key)) {
+                            hasil.push({ sumber: 'Piutang Tempo', bulan, tanggal: day.tanggal, noFaktur: d.noFaktur,
+                                namaToko: d.namaToko || '', sales: d.sales || '', nominal: d.tagihan || d.totalBayar || 0 });
+                        }
+                    });
+                    (day.cashDroppingDetail || []).forEach(d => {
+                        const key = normFaktur(d.noFaktur);
+                        if (key && !validSet.has(key)) {
+                            hasil.push({ sumber: 'Cash Dropping', bulan, tanggal: day.tanggal, noFaktur: d.noFaktur,
+                                namaToko: d.namaToko || '', sales: d.sales || '', nominal: d.tagihan || d.totalBayar || 0 });
+                        }
+                    });
+                });
+            }
+            // Urutkan dari bulan/tanggal terbaru supaya salah ketik yang baru
+            // terjadi (paling relevan buat dicek) muncul duluan.
+            hasil.sort((a, b) => (b.bulan + b.tanggal).localeCompare(a.bulan + a.tanggal));
+            return hasil;
+        }
+
+        function renderFakturTakCocokBanner(tabKey) {
+            const banner = document.getElementById(tabKey === 'cash' ? 'cashFakturTakCocokBanner' : 'ptFakturTakCocokBanner');
+            const box = document.getElementById(tabKey === 'cash' ? 'cashFakturTakCocokBox' : 'ptFakturTakCocokBox');
+            const body = document.getElementById(tabKey === 'cash' ? 'cashFakturTakCocokBody' : 'ptFakturTakCocokBody');
+            if (!banner) return;
+            const daftar = cariFakturUangMasukTakCocok();
+            if (!daftar.length) {
+                banner.style.display = 'none';
+                if (box) box.style.display = 'none';
+                return;
+            }
+            banner.style.display = 'flex';
+            banner.dataset.count = daftar.length;
+            banner.querySelector('.fk-count').textContent =
+                daftar.length + ' No.Faktur di Data Uang Masuk tidak ditemukan di Bank Data Penjualan (kemungkinan salah ketik)';
+            if (body) {
+                body.innerHTML = daftar.map(d => `
+                    <tr>
+                        <td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;white-space:nowrap;">${escapeHtml(periodLabel(d.bulan))} · ${escapeHtml(fmtTglBayarCash(d.tanggal, d.bulan))}</td>
+                        <td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;">${escapeHtml(d.sumber)}</td>
+                        <td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;font-family:ui-monospace,monospace;font-weight:700;color:#9b2c2c;">${escapeHtml(d.noFaktur)}</td>
+                        <td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;">${escapeHtml(d.namaToko)}</td>
+                        <td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;">${escapeHtml(d.sales)}</td>
+                        <td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;text-align:right;">${fmtRp(d.nominal)}</td>
+                    </tr>`).join('');
+            }
+        }
+
+        // Klik banner untuk buka/tutup daftar detailnya.
+        (function initFakturTakCocokToggle() {
+            ['cash', 'piutang'].forEach(tabKey => {
+                const banner = document.getElementById(tabKey === 'cash' ? 'cashFakturTakCocokBanner' : 'ptFakturTakCocokBanner');
+                const box = document.getElementById(tabKey === 'cash' ? 'cashFakturTakCocokBox' : 'ptFakturTakCocokBox');
+                if (!banner || !box) return;
+                banner.addEventListener('click', function() {
+                    const buka = box.style.display === 'none';
+                    box.style.display = buka ? 'block' : 'none';
+                    const arrow = banner.querySelector('span:last-child');
+                    if (arrow) arrow.textContent = buka ? '▲ Sembunyikan' : '▼ Lihat Daftar';
+                });
+            });
+        })();
+
         // renderCek untuk Tab 3 – satu tabel seperti Cek Piutang
         async function renderCek() {
             cekFilterFaktur = document.getElementById('cekFilterFaktur').value.trim();
@@ -10711,6 +10827,7 @@
             const finalFilteredSales = getFilteredSalesCek();
             const cashSales = finalFilteredSales.filter(d => (d.Pembayaran || '').toLowerCase() === 'cash');
             const cashDataAll = await loadAllCashForCek();
+            renderFakturTakCocokBanner('cash');
             let cashDroppingAll = [];
             let piutangTempoAll = [];
             cashDataAll.forEach(day => {
@@ -11935,6 +12052,7 @@
         })();
 
         function ptRenderTempoTable() {
+            renderFakturTakCocokBanner('piutang');
             const rows = ptGetFilteredTempo();
             const totalRows = rows.length;
 

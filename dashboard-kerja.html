@@ -10283,14 +10283,16 @@
 
             const duplicateIdx = [];      // semua baris berlebih (siap dihapus), 1 baris/kelompok dipertahankan
             const duplicateGroups = [];   // detail per kelompok, untuk konfirmasi/laporan
+            const duplicateInfo = new Map(); // idx (extra) -> { keepIdx, totalSalinan }
             lookup.forEach((idxList) => {
                 if (idxList.length > 1) {
                     const [keepIdx, ...extraIdx] = idxList;
                     duplicateGroups.push({ keepIdx, extraIdx });
                     duplicateIdx.push(...extraIdx);
+                    extraIdx.forEach(idx => duplicateInfo.set(idx, { keepIdx, totalSalinan: idxList.length }));
                 }
             });
-            return { duplicateIdx, duplicateGroups };
+            return { duplicateIdx, duplicateGroups, duplicateInfo };
         }
 
         // ================================================================
@@ -10337,7 +10339,7 @@
             // Baris "minus tanpa pasangan" yang sudah pernah ditandai "sudah diperiksa" -> disaring keluar.
             const toFlagIdx = toFlagIdxMentah.filter(idx => !dismissed.has(buatKunciAnomaliSales(rows[idx])));
 
-            const { duplicateIdx: duplicateIdxMentah } = cariDuplikatPersisSales(rows);
+            const { duplicateIdx: duplicateIdxMentah, duplicateInfo } = cariDuplikatPersisSales(rows);
             // Sama seperti baris hantu, duplikat persis siap dibersihkan otomatis, tapi tetap
             // dihormati kalau pernah ditandai "sudah diperiksa" (mis. memang disengaja).
             const duplicateIdx = duplicateIdxMentah.filter(idx => !dismissed.has(buatKunciAnomaliSales(rows[idx])));
@@ -10355,7 +10357,7 @@
                 if (jumlah > 0 && (!isFinite(harga) || harga <= 0)) { hargaKosong.push(idx); return; }
                 if (isFinite(disc) && disc > 0 && isFinite(jumlah) && isFinite(harga) && disc > (jumlah * harga)) { discBerlebih.push(idx); return; }
             });
-            return { toDeleteIdx, toFlagIdx, duplicateIdx, totalMinus, hargaKosong, discBerlebih };
+            return { toDeleteIdx, toFlagIdx, duplicateIdx, totalMinus, hargaKosong, discBerlebih, duplicateInfo };
         }
 
         function totalAnomaliCount(result) {
@@ -10415,13 +10417,16 @@
             bukaModalDeteksiAnomaliSales();
         });
 
-        function anomaliRowHtml(idx, catLabel) {
+        function anomaliRowHtml(idx, catLabel, reasonText) {
             const r = salesData[idx];
             if (!r) return '';
             const jumlah = parseNumber(r.Jumlah);
             const harga = parseNumber(r['Harga Jual']);
             const disc = parseNumber(r.Disc);
             const totalRaw = (r.Total !== undefined && r.Total !== '') ? parseNumber(r.Total) : ((jumlah || 0) * (harga || 0) - (disc || 0));
+            const reasonHtml = reasonText
+                ? `<div style="margin-top:2px;font-weight:400;font-size:9.5px;color:#6b7280;">${escapeHtml(reasonText)}</div>`
+                : '';
             return `<tr>
                 <td style="padding:4px 8px;border:1px solid #e2e8f0;text-align:center;"><input type="checkbox" class="anomali-row-checkbox" data-idx="${idx}"></td>
                 <td style="padding:4px 8px;border:1px solid #e2e8f0;">${escapeHtml(String(r.Tanggal || ''))}</td>
@@ -10429,7 +10434,7 @@
                 <td style="padding:4px 8px;border:1px solid #e2e8f0;">${escapeHtml(String(r.Produk || ''))}</td>
                 <td style="padding:4px 8px;border:1px solid #e2e8f0;text-align:right;">${escapeHtml(String(r.Jumlah))}</td>
                 <td style="padding:4px 8px;border:1px solid #e2e8f0;text-align:right;">${fmtRp(totalRaw)}</td>
-                <td style="padding:4px 8px;border:1px solid #e2e8f0;">${escapeHtml(catLabel)}</td>
+                <td style="padding:4px 8px;border:1px solid #e2e8f0;">${escapeHtml(catLabel)}${reasonHtml}</td>
             </tr>`;
         }
 
@@ -10443,12 +10448,23 @@
                 return;
             }
             let rowsHtml = '';
-            result.toDeleteIdx.forEach(idx => rowsHtml += anomaliRowHtml(idx, '🧹 Baris Hantu (siap dibersihkan)'));
-            result.toFlagIdx.forEach(idx => rowsHtml += anomaliRowHtml(idx, '⚠️ Minus tanpa pasangan'));
-            result.duplicateIdx.forEach(idx => rowsHtml += anomaliRowHtml(idx, '📋 Duplikat Persis (siap dibersihkan)'));
-            result.totalMinus.forEach(idx => rowsHtml += anomaliRowHtml(idx, '🔻 Total minus'));
-            result.hargaKosong.forEach(idx => rowsHtml += anomaliRowHtml(idx, '❓ Harga Jual kosong/0'));
-            result.discBerlebih.forEach(idx => rowsHtml += anomaliRowHtml(idx, '❗ Disc > nilai jual'));
+            result.toDeleteIdx.forEach(idx => rowsHtml += anomaliRowHtml(idx, '🧹 Baris Hantu (siap dibersihkan)',
+                'Baris minus ini pasangan otomatis dari baris plus lain (No.Faktur+Tanggal+Produk+Jumlah cocok, tanda kebalikan) — bekas edit faktur di kasir, net dampak nol, aman dihapus otomatis.'));
+            result.toFlagIdx.forEach(idx => rowsHtml += anomaliRowHtml(idx, '⚠️ Minus tanpa pasangan',
+                'Jumlah baris ini minus, tapi tidak ada baris plus dengan No.Faktur+Tanggal+Produk+Jumlah yang cocok sebagai pasangannya — kemungkinan retur/void asli, perlu diperiksa manual apakah sah.'));
+            result.duplicateIdx.forEach(idx => {
+                const info = result.duplicateInfo && result.duplicateInfo.get(idx);
+                const reason = info
+                    ? `Isi baris ini (No.Faktur, Tanggal, Produk, Jumlah, Satuan, Harga Jual, Harga Beli, Disc, Total) sama persis dengan baris lain — total ${info.totalSalinan} baris identik ditemukan, 1 disimpan (baris data ke-${info.keepIdx + 1}), sisanya termasuk baris ini siap dihapus.`
+                    : 'Isi baris ini sama persis dengan baris lain di Bank Data Penjualan (kemungkinan bekas bug duplikasi sinkronisasi) — 1 disimpan, sisanya siap dihapus.';
+                rowsHtml += anomaliRowHtml(idx, '📋 Duplikat Persis (siap dibersihkan)', reason);
+            });
+            result.totalMinus.forEach(idx => rowsHtml += anomaliRowHtml(idx, '🔻 Total minus',
+                'Nilai Total transaksi baris ini minus (dari kolom Total, atau hasil hitung Jumlah × Harga Jual − Disc), di luar kasus baris hantu/duplikat — cek apakah ini transaksi retur/koreksi yang wajar atau salah input.'));
+            result.hargaKosong.forEach(idx => rowsHtml += anomaliRowHtml(idx, '❓ Harga Jual kosong/0',
+                'Jumlah barang terjual lebih dari 0, tapi kolom Harga Jual kosong atau bernilai 0 — kemungkinan salah/lupa input harga saat entri data, sehingga Total ikut tidak wajar.'));
+            result.discBerlebih.forEach(idx => rowsHtml += anomaliRowHtml(idx, '❗ Disc > nilai jual',
+                'Nilai Disc (diskon) pada baris ini lebih besar dari nilai jual sebelum diskon (Jumlah × Harga Jual), membuat Total jadi janggal/negatif — kemungkinan salah input Disc.'));
 
             document.getElementById('detailModalTitleGlobal').textContent = `🔍 Deteksi Anomali Bank Data Penjualan (${total} baris)`;
             document.getElementById('detailModalBodyGlobal').innerHTML = `

@@ -6001,9 +6001,12 @@
                          Data Penjualan aktif (kemungkinan versi lama sebelum dikoreksi,
                          atau memang benar-benar unik/tidak ada gantinya) -->
                     <div id="trashBedaPanel" style="display:none;margin:12px 0;border:1px solid #f59e0b;border-radius:8px;background:#fffbeb;overflow:hidden;">
-                        <div style="padding:10px 14px;background:#fef3c7;font-size:12px;font-weight:700;color:#92400e;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
-                            <span id="trashBedaTitle">🔎 Memeriksa...</span>
-                            <span style="cursor:pointer;font-weight:700;" id="trashBedaCloseBtn">✕ Tutup</span>
+                        <div style="padding:10px 14px;background:#fef3c7;font-size:12px;font-weight:700;color:#92400e;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                            <span id="trashBedaTitle" style="flex:1 1 260px;min-width:0;">🔎 Memeriksa...</span>
+                            <span style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+                                <button id="trashBedaRestoreAllBtn" class="btn" style="font-size:11px;padding:5px 10px;">♻️ Pulihkan Semua yang Tampil</button>
+                                <span style="cursor:pointer;font-weight:700;" id="trashBedaCloseBtn">✕ Tutup</span>
+                            </span>
                         </div>
                         <div style="padding:8px 14px;font-size:10px;color:#92400e;">
                             Baris di bawah ini ada di Data Sampah tapi <strong>tidak ditemukan kembarannya persis</strong> (No.Faktur + Produk + Jumlah + Total yang sama) di Bank Data Penjualan yang aktif sekarang. Biasanya ini versi LAMA sebelum dikoreksi/diketik ulang — dibandingkan langsung dengan data yang saat ini aktif di faktur yang sama, supaya gampang dicek. Kalau ternyata ini yang benar, klik Pulihkan.
@@ -9153,6 +9156,12 @@
                 ? `🔎 Ditemukan ${list.length} baris di Sampah yang beda dari versi aktif`
                 : '✅ Tidak ada baris yang beda — semua data di Sampah sudah punya kembaran persis di data aktif (aman).';
 
+            const restoreAllBtn = document.getElementById('trashBedaRestoreAllBtn');
+            if (restoreAllBtn) {
+                restoreAllBtn.style.display = list.length ? '' : 'none';
+                restoreAllBtn.textContent = `♻️ Pulihkan Semua yang Tampil (${list.length})`;
+            }
+
             tbody.innerHTML = list.map(({ trash: t, aktifSama }) => {
                 const aktifHtml = aktifSama.length
                     ? aktifSama.map(s => `<div style="padding:2px 0;border-top:1px dashed #fde68a;">${escapeHtml(s.Produk || '')} — ${s.Jumlah || 0} ${escapeHtml(s.Satuan || '')} — ${fmtRp(s.Total || 0)}</div>`).join('')
@@ -9186,6 +9195,31 @@
             const id = parseInt(btn.dataset.id, 10);
             pulihkanDariSampah(id).then(() => renderTrashBedaPanel());
         });
+
+        async function pulihkanSemuaTrashBeda() {
+            const list = cariTrashKemungkinanBeda();
+            if (!list.length) { showToast('Tidak ada baris untuk dipulihkan.', 'info'); return; }
+            if (!confirm(`♻️ Pulihkan semua ${list.length} baris yang beda ini ke Bank Data Penjualan sekaligus?\n\nPastikan Anda sudah mengecek perbandingannya dan yakin ini yang benar.`)) return;
+
+            const ids = list.map(({ trash: t }) => t.id);
+            for (const id of ids) {
+                const item = trashData.find(t => t.id === id);
+                if (!item) continue;
+                const { id: _id, alasanHapus, tanggalHapus, ...row } = item;
+                salesData.push(row);
+                await db.trash.delete(id);
+            }
+            await saveSalesData();
+            await loadTrashData();
+            rebuildSalesFilterOptions();
+            salesCurrentDateIndex = Infinity;
+            renderSales();
+            renderTrashTable();
+            renderRingkasanSaveAll();
+            renderTrashBedaPanel();
+            showToast(`♻️ ${ids.length} baris dipulihkan ke Bank Data Penjualan.`, 'success');
+        }
+        document.getElementById('trashBedaRestoreAllBtn').addEventListener('click', pulihkanSemuaTrashBeda);
 
         async function hapusPermanenSampah(trashId) {
             if (!confirm('⚠️ Hapus data ini secara PERMANEN dari Data Sampah? Tidak bisa dikembalikan lagi.')) return;

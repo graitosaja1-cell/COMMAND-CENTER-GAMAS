@@ -5992,7 +5992,37 @@
                         <span class="info-right" id="trashInfoRight">0 data</span>
                         <div class="actions">
                             <button class="btn" id="btnRestoreAllTrash">↩️ Pulihkan Terpilih/Semua</button>
+                            <button class="btn btn-outline" id="btnCekTrashBeda">🔍 Cek Kemungkinan Beda dari Aktif</button>
                             <button class="btn" id="btnEmptyTrash">🗑️ Kosongkan Sampah</button>
+                        </div>
+                    </div>
+
+                    <!-- Panel: baris sampah yang TIDAK ketemu kembarannya persis di Bank
+                         Data Penjualan aktif (kemungkinan versi lama sebelum dikoreksi,
+                         atau memang benar-benar unik/tidak ada gantinya) -->
+                    <div id="trashBedaPanel" style="display:none;margin:12px 0;border:1px solid #f59e0b;border-radius:8px;background:#fffbeb;overflow:hidden;">
+                        <div style="padding:10px 14px;background:#fef3c7;font-size:12px;font-weight:700;color:#92400e;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+                            <span id="trashBedaTitle">🔎 Memeriksa...</span>
+                            <span style="cursor:pointer;font-weight:700;" id="trashBedaCloseBtn">✕ Tutup</span>
+                        </div>
+                        <div style="padding:8px 14px;font-size:10px;color:#92400e;">
+                            Baris di bawah ini ada di Data Sampah tapi <strong>tidak ditemukan kembarannya persis</strong> (No.Faktur + Produk + Jumlah + Total yang sama) di Bank Data Penjualan yang aktif sekarang. Biasanya ini versi LAMA sebelum dikoreksi/diketik ulang — dibandingkan langsung dengan data yang saat ini aktif di faktur yang sama, supaya gampang dicek. Kalau ternyata ini yang benar, klik Pulihkan.
+                        </div>
+                        <div class="trash-table-wrap" style="max-height:420px;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>No.Faktur</th>
+                                        <th>Produk (versi Sampah)</th>
+                                        <th class="num">Jml</th>
+                                        <th class="num">Total (Sampah)</th>
+                                        <th>Alasan</th>
+                                        <th>Versi Aktif di Faktur yang Sama Sekarang</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="trashBedaTbody"></tbody>
+                            </table>
                         </div>
                     </div>
 
@@ -9079,6 +9109,84 @@
             showToast('♻️ Data dipulihkan ke Bank Data Penjualan.', 'success');
         }
 
+        // ================================================================
+        // CEK KEMUNGKINAN BEDA DARI AKTIF — bandingkan tiap baris Data
+        // Sampah dengan Bank Data Penjualan yang aktif SEKARANG. Kalau tidak
+        // ketemu kembaran persisnya (No.Faktur + Produk + Jumlah + Total sama
+        // persis, toleran spasi/besar-kecil huruf di nama produk), baris itu
+        // ditandai "beda" -- biasanya ini versi LAMA sebelum dikoreksi/diketik
+        // ulang. Ditampilkan berdampingan dengan versi aktif di faktur yang
+        // sama supaya gampang dibandingkan manual sebelum diputuskan.
+        // ================================================================
+        function _trashSig(row) {
+            return [row['No.Faktur'], row.Produk, row.Jumlah, row['Harga Jual'], row.Total].join('|');
+        }
+        function _trashSigLoose(row) {
+            const produk = String(row.Produk || '').trim().toLowerCase();
+            return [row['No.Faktur'], produk, row.Jumlah, row.Total].join('|');
+        }
+
+        function cariTrashKemungkinanBeda() {
+            const sigSet = new Set(salesData.map(_trashSig));
+            const sigLooseSet = new Set(salesData.map(_trashSigLoose));
+            const salesByFaktur = new Map();
+            salesData.forEach(s => {
+                const fk = s['No.Faktur'];
+                if (!salesByFaktur.has(fk)) salesByFaktur.set(fk, []);
+                salesByFaktur.get(fk).push(s);
+            });
+
+            return trashData.filter(t => {
+                if (sigSet.has(_trashSig(t))) return false;
+                if (sigLooseSet.has(_trashSigLoose(t))) return false;
+                return true;
+            }).map(t => ({ trash: t, aktifSama: salesByFaktur.get(t['No.Faktur']) || [] }));
+        }
+
+        function renderTrashBedaPanel() {
+            const list = cariTrashKemungkinanBeda();
+            const titleEl = document.getElementById('trashBedaTitle');
+            const tbody = document.getElementById('trashBedaTbody');
+            if (!titleEl || !tbody) return;
+
+            titleEl.textContent = list.length
+                ? `🔎 Ditemukan ${list.length} baris di Sampah yang beda dari versi aktif`
+                : '✅ Tidak ada baris yang beda — semua data di Sampah sudah punya kembaran persis di data aktif (aman).';
+
+            tbody.innerHTML = list.map(({ trash: t, aktifSama }) => {
+                const aktifHtml = aktifSama.length
+                    ? aktifSama.map(s => `<div style="padding:2px 0;border-top:1px dashed #fde68a;">${escapeHtml(s.Produk || '')} — ${s.Jumlah || 0} ${escapeHtml(s.Satuan || '')} — ${fmtRp(s.Total || 0)}</div>`).join('')
+                    : '<span style="color:#dc2626;">⚠️ Faktur ini sudah tidak ada sama sekali di data aktif</span>';
+                return `<tr>
+                    <td>${escapeHtml(t['No.Faktur'] || '')}</td>
+                    <td>${escapeHtml(t.Produk || '')}</td>
+                    <td class="num">${t.Jumlah || 0}</td>
+                    <td class="num">${fmtRp(t.Total || 0)}</td>
+                    <td>${escapeHtml(t.alasanHapus || '-')}</td>
+                    <td style="font-size:10px;">${aktifHtml}</td>
+                    <td><button class="btn-restore trash-beda-restore-btn" data-id="${t.id}" title="Pulihkan baris ini">♻️</button></td>
+                </tr>`;
+            }).join('') || '<tr><td colspan="7" style="text-align:center;padding:16px;color:#6b7280;">Tidak ada data.</td></tr>';
+        }
+
+        document.getElementById('btnCekTrashBeda').addEventListener('click', function() {
+            const panel = document.getElementById('trashBedaPanel');
+            const showing = panel.style.display !== 'none';
+            if (showing) { panel.style.display = 'none'; return; }
+            panel.style.display = 'block';
+            renderTrashBedaPanel();
+            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+        document.getElementById('trashBedaCloseBtn').addEventListener('click', function() {
+            document.getElementById('trashBedaPanel').style.display = 'none';
+        });
+        document.getElementById('trashBedaTbody').addEventListener('click', function(e) {
+            const btn = e.target.closest('.trash-beda-restore-btn');
+            if (!btn) return;
+            const id = parseInt(btn.dataset.id, 10);
+            pulihkanDariSampah(id).then(() => renderTrashBedaPanel());
+        });
+
         async function hapusPermanenSampah(trashId) {
             if (!confirm('⚠️ Hapus data ini secara PERMANEN dari Data Sampah? Tidak bisa dikembalikan lagi.')) return;
             await db.trash.delete(trashId);
@@ -9198,6 +9306,9 @@
             if (countEl) countEl.textContent = trashData.length;
             const badgeEl = document.getElementById('badgeTrash');
             if (badgeEl) badgeEl.textContent = trashData.length;
+
+            const bedaPanel = document.getElementById('trashBedaPanel');
+            if (bedaPanel && bedaPanel.style.display !== 'none') renderTrashBedaPanel();
         }
 
         async function restoreTerpilihAtauSemuaDariSampah() {

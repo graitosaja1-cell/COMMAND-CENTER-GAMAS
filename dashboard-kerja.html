@@ -5297,7 +5297,7 @@
             <div class="tab1-split-right">
                 <div class="table-wrap" style="height: 485px; max-height: 485px;" id="tab1TableWrap">
                     <table>
-                        <thead><tr><th style="width:26px;"><input type="checkbox" id="salesSelectAll" title="Pilih semua baris yang tampil"></th><th>Tanggal</th><th>No.Faktur</th><th>Produk</th><th class="num">Jumlah</th><th>Satuan</th><th class="num">Harga Jual</th><th class="num">Harga Beli</th><th class="num">Disc</th><th class="num">Total</th><th class="num">Profit</th><th>Sales</th><th>Customer</th><th>Alamat</th><th>Pembayaran</th></tr></thead>
+                        <thead><tr><th style="width:26px;"><input type="checkbox" id="salesSelectAll" title="Pilih semua baris yang tampil"></th><th>Tanggal</th><th>No.Faktur</th><th>Produk</th><th class="num">Jumlah</th><th>Satuan</th><th class="num">Harga Jual</th><th class="num">Harga Beli</th><th class="num">Disc</th><th class="num">Total</th><th>Sales</th><th>Customer</th><th>Alamat</th><th>Pembayaran</th></tr></thead>
                         <tbody id="salesTableBody"><tr><td colspan="15" class="empty-msg">📂 Tidak ada data. Import Excel atau Tambah transaksi.</td></tr></tbody>
                     </table>
                 </div>
@@ -9782,7 +9782,6 @@
                 'Harga Beli'] !== null ? parseNumber(r['Harga Beli']) : null;
             const disc = parseNumber(r.Disc);
             const total = r.Total !== undefined ? r.Total : (jumlah * harga) - disc;
-            const profit = hargaBeli !== null ? (total - (hargaBeli * jumlah)) : null;
             const gidx = salesIndexMap.get(r);
             const cbChecked = salesRowsSelected.has(gidx) ? 'checked' : '';
             const noFakturSafe = escapeHtml(String(r['No.Faktur'] || ''));
@@ -9804,7 +9803,7 @@
                 rowClass = ' class="row-harga-confirmed"';
                 hargaJualCellExtra = ` <button type="button" class="btn-kesepakatan-toggle" data-gidx="${gidx}" title="Kesepakatan Khusus — di bawah minimal (Rp ${fmtRp(hargaMinimal)}) tapi sudah dikonfirmasi. Klik untuk batalkan.">✅</button>`;
             }
-            return `<tr${rowClass}><td><input type="checkbox" class="sales-trash-checkbox" data-gidx="${gidx}" ${cbChecked}></td><td>${fmtTanggal(r.Tanggal)}</td><td>${noFakturSafe ? `<a href="#" class="tab1-faktur-link" data-faktur="${noFakturSafe}" style="${fakturLinkStyle}"${fakturLinkTitle}>${sudahDiedit ? '✏️ ' : ''}${noFakturSafe}</a>` : ''}</td><td>${r.Produk || ''}</td><td class="num">${jumlah}</td><td>${r.Satuan || ''}</td><td class="num">${fmtRp(harga)}${hargaJualCellExtra}</td><td class="num">${hargaBeli !== null ? fmtRp(hargaBeli) : '-'}</td><td class="num">${fmtRp(disc)}</td><td class="num">${fmtRp(total)}</td><td class="num">${profit !== null ? fmtRp(profit) : '-'}</td><td>${r.Sales || ''}</td><td>${r.Customer || ''}</td><td>${r.Alamat || ''}</td><td><span class="badge ${r.Pembayaran === 'Cash' ? 'cash' : 'tempo'}">${r.Pembayaran || 'Tempo'}</span></td></tr>`;
+            return `<tr${rowClass}><td><input type="checkbox" class="sales-trash-checkbox" data-gidx="${gidx}" ${cbChecked}></td><td>${fmtTanggal(r.Tanggal)}</td><td>${noFakturSafe ? `<a href="#" class="tab1-faktur-link" data-faktur="${noFakturSafe}" style="${fakturLinkStyle}"${fakturLinkTitle}>${sudahDiedit ? '✏️ ' : ''}${noFakturSafe}</a>` : ''}</td><td>${r.Produk || ''}</td><td class="num">${jumlah}</td><td>${r.Satuan || ''}</td><td class="num">${fmtRp(harga)}${hargaJualCellExtra}</td><td class="num">${hargaBeli !== null ? fmtRp(hargaBeli) : '-'}</td><td class="num">${fmtRp(disc)}</td><td class="num">${fmtRp(total)}</td><td>${r.Sales || ''}</td><td>${r.Customer || ''}</td><td>${r.Alamat || ''}</td><td><span class="badge ${r.Pembayaran === 'Cash' ? 'cash' : 'tempo'}">${r.Pembayaran || 'Tempo'}</span></td></tr>`;
         }
 
         function renderSalesTableWindow() {
@@ -10050,11 +10049,9 @@
             const alamat = prompt('Alamat:', '') || '';
             const pembayaran = confirm('Cash? (OK=Cash, Cancel=Tempo)') ? 'Cash' : 'Tempo';
             const totalBaru = (jumlah * harga) - disc;
-            const profitBaru = hargaBeli === '' ? '' : totalBaru - (hargaBeli * jumlah);
             salesData.push({ 'Tanggal': tgl, 'No.Faktur': noFaktur, 'Produk': produk, 'Jumlah': jumlah, 'Satuan': '',
                 'Harga Jual': harga, 'Disc': disc, 'Total': totalBaru, 'Sales': sales,
-                'Customer': customer, 'Alamat': alamat, 'Pembayaran': pembayaran, 'Harga Beli': hargaBeli,
-                'Profit': profitBaru });
+                'Customer': customer, 'Alamat': alamat, 'Pembayaran': pembayaran, 'Harga Beli': hargaBeli });
             const okSave = await saveSalesData();
             rebuildSalesFilterOptions();
             salesCurrentDateIndex = Infinity;
@@ -10147,7 +10144,6 @@
                 const harga = parseNumber(it['Harga Jual']);
                 const disc = parseNumber(it.Disc);
                 const total = (jumlah * harga) - disc;
-                const profit = hargaBeli === '' ? '' : total - (hargaBeli * jumlah);
 
                 let pembayaran = String(it.Pembayaran || '').trim();
                 if (pembayaran !== 'Cash' && pembayaran !== 'Tempo') pembayaran = 'Tempo';
@@ -10159,7 +10155,7 @@
                     'Jumlah': jumlah, 'Satuan': String(it.Satuan || '').trim(),
                     'Harga Jual': harga, 'Disc': disc, 'Total': total, 'Sales': sales,
                     'Customer': String(it.Customer || '').trim(), 'Alamat': String(it.Alamat || '').trim(),
-                    'Pembayaran': pembayaran, 'Harga Beli': hargaBeli, 'Profit': profit
+                    'Pembayaran': pembayaran, 'Harga Beli': hargaBeli
                 });
                 added++;
             });
@@ -10786,11 +10782,6 @@
                             disc = disc * 1000;
                         }
                         const total = (jumlah * harga) - disc;
-                        // Profit selalu dihitung ulang dari Total (nominal diterima setelah Disc) &
-                        // Harga Beli yang sudah sepadan skalanya, bukan memakai kolom Profit bawaan file
-                        // (karena kolom Profit di file sumber sering ikut salah hitung akibat beda skala tsb).
-                        // Profit = Total - (Harga Beli x Jumlah)
-                        const profit = hargaBeli === '' ? '' : total - (hargaBeli * jumlah);
                         const produkTrim = String(row[2] || '').trim();
                         const dupKey = salesDupKey(faktur, produkTrim, tanggal, jumlah);
                         if (dupKeys.has(dupKey)) { dupSkipped++; continue; }
@@ -10799,7 +10790,7 @@
                                 'Jumlah': jumlah, 'Satuan': String(row[4] || '').trim(),
                             'Harga Jual': harga, 'Disc': disc, 'Total': total, 'Sales': sales,
                             'Customer': String(row[9] || '').trim(), 'Alamat': String(row[10] || '').trim(),
-                            'Pembayaran': pembayaran, 'Harga Beli': hargaBeli, 'Profit': profit });
+                            'Pembayaran': pembayaran, 'Harga Beli': hargaBeli });
                         added++;
                     }
                     const okSave = await saveSalesData();
@@ -10824,7 +10815,7 @@
                 'Produk': r.Produk, 'Jumlah': r.Jumlah, 'Satuan': r.Satuan, 'Harga Jual': r['Harga Jual'],
                 'Disc': r.Disc, 'Total': r.Total, 'Sales': r.Sales, 'Customer': r.Customer,
                 'Alamat': r.Alamat, 'Pembayaran': r.Pembayaran, 'Harga Beli': r['Harga Beli'] === undefined ? ''
-                    : r['Harga Beli'], 'Profit': r.Profit === undefined ? '' : r.Profit }));
+                    : r['Harga Beli'] }));
             const ws = XLSX.utils.json_to_sheet(exportData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Data Penjualan');
@@ -13498,7 +13489,7 @@
             const row = {
                 'Tanggal': tanggal, 'No.Faktur': noFaktur, 'Produk': produk, 'Jumlah': 1, 'Satuan': '',
                 'Harga Jual': total, 'Disc': 0, 'Total': total, 'Sales': sales, 'Customer': customer,
-                'Alamat': alamat, 'Pembayaran': 'Tempo', 'Harga Beli': '', 'Profit': ''
+                'Alamat': alamat, 'Pembayaran': 'Tempo', 'Harga Beli': ''
             };
             if (jatuhTempoIso) row.JatuhTempoManual = isoToDMY(jatuhTempoIso);
             salesData.push(row);

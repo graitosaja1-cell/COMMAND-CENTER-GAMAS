@@ -10454,9 +10454,16 @@
                 'Jumlah baris ini minus, tapi tidak ada baris plus dengan No.Faktur+Tanggal+Produk+Jumlah yang cocok sebagai pasangannya — kemungkinan retur/void asli, perlu diperiksa manual apakah sah.'));
             result.duplicateIdx.forEach(idx => {
                 const info = result.duplicateInfo && result.duplicateInfo.get(idx);
-                const reason = info
-                    ? `Isi baris ini (No.Faktur, Tanggal, Produk, Jumlah, Satuan, Harga Jual, Harga Beli, Disc, Total) sama persis dengan baris lain — total ${info.totalSalinan} baris identik ditemukan, 1 disimpan (baris data ke-${info.keepIdx + 1}), sisanya termasuk baris ini siap dihapus.`
-                    : 'Isi baris ini sama persis dengan baris lain di Bank Data Penjualan (kemungkinan bekas bug duplikasi sinkronisasi) — 1 disimpan, sisanya siap dihapus.';
+                let reason;
+                if (info) {
+                    const kembar = salesData[info.keepIdx];
+                    const kembarInfo = kembar
+                        ? ` Baris kembarnya: Tanggal ${escapeHtml(String(kembar.Tanggal || ''))}, No.Faktur ${escapeHtml(String(kembar['No.Faktur'] || ''))}, Jumlah ${escapeHtml(String(kembar.Jumlah || ''))}, Total ${fmtRp(parseNumber(kembar.Total) || 0)} — persis sama dengan baris ini di baris data ke-${info.keepIdx + 1}.`
+                        : '';
+                    reason = `Baris ini adalah SALINAN 100% identik (No.Faktur, Tanggal, Produk, Jumlah, Satuan, Harga Jual, Harga Beli, Disc, DAN Total-nya sama semua) dari baris lain — total ${info.totalSalinan} baris kembar ditemukan, 1 disimpan.${kembarInfo} Ini BUKAN kasus qty pesanan berkurang/dikoreksi — kalau Jumlah atau Total-nya beda sedikit saja, baris itu TIDAK akan masuk kategori ini.`;
+                } else {
+                    reason = 'Isi baris ini sama persis dengan baris lain di Bank Data Penjualan (kemungkinan bekas bug duplikasi sinkronisasi) — 1 disimpan, sisanya siap dihapus.';
+                }
                 rowsHtml += anomaliRowHtml(idx, '📋 Duplikat Persis (siap dibersihkan)', reason);
             });
             result.totalMinus.forEach(idx => rowsHtml += anomaliRowHtml(idx, '🔻 Total minus',

@@ -5892,10 +5892,10 @@
         <div class="container" style="max-width:1400px; margin:0 auto; padding:0 16px;">
 
             <!-- Bar ringkas: selalu tampil, klik untuk buka/tutup kotak upload -->
-            <div id="umToggleBar" style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 18px;margin-bottom:0;cursor:pointer;user-select:none;transition:background .12s ease;">
-                <span style="font-size:18px;">📥</span>
+            <div id="umToggleBar" style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 18px;margin-bottom:0;cursor:pointer;user-select:none;transition:background .12s ease, padding .15s ease;">
+                <span id="umToggleIcon" style="font-size:18px;transition:font-size .15s ease, opacity .15s ease;">📥</span>
                 <div style="flex:1;min-width:0;">
-                    <div style="font-size:13px;font-weight:800;color:#1e293b;">Upload Data Uang Masuk</div>
+                    <div id="umToggleTitle" style="font-size:13px;font-weight:800;color:#1e293b;transition:font-size .15s ease, font-weight .15s ease, color .15s ease;">Upload Data Uang Masuk</div>
                     <div id="umToggleStatus" style="font-size:11px;color:#64748b;margin-top:1px;">dari file Excel laporan harian</div>
                 </div>
                 <span id="umToggleChevron" style="font-size:11px;color:#94a3b8;transition:transform .15s ease;">▼ Buka</span>
@@ -7768,18 +7768,39 @@
 
         function umSetCollapsed(collapsed, opts) {
             opts = opts || {};
+            const bar = document.getElementById('umToggleBar');
             const body = document.getElementById('umCollapsibleBody');
             const chevron = document.getElementById('umToggleChevron');
             const status = document.getElementById('umToggleStatus');
+            const icon = document.getElementById('umToggleIcon');
+            const title = document.getElementById('umToggleTitle');
             if (!body) return;
             body.style.display = collapsed ? 'none' : '';
             if (chevron) chevron.textContent = collapsed ? '▶ Buka' : '▼ Tutup';
+            const totalHari = (t2AllRows || []).length ?
+                new Set((t2AllRows || []).map(r => r.sheet)).size : 0;
+            const collapsedDenganData = collapsed && totalHari > 0;
             if (status) {
-                const totalHari = (t2AllRows || []).length ?
-                    new Set((t2AllRows || []).map(r => r.sheet)).size : 0;
-                status.textContent = collapsed && totalHari > 0 ?
+                status.textContent = collapsedDenganData ?
                     totalHari.toLocaleString('id-ID') + ' entri data tersimpan • klik untuk upload lagi' :
                     'dari file Excel laporan harian';
+            }
+            // Kalau kotaknya sedang ditutup DAN datanya sudah ada, bikin bar-nya
+            // sekecil & sepudar mungkin (kayak baris info biasa) supaya tidak
+            // terlihat seperti tombol besar yang mencolok tiap buka tab ini.
+            // Begitu dibuka lagi (mau upload), tampilannya kembali normal.
+            if (bar) {
+                bar.style.padding = collapsedDenganData ? '6px 14px' : '12px 18px';
+                bar.style.background = collapsedDenganData ? '#f8fafc' : '#fff';
+            }
+            if (icon) {
+                icon.style.fontSize = collapsedDenganData ? '13px' : '18px';
+                icon.style.opacity = collapsedDenganData ? '0.55' : '1';
+            }
+            if (title) {
+                title.style.fontSize = collapsedDenganData ? '11px' : '13px';
+                title.style.fontWeight = collapsedDenganData ? '600' : '800';
+                title.style.color = collapsedDenganData ? '#94a3b8' : '#1e293b';
             }
             if (!opts.skipSave) {
                 try { localStorage.setItem(UM_COLLAPSE_KEY, collapsed ? '1' : '0'); } catch (e) {}

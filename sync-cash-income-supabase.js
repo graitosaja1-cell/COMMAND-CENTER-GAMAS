@@ -264,6 +264,11 @@
     async function runCashFullSync(manual) {
         if (syncing) return;
         if (!navigator.onLine) return;
+        // Saklar manual Online/Offline (tombol di header dashboard-kerja.html).
+        // Kalau lagi di-set "Offline (Mode Kerja)", jangan sync sama sekali
+        // -- kecuali dipanggil manual (misal langsung setelah user pencet
+        // tombol balik ke Online), supaya efeknya langsung terasa.
+        if (!manual && typeof window.gmIsSyncOnline === 'function' && !window.gmIsSyncOnline()) return;
         syncing = true;
         try {
             const pullRes = await pullCashFromCloud();
@@ -272,20 +277,6 @@
                 if (typeof renderPemasukan === 'function') { try { renderPemasukan(); } catch (e) {} }
                 if (typeof refreshPiutangUangMasuk === 'function') { try { refreshPiutangUangMasuk(); } catch (e) {} }
                 if (typeof ptRefresh === 'function') { try { await ptRefresh(false); } catch (e) {} }
-                // Tab Cek Cash (tab3) sebelumnya tidak ikut di-refresh di sini,
-                // jadi data baru dari device lain baru kelihatan kalau user
-                // pindah tab lalu balik lagi / klik Sinkronkan Data 2x. Sekarang
-                // ikut disegarkan kalau tab3 sedang aktif, dan tetap kasih
-                // notif "Data baru masuk" kalau tab3 TIDAK sedang aktif.
-                try {
-                    const tab3El = document.getElementById('tab3');
-                    const tab3Aktif = tab3El && tab3El.classList.contains('active');
-                    if (tab3Aktif && typeof renderCek === 'function') {
-                        await renderCek();
-                    } else if (typeof tampilkanNotifDataBaru === 'function') {
-                        tampilkanNotifDataBaru('cash');
-                    }
-                } catch (e) {}
                 if (manual && typeof showToast === 'function') {
                     showToast('☁️ Data Uang Masuk diperbarui dari cloud (' + pullRes.bulans.length + ' bulan).', 'info');
                 }
@@ -309,13 +300,9 @@
         }
     }
 
-    // ── Dipanggil langsung dari tombol "🔄 Sinkronkan Data" di dashboard
-    //    (tab Cek Cash & Cek Piutang) supaya klik tombol itu benar-benar
-    //    menunggu pull+push ke Supabase selesai, bukan cuma baca ulang
-    //    IndexedDB lokal yang bisa saja belum ter-update. ──
-    window.gamasCashSync = {
-        runFullSync: runCashFullSync
-    };
+    // Expose supaya tombol saklar Online/Offline di header bisa memicu
+    // sync manual langsung begitu dipindah balik ke "Online".
+    window.runCashFullSync = runCashFullSync;
 
     window.addEventListener('online', () => runCashFullSync(false));
 
@@ -345,6 +332,7 @@
         const _origSave = saveCashData;
         saveCashData = async function () {
             const result = await _origSave.apply(this, arguments);
+            if (typeof window.gmIsSyncOnline === 'function' && !window.gmIsSyncOnline()) return result;
             try { await pushCashDeltaToCloud(); }
             catch (e) { console.warn('[sync-cash-income] push gagal setelah saveCashData:', e); }
             return result;

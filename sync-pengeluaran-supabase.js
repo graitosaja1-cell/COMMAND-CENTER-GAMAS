@@ -233,6 +233,11 @@
     async function runPengeluaranFullSync(manual) {
         if (syncing) return;
         if (!navigator.onLine) return;
+        // Saklar manual Online/Offline (tombol di header dashboard-kerja.html).
+        // Kalau lagi di-set "Offline (Mode Kerja)", jangan sync sama sekali
+        // -- kecuali dipanggil manual (misal langsung setelah user pencet
+        // tombol balik ke Online), supaya efeknya langsung terasa.
+        if (!manual && typeof window.gmIsSyncOnline === 'function' && !window.gmIsSyncOnline()) return;
         syncing = true;
         try {
             const pullRes = await pullPengeluaranFromCloud();
@@ -260,6 +265,10 @@
             syncing = false;
         }
     }
+
+    // Expose supaya tombol saklar Online/Offline di header bisa memicu
+    // sync manual langsung begitu dipindah balik ke "Online".
+    window.runPengeluaranFullSync = runPengeluaranFullSync;
 
     window.addEventListener('online', () => runPengeluaranFullSync(false));
 
@@ -289,6 +298,7 @@
         const _origSave = savePengeluaranData;
         savePengeluaranData = async function () {
             const result = await _origSave.apply(this, arguments);
+            if (typeof window.gmIsSyncOnline === 'function' && !window.gmIsSyncOnline()) return result;
             try { await pushPengeluaranDeltaToCloud(); }
             catch (e) { console.warn('[sync-pengeluaran] push gagal setelah savePengeluaranData:', e); }
             return result;

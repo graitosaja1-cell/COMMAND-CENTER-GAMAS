@@ -4999,11 +4999,81 @@
             <span class="sub">Kerja</span>
         </div>
         <div style="display:flex; gap:8px; align-items:center;">
+            <button id="btnSyncMode" type="button" style="border-radius:6px; padding:5px 12px; font-size:11px; cursor:pointer; white-space:nowrap; font-weight:700;">☁️ Online (Sync Aktif)</button>
             <a href="index.html" id="btnKembaliHub" title="Kembali ke Hub" style="background:rgba(255,255,255,0.08); color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:6px; padding:5px 12px; font-size:11px; cursor:pointer; white-space:nowrap; text-decoration:none;">⬅️ Ke Dashboard Utama</a>
             <button type="button" id="btnKeLaporan" title="Buka Trash & Save" onclick="switchTab('tab8')" style="background:rgba(255,255,255,0.08); color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:6px; padding:5px 12px; font-size:11px; cursor:pointer; white-space:nowrap; text-decoration:none;">🗑️ Trash &amp; Save</button>
             <button id="btnLogoutHeader" type="button" title="Keluar dari akun" style="background:rgba(255,255,255,0.08); color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:6px; padding:5px 12px; font-size:11px; cursor:pointer; white-space:nowrap;">🚪 Logout</button>
         </div>
     </header>
+    <script>
+        // ================================================================
+        // SAKLAR ONLINE/OFFLINE MANUAL — mengontrol semua sync-*.js
+        // ================================================================
+        // Tujuan: saat jam kerja (misal 08.00–16.00) mode bisa dipindah ke
+        // "Offline (Mode Kerja)" supaya SEMUA proses sync ke Supabase (push
+        // maupun pull, di sync-supabase.js / sync-cash-income-supabase.js /
+        // sync-pengeluaran-supabase.js) berhenti total -- input jadi
+        // 100% lokal (IndexedDB) tanpa nunggu jaringan sama sekali, jadi
+        // lancar walau koneksi lambat/putus-putus. Begitu selesai kerja
+        // (atau kapan saja butuh update), tekan lagi supaya balik "Online"
+        // dan semua perubahan yang numpuk langsung disinkronkan.
+        //
+        // Status disimpan di localStorage supaya "nempel" walau browser
+        // ditutup/dibuka lagi atau di-refresh. Default: ONLINE (perilaku
+        // asli, tidak berubah kalau tombol belum pernah dipencet).
+        (function () {
+            'use strict';
+            const SYNC_MODE_KEY = 'gm2026_sync_mode'; // value: 'offline' | (kosong = online)
+
+            window.gmIsSyncOnline = function () {
+                return localStorage.getItem(SYNC_MODE_KEY) !== 'offline';
+            };
+            window.gmSetSyncMode = function (mode) {
+                if (mode === 'offline') localStorage.setItem(SYNC_MODE_KEY, 'offline');
+                else localStorage.removeItem(SYNC_MODE_KEY);
+                window.dispatchEvent(new CustomEvent('gm-sync-mode-changed', { detail: { mode: mode } }));
+                updateSyncModeBtn();
+            };
+
+            function updateSyncModeBtn() {
+                const btn = document.getElementById('btnSyncMode');
+                if (!btn) return;
+                if (window.gmIsSyncOnline()) {
+                    btn.textContent = '☁️ Online (Sync Aktif)';
+                    btn.style.background = 'rgba(34,197,94,0.18)';
+                    btn.style.color = '#fff';
+                    btn.style.border = '1px solid rgba(34,197,94,0.5)';
+                    btn.title = 'Sinkronisasi cloud AKTIF. Klik untuk matikan (mode kerja offline supaya lebih lancar).';
+                } else {
+                    btn.textContent = '🔌 Offline (Mode Kerja)';
+                    btn.style.background = 'rgba(239,68,68,0.18)';
+                    btn.style.color = '#fff';
+                    btn.style.border = '1px solid rgba(239,68,68,0.5)';
+                    btn.title = 'Sinkronisasi cloud DIMATIKAN sementara. Klik untuk aktifkan lagi & update/kirim data.';
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                updateSyncModeBtn();
+                const btn = document.getElementById('btnSyncMode');
+                if (!btn) return;
+                btn.addEventListener('click', function () {
+                    const next = window.gmIsSyncOnline() ? 'offline' : 'online';
+                    window.gmSetSyncMode(next);
+                    if (next === 'online') {
+                        // Balik online -> langsung paksa sync semua modul yang tersedia
+                        // (fungsi-fungsi ini di-expose oleh masing-masing sync-*.js).
+                        if (typeof window.runSalesFullSync === 'function') window.runSalesFullSync(true);
+                        if (typeof window.runCashFullSync === 'function') window.runCashFullSync(true);
+                        if (typeof window.runPengeluaranFullSync === 'function') window.runPengeluaranFullSync(true);
+                        if (typeof showToast === 'function') showToast('☁️ Online — menyinkronkan data yang tertunda...', 'info');
+                    } else {
+                        if (typeof showToast === 'function') showToast('🔌 Offline — sync dimatikan, kerja lokal dulu.', 'info');
+                    }
+                });
+            });
+        })();
+    </script>
     <div class="tabs" id="tabHeaders">
         <button class="tab-btn active" data-tab="tab0">
             <svg class="tab-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></svg>
@@ -5035,7 +5105,7 @@
         </button>
         <button class="tab-btn" data-tab="tab9">
             <svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 3v12"></path><path d="M7 8l5-5 5 5"></path><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"></path></svg>
-            Upload Uang Masuk
+            Uang Masuk
         </button>
         <button class="tab-btn" data-tab="tab10">
             <svg class="tab-icon" viewBox="0 0 24 24"><polyline points="3 7 10 14 14 10 21 17"></polyline><polyline points="15 17 21 17 21 11"></polyline></svg>

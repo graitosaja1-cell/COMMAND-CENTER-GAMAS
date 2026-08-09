@@ -10296,15 +10296,58 @@
         }
 
         // ================================================================
-        // DETEKSI ANOMALI BANK DATA PENJUALAN (banner otomatis + modal detail)
-        // Kategori yang dideteksi:
-        //  - Baris hantu (pasangan minus/plus dari edit faktur) -> siap dibersihkan otomatis
-        //  - Baris minus TANPA pasangan -> kemungkinan retur/void asli, perlu periksa manual
-        //  - Duplikat persis (2+ baris positif identik plek-ketiplek) -> siap dibersihkan otomatis
-        //  - Total transaksi minus (di luar kategori di atas)
-        //  - Harga Jual kosong/0 padahal Jumlah > 0
-        //  - Disc lebih besar dari nilai jual (Jumlah x Harga Jual), sehingga Total janggal
+        // DETEKSI "KEMUNGKINAN DUPLIKAT, BEDA HARGA BELI/PROFIT": 2+ baris
+        // POSITIF yang sama persis di sisi PENJUALAN (No.Faktur + Tanggal +
+        // Produk + Jumlah + Satuan + Harga Jual + Disc + Total) TAPI beda di
+        // Harga Beli (sehingga Profit ikut beda). Ini beda dari "Duplikat
+        // Persis" (yang mensyaratkan semua kolom termasuk Harga Beli sama
+        // persis) -- kasus ini biasanya transaksi yang sama ke-input dua
+        // kali dengan harga modal yang beda (mis. diedit ulang / disalin
+        // dari sumber lain), yang kalau dibiarkan bisa dobel-hitung
+        // pendapatan DAN bikin Profit tidak akurat. Butuh diperiksa manual
+        // untuk menentukan Harga Beli mana yang benar sebelum salah satu
+        // baris dihapus -- tidak dibersihkan otomatis.
         // ================================================================
+        function kunciDuplikatBedaHargaBeli(r) {
+            if (!r) return '';
+            return [
+                String(r['No.Faktur'] || '').trim().toUpperCase(),
+                String(r['Tanggal'] || '').trim(),
+                String(r['Produk'] || '').trim().toUpperCase(),
+                String(r.Jumlah),
+                String(r.Satuan || '').trim().toUpperCase(),
+                String(r['Harga Jual']),
+                String(r.Disc),
+                String(r.Total)
+            ].join('|||');
+        }
+
+        function cariDuplikatBedaHargaBeliSales(rows, excludeSet) {
+            const lookup = new Map();
+            rows.forEach((r, idx) => {
+                if (excludeSet && excludeSet.has(idx)) return;
+                const jml = Number(r.Jumlah);
+                if (!isFinite(jml) || jml <= 0) return;
+                const key = kunciDuplikatBedaHargaBeli(r);
+                if (!lookup.has(key)) lookup.set(key, []);
+                lookup.get(key).push(idx);
+            });
+
+            const flagIdx = [];
+            const info = new Map(); // idx -> { pasanganIdx: [...] }
+            lookup.forEach((idxList) => {
+                if (idxList.length < 2) return;
+                const beliSet = new Set(idxList.map(i => String(rows[i]['Harga Beli'] ?? '')));
+                if (beliSet.size <= 1) return; // Harga Beli semua sama -> bukan kasus ini (sudah tercakup Duplikat Persis)
+                idxList.forEach(i => {
+                    flagIdx.push(i);
+                    info.set(i, { pasanganIdx: idxList.filter(x => x !== i) });
+                });
+            });
+            return { flagIdx, info };
+        }
+
+
         // ================================================================
         // MEMORI "SUDAH DIPERIKSA" — supaya baris yang sudah dicek manual
         // (mis. retur/void yang memang sah) tidak terus-terusan dideteksi
@@ -10345,6 +10388,11 @@
             const duplicateIdx = duplicateIdxMentah.filter(idx => !dismissed.has(buatKunciAnomaliSales(rows[idx])));
 
             const ghostSet = new Set([...toDeleteIdx, ...toFlagIdxMentah, ...duplicateIdxMentah]);
+
+            const { flagIdx: bedaBeliIdxMentah, info: bedaBeliInfo } = cariDuplikatBedaHargaBeliSales(rows, ghostSet);
+            const bedaBeliIdx = bedaBeliIdxMentah.filter(idx => !dismissed.has(buatKunciAnomaliSales(rows[idx])));
+            bedaBeliIdxMentah.forEach(idx => ghostSet.add(idx));
+
             const totalMinus = [], hargaKosong = [], discBerlebih = [];
             rows.forEach((r, idx) => {
                 if (ghostSet.has(idx)) return; // sudah tercakup kategori baris hantu / minus tanpa pasangan / duplikat
@@ -10357,11 +10405,12 @@
                 if (jumlah > 0 && (!isFinite(harga) || harga <= 0)) { hargaKosong.push(idx); return; }
                 if (isFinite(disc) && disc > 0 && isFinite(jumlah) && isFinite(harga) && disc > (jumlah * harga)) { discBerlebih.push(idx); return; }
             });
-            return { toDeleteIdx, toFlagIdx, duplicateIdx, totalMinus, hargaKosong, discBerlebih, duplicateInfo };
+            return { toDeleteIdx, toFlagIdx, duplicateIdx, bedaBeliIdx, bedaBeliInfo, totalMinus, hargaKosong, discBerlebih, duplicateInfo };
         }
 
         function totalAnomaliCount(result) {
             return result.toDeleteIdx.length + result.toFlagIdx.length + result.duplicateIdx.length +
+                (result.bedaBeliIdx ? result.bedaBeliIdx.length : 0) +
                 result.totalMinus.length + result.hargaKosong.length + result.discBerlebih.length;
         }
 
@@ -10372,6 +10421,7 @@
             if (result.toDeleteIdx.length) parts.push(`${result.toDeleteIdx.length} baris hantu (siap dibersihkan otomatis)`);
             if (result.toFlagIdx.length) parts.push(`${result.toFlagIdx.length} minus tanpa pasangan`);
             if (result.duplicateIdx.length) parts.push(`${result.duplicateIdx.length} baris duplikat persis (siap dibersihkan otomatis)`);
+            if (result.bedaBeliIdx && result.bedaBeliIdx.length) parts.push(`${result.bedaBeliIdx.length} kemungkinan duplikat dengan Harga Beli/Profit beda (perlu periksa manual)`);
             if (result.totalMinus.length) parts.push(`${result.totalMinus.length} Total transaksi minus`);
             if (result.hargaKosong.length) parts.push(`${result.hargaKosong.length} Harga Jual kosong/0`);
             if (result.discBerlebih.length) parts.push(`${result.discBerlebih.length} Disc lebih besar dari nilai jual`);
@@ -10466,6 +10516,20 @@
                 }
                 rowsHtml += anomaliRowHtml(idx, '📋 Duplikat Persis (siap dibersihkan)', reason);
             });
+            (result.bedaBeliIdx || []).forEach(idx => {
+                const r = salesData[idx];
+                const info = result.bedaBeliInfo && result.bedaBeliInfo.get(idx);
+                let reason = 'Baris ini sama persis di sisi penjualan (No.Faktur, Tanggal, Produk, Jumlah, Satuan, Harga Jual, Disc, Total) dengan baris lain, TAPI Harga Beli-nya beda, sehingga Profit ikut beda.';
+                if (info && info.pasanganIdx && info.pasanganIdx.length) {
+                    const pasangan = info.pasanganIdx.map(pi => {
+                        const pr = salesData[pi];
+                        return pr ? `baris ke-${pi + 1} (Harga Beli ${fmtRp(parseNumber(pr['Harga Beli']) || 0)})` : null;
+                    }).filter(Boolean).join(', ');
+                    if (pasangan) reason += ` Bandingkan dengan: ${pasangan}.`;
+                }
+                reason += ' Kemungkinan transaksi yang sama ke-input dua kali dengan harga modal berbeda — periksa manual harga beli mana yang benar sebelum menghapus salah satu baris (kalau dibiarkan keduanya, pendapatan bisa dobel-hitung juga).';
+                rowsHtml += anomaliRowHtml(idx, '🧮 Kemungkinan Duplikat (Harga Beli/Profit beda)', reason);
+            });
             result.totalMinus.forEach(idx => rowsHtml += anomaliRowHtml(idx, '🔻 Total minus',
                 'Nilai Total transaksi baris ini minus (dari kolom Total, atau hasil hitung Jumlah × Harga Jual − Disc), di luar kasus baris hantu/duplikat — cek apakah ini transaksi retur/koreksi yang wajar atau salah input.'));
             result.hargaKosong.forEach(idx => rowsHtml += anomaliRowHtml(idx, '❓ Harga Jual kosong/0',
@@ -10479,6 +10543,7 @@
                     Ringkasan: <b>${result.toDeleteIdx.length}</b> baris hantu siap dibersihkan otomatis,
                     <b>${result.toFlagIdx.length}</b> baris minus tanpa pasangan (perlu periksa manual),
                     <b>${result.duplicateIdx.length}</b> baris duplikat persis siap dibersihkan otomatis,
+                    <b>${(result.bedaBeliIdx || []).length}</b> kemungkinan duplikat dengan Harga Beli/Profit beda (perlu periksa manual),
                     <b>${result.totalMinus.length}</b> Total transaksi minus,
                     <b>${result.hargaKosong.length}</b> baris Harga Jual kosong/0,
                     <b>${result.discBerlebih.length}</b> baris Disc lebih besar dari nilai jual.

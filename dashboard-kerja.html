@@ -10353,6 +10353,26 @@
             ].join('|||');
         }
 
+        // Identitas "transaksi yang sama secara nyata": No.Faktur + Tanggal +
+        // Customer + Alamat + Sales + Produk + Jumlah. Kalau semua ini sama
+        // persis antar baris, baris-baris itu dianggap SATU transaksi yang
+        // sama (bukan hasil dobel-input) -- perbedaan Harga Beli/Harga Jual
+        // di antara mereka dianggap wajar (mis. akibat update Harga
+        // Beli/Harga Jual di Master Produk & Harga yang ikut mengubah baris
+        // lama), sehingga TIDAK ditandai sebagai anomali/duplikat.
+        function kunciIdentitasSamaTransaksiSales(r) {
+            if (!r) return '';
+            return [
+                String(r['No.Faktur'] || '').trim().toUpperCase(),
+                String(r['Tanggal'] || '').trim(),
+                String(r.Customer || '').trim().toUpperCase(),
+                String(r.Alamat || '').trim().toUpperCase(),
+                String(r.Sales || '').trim().toUpperCase(),
+                String(r['Produk'] || '').trim().toUpperCase(),
+                String(r.Jumlah)
+            ].join('|||');
+        }
+
         function cariDuplikatBedaHargaBeliSales(rows, excludeSet) {
             const lookup = new Map();
             rows.forEach((r, idx) => {
@@ -10370,6 +10390,11 @@
                 if (idxList.length < 2) return;
                 const beliSet = new Set(idxList.map(i => String(rows[i]['Harga Beli'] ?? '')));
                 if (beliSet.size <= 1) return; // Harga Beli semua sama -> bukan kasus ini (sudah tercakup Duplikat Persis)
+                // Kalau Faktur+Tanggal+Customer+Alamat+Sales+Produk+Jumlah SEMUA sama,
+                // ini transaksi yang sama nyata -- jangan ditandai anomali walau Harga
+                // Beli beda (biasanya akibat update harga di Master Produk & Harga).
+                const identitasSet = new Set(idxList.map(i => kunciIdentitasSamaTransaksiSales(rows[i])));
+                if (identitasSet.size <= 1) return;
                 idxList.forEach(i => {
                     flagIdx.push(i);
                     info.set(i, { pasanganIdx: idxList.filter(x => x !== i) });

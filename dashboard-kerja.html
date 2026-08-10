@@ -10227,18 +10227,20 @@
 
             const toDeleteIdx = [];
             const toFlagIdx = [];
+            const ghostInfo = new Map(); // idx (minus) -> { plusIdx } -- baris PLUS pasangannya (TIDAK ikut dihapus)
             rows.forEach((r, idx) => {
                 const jml = Number(r.Jumlah);
                 if (!isFinite(jml) || jml >= 0) return; // hanya proses baris MINUS
                 const candidates = positiveLookup.get(kunci(r, -jml));
                 if (candidates && candidates.length) {
-                    candidates.pop(); // pakai satu pasangan, jangan dipakai dua kali
+                    const plusIdx = candidates.pop(); // pakai satu pasangan, jangan dipakai dua kali
                     toDeleteIdx.push(idx);
+                    ghostInfo.set(idx, { plusIdx });
                 } else {
                     toFlagIdx.push(idx); // minus tanpa pasangan -> kemungkinan retur/void asli
                 }
             });
-            return { toDeleteIdx, toFlagIdx };
+            return { toDeleteIdx, toFlagIdx, ghostInfo };
         }
 
         // ================================================================
@@ -10373,7 +10375,7 @@
 
         function detectSalesAnomali(rows) {
             const dismissed = getSalesAnomaliDismissedSet();
-            const { toDeleteIdx, toFlagIdx: toFlagIdxMentah } = cariBarisHantuSales(rows);
+            const { toDeleteIdx, toFlagIdx: toFlagIdxMentah, ghostInfo } = cariBarisHantuSales(rows);
             // Baris hantu (toDeleteIdx) tetap otomatis dibersihkan tiap saat, tidak perlu ditandai.
             // Baris "minus tanpa pasangan" yang sudah pernah ditandai "sudah diperiksa" -> disaring keluar.
             const toFlagIdx = toFlagIdxMentah.filter(idx => !dismissed.has(buatKunciAnomaliSales(rows[idx])));
@@ -10401,7 +10403,7 @@
                 if (jumlah > 0 && (!isFinite(harga) || harga <= 0)) { hargaKosong.push(idx); return; }
                 if (isFinite(disc) && disc > 0 && isFinite(jumlah) && isFinite(harga) && disc > (jumlah * harga)) { discBerlebih.push(idx); return; }
             });
-            return { toDeleteIdx, toFlagIdx, duplicateIdx, bedaBeliIdx, bedaBeliInfo, totalMinus, hargaKosong, discBerlebih, duplicateInfo };
+            return { toDeleteIdx, toFlagIdx, duplicateIdx, bedaBeliIdx, bedaBeliInfo, totalMinus, hargaKosong, discBerlebih, duplicateInfo, ghostInfo };
         }
 
         function totalAnomaliCount(result) {
@@ -10697,7 +10699,8 @@
                 hargaKosong: resultFull.hargaKosong.filter(filterFn),
                 discBerlebih: resultFull.discBerlebih.filter(filterFn),
                 duplicateInfo: resultFull.duplicateInfo,
-                bedaBeliInfo: resultFull.bedaBeliInfo
+                bedaBeliInfo: resultFull.bedaBeliInfo,
+                ghostInfo: resultFull.ghostInfo
             };
             const total = totalAnomaliCount(result);
             const filterChipsHtml = sortedPeriods.length ? `
@@ -10722,8 +10725,17 @@
                 return;
             }
             let rowsHtml = '';
-            result.toDeleteIdx.forEach(idx => rowsHtml += anomaliRowHtml(idx, '🧹 Baris Hantu (siap dibersihkan)',
-                'Baris minus ini pasangan otomatis dari baris plus lain (No.Faktur+Tanggal+Produk+Jumlah cocok, tanda kebalikan) — bekas edit faktur di kasir, net dampak nol, aman dihapus otomatis.'));
+            result.toDeleteIdx.forEach(idx => {
+                const ginfo = result.ghostInfo && result.ghostInfo.get(idx);
+                let reason = 'Baris minus ini pasangan otomatis dari baris plus lain (No.Faktur+Tanggal+Produk+Jumlah cocok, tanda kebalikan) — bekas edit faktur di kasir, net dampak nol, aman dihapus otomatis.';
+                if (ginfo && ginfo.plusIdx !== undefined && salesData[ginfo.plusIdx]) {
+                    const plus = salesData[ginfo.plusIdx];
+                    reason += ` Pasangan PLUS-nya: baris data ke-${ginfo.plusIdx + 1} — Tanggal ${escapeHtml(String(plus.Tanggal || ''))}, No.Faktur ${escapeHtml(String(plus['No.Faktur'] || ''))}, Jumlah ${escapeHtml(String(plus.Jumlah || ''))}, Total ${fmtRp(parseNumber(plus.Total) || 0)}. ⚠️ PENTING: baris PLUS ini TIDAK ikut dihapus/dipindah — cuma baris MINUS di atas yang akan dihapus saat "Bersihkan Baris Hantu Sekarang" ditekan.`;
+                } else {
+                    reason += ' ⚠️ Baris PLUS pasangannya tidak ditemukan detailnya untuk ditampilkan, tapi tetap TIDAK ikut dihapus — cuma baris MINUS ini yang dihapus.';
+                }
+                rowsHtml += anomaliRowHtml(idx, '🧹 Baris Hantu (siap dibersihkan)', reason);
+            });
             result.toFlagIdx.forEach(idx => rowsHtml += anomaliRowHtml(idx, '⚠️ Minus tanpa pasangan',
                 'Jumlah baris ini minus, tapi tidak ada baris plus dengan No.Faktur+Tanggal+Produk+Jumlah yang cocok sebagai pasangannya — kemungkinan retur/void asli, perlu diperiksa manual apakah sah.'));
             result.duplicateIdx.forEach(idx => {
@@ -10909,7 +10921,8 @@
 
             const konfirmasi = `Ditemukan ${toDeleteIdx.length} baris hantu (pasangan minus/plus dari edit faktur) ` +
                 `yang akan DIHAPUS,\ndan ${toFlagIdx.length} baris minus TANPA pasangan (kemungkinan retur/void asli) ` +
-                `yang TIDAK akan dihapus, hanya dilaporkan untuk diperiksa manual.\n\nLanjutkan?`;
+                `yang TIDAK akan dihapus, hanya dilaporkan untuk diperiksa manual.\n\n` +
+                `⚠️ CATATAN: hanya baris MINUS yang dihapus. Baris PLUS pasangannya TIDAK ikut dihapus/dipindah, tetap disimpan di Bank Data Penjualan.\n\nLanjutkan?`;
             if (!confirm(konfirmasi)) return;
 
             // Simpan detail baris yang perlu diperiksa manual SEBELUM index berubah

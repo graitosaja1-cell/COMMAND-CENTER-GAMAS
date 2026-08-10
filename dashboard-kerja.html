@@ -10463,6 +10463,25 @@
             bukaModalDeteksiAnomaliSales();
         });
 
+        // Pasang event listener untuk chip filter periode di modal deteksi anomali: centang/hapus
+        // centang salah satu chip, atau klik "Semua Periode", akan membuka ulang modal dengan
+        // set periode terpilih yang baru (rebuild total, ringkasan, dan daftar baris).
+        function bindAnomaliFilterChipEvents(currentFilterPeriods) {
+            document.querySelectorAll('.anomali-periode-chip').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const checked = Array.from(document.querySelectorAll('.anomali-periode-chip:checked'))
+                        .map(el => el.value);
+                    bukaModalDeteksiAnomaliSales(checked.length ? new Set(checked) : null);
+                });
+            });
+            const resetBtn = document.getElementById('anomaliFilterResetBtn');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function() {
+                    bukaModalDeteksiAnomaliSales(null);
+                });
+            }
+        }
+
         function anomaliRowHtml(idx, catLabel, reasonText) {
             const r = salesData[idx];
             if (!r) return '';
@@ -10484,13 +10503,65 @@
             </tr>`;
         }
 
-        function bukaModalDeteksiAnomaliSales() {
+        // filterPeriods: Set berisi "YYYY-MM" (mis. "2026-07") -> hanya tampilkan/proses baris
+        // anomali yang Tanggal-nya masuk periode itu. Kosong/null/undefined = tampilkan semua periode.
+        function bukaModalDeteksiAnomaliSales(filterPeriods) {
             if (!salesData.length) { showToast('Tidak ada data di Bank Data Penjualan.', 'warning'); return; }
-            const result = detectSalesAnomali(salesData);
-            const total = totalAnomaliCount(result);
-            if (!total) {
+            const resultFull = detectSalesAnomali(salesData);
+            const totalFull = totalAnomaliCount(resultFull);
+            if (!totalFull) {
                 showToast('✅ Tidak ditemukan anomali di Bank Data Penjualan saat ini.', 'success');
                 document.getElementById('salesAnomaliBanner').classList.remove('show');
+                return;
+            }
+            // Kumpulkan semua periode (YYYY-MM) yang ada di antara baris-baris anomali, untuk
+            // ditampilkan sebagai chip filter (mis. supaya bisa pilih "Juli 2026" + "Agustus 2026" saja).
+            const allAnomaliIdxSet = new Set([
+                ...resultFull.toDeleteIdx, ...resultFull.toFlagIdx, ...resultFull.duplicateIdx,
+                ...(resultFull.bedaBeliIdx || []), ...resultFull.totalMinus, ...resultFull.hargaKosong,
+                ...resultFull.discBerlebih
+            ]);
+            const periodSet = new Set();
+            allAnomaliIdxSet.forEach(idx => { const r = salesData[idx]; if (r && r.Tanggal) periodSet.add(periodKey(r.Tanggal)); });
+            const sortedPeriods = Array.from(periodSet).sort();
+
+            const activeFilter = (filterPeriods && filterPeriods.size) ? filterPeriods : null;
+            const filterFn = idx => {
+                if (!activeFilter) return true;
+                const r = salesData[idx];
+                return !!(r && r.Tanggal && activeFilter.has(periodKey(r.Tanggal)));
+            };
+            const result = {
+                toDeleteIdx: resultFull.toDeleteIdx.filter(filterFn),
+                toFlagIdx: resultFull.toFlagIdx.filter(filterFn),
+                duplicateIdx: resultFull.duplicateIdx.filter(filterFn),
+                bedaBeliIdx: (resultFull.bedaBeliIdx || []).filter(filterFn),
+                totalMinus: resultFull.totalMinus.filter(filterFn),
+                hargaKosong: resultFull.hargaKosong.filter(filterFn),
+                discBerlebih: resultFull.discBerlebih.filter(filterFn),
+                duplicateInfo: resultFull.duplicateInfo,
+                bedaBeliInfo: resultFull.bedaBeliInfo
+            };
+            const total = totalAnomaliCount(result);
+            const filterChipsHtml = sortedPeriods.length ? `
+                <div style="margin-bottom:10px;padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;">
+                    <div style="font-size:11px;font-weight:600;margin-bottom:5px;color:#334155;">📅 Filter Periode (centang periode yang mau diperiksa saja, kosongkan semua = tampilkan semua):</div>
+                    <div id="anomaliFilterChips" style="display:flex;gap:10px;flex-wrap:wrap;">
+                        ${sortedPeriods.map(p => `
+                            <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;background:${activeFilter && activeFilter.has(p) ? '#dbeafe' : '#fff'};border:1px solid #cbd5e1;border-radius:4px;padding:3px 8px;">
+                                <input type="checkbox" class="anomali-periode-chip" value="${p}" ${activeFilter && activeFilter.has(p) ? 'checked' : ''}>
+                                ${escapeHtml(periodLabel(p))}
+                            </label>`).join('')}
+                        <button type="button" id="anomaliFilterResetBtn" style="font-size:11px;padding:3px 10px;border:1px solid #cbd5e1;border-radius:4px;background:#fff;cursor:pointer;color:#64748b;">↺ Semua Periode</button>
+                    </div>
+                    ${activeFilter ? `<div style="font-size:10.5px;color:#b45309;margin-top:5px;">⚠️ Filter periode aktif — tombol "Bersihkan Otomatis" disembunyikan sementara supaya tidak ikut membersihkan data di luar periode terpilih. Klik "↺ Semua Periode" untuk mengaktifkannya lagi.</div>` : ''}
+                </div>` : '';
+            if (!total) {
+                document.getElementById('detailModalTitleGlobal').textContent = `🔍 Deteksi Anomali Bank Data Penjualan (0 baris pada periode terpilih)`;
+                document.getElementById('detailModalBodyGlobal').innerHTML = filterChipsHtml +
+                    `<p style="font-size:12px;color:#555;">✅ Tidak ada anomali pada periode yang dipilih (total ${totalFull} anomali ada di periode lain).</p>`;
+                document.getElementById('detailModalGlobal').classList.add('show');
+                bindAnomaliFilterChipEvents(filterPeriods);
                 return;
             }
             let rowsHtml = '';
@@ -10533,8 +10604,10 @@
             result.discBerlebih.forEach(idx => rowsHtml += anomaliRowHtml(idx, '❗ Disc > nilai jual',
                 'Nilai Disc (diskon) pada baris ini lebih besar dari nilai jual sebelum diskon (Jumlah × Harga Jual), membuat Total jadi janggal/negatif — kemungkinan salah input Disc.'));
 
-            document.getElementById('detailModalTitleGlobal').textContent = `🔍 Deteksi Anomali Bank Data Penjualan (${total} baris)`;
-            document.getElementById('detailModalBodyGlobal').innerHTML = `
+            document.getElementById('detailModalTitleGlobal').textContent = activeFilter
+                ? `🔍 Deteksi Anomali Bank Data Penjualan (${total} baris, periode terpilih dari total ${totalFull})`
+                : `🔍 Deteksi Anomali Bank Data Penjualan (${total} baris)`;
+            document.getElementById('detailModalBodyGlobal').innerHTML = filterChipsHtml + `
                 <p style="margin-bottom:10px;font-size:12px;color:#555;">
                     Ringkasan: <b>${result.toDeleteIdx.length}</b> baris hantu siap dibersihkan otomatis,
                     <b>${result.toFlagIdx.length}</b> baris minus tanpa pasangan (perlu periksa manual),
@@ -10560,13 +10633,14 @@
                 </div>
                 <p style="margin:0 0 8px;font-size:11px;color:#666;">Centang baris yang sudah kamu periksa (misal retur/void yang sah): pilih <b>"✅ Tandai Sudah Diperiksa"</b> kalau datanya memang benar dan mau tetap disimpan di Bank Data Penjualan (tidak akan dideteksi lagi), atau <b>"🗑️ Pindah ke Sampah"</b> kalau datanya memang mau dikeluarkan (masih bisa dipulihkan dari tab Trash &amp; Save). Pengecekan berikutnya hanya akan menyorot data yang benar-benar baru.</p>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                ${result.toDeleteIdx.length ? `<button class="btn" id="btnBersihkanDariModalAnomali" style="background:#0d6efd;border-color:#0d6efd;">🧹 Bersihkan Baris Hantu Sekarang</button>` : ''}
-                ${result.duplicateIdx.length ? `<button class="btn" id="btnBersihkanDuplikatDariModalAnomali" style="background:#7c3aed;border-color:#7c3aed;">📋 Bersihkan Duplikat Sekarang</button>` : ''}
+                ${(!activeFilter && result.toDeleteIdx.length) ? `<button class="btn" id="btnBersihkanDariModalAnomali" style="background:#0d6efd;border-color:#0d6efd;">🧹 Bersihkan Baris Hantu Sekarang</button>` : ''}
+                ${(!activeFilter && result.duplicateIdx.length) ? `<button class="btn" id="btnBersihkanDuplikatDariModalAnomali" style="background:#7c3aed;border-color:#7c3aed;">📋 Bersihkan Duplikat Sekarang</button>` : ''}
                 <button class="btn" id="btnAbaikanDariModalAnomali" style="background:#64748b;border-color:#64748b;">✅ Tandai Sudah Diperiksa (Terpilih)</button>
                 <button class="btn" id="btnPindahSampahDariModalAnomali" style="background:#b45309;border-color:#b45309;">🗑️ Pindah ke Sampah (Terpilih)</button>
                 </div>
             `;
             document.getElementById('detailModalGlobal').classList.add('show');
+            bindAnomaliFilterChipEvents(filterPeriods);
             const btnBersihkanModal = document.getElementById('btnBersihkanDariModalAnomali');
             if (btnBersihkanModal) {
                 btnBersihkanModal.addEventListener('click', function() {

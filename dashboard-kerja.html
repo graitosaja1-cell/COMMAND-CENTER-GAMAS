@@ -2246,6 +2246,19 @@
         tr.row-harga-confirmed:hover td {
             background: #fff1cc !important;
         }
+        /* ---- Baris MINUS tanpa pasangan plus (kemungkinan retur/void asli, perlu cek manual) ---- */
+        tr.row-minus-unpaired td {
+            background: #ffd6e0 !important;
+        }
+        tr.row-minus-unpaired:hover td {
+            background: #ffbecf !important;
+        }
+        html.gamas-dark-mode tr.row-minus-unpaired td {
+            background: #4a1f2b !important;
+        }
+        html.gamas-dark-mode tr.row-minus-unpaired:hover td {
+            background: #5c2534 !important;
+        }
         .btn-kesepakatan-toggle {
             border: none;
             background: none;
@@ -9775,6 +9788,20 @@
             }
         });
 
+        // Set berisi index GLOBAL (index di salesData) dari baris MINUS yang tidak
+        // punya pasangan PLUS (kategori "toFlagIdx" di cariBarisHantuSales) — dipakai
+        // untuk kasih highlight merah muda langsung di tabel Bank Data Penjualan,
+        // supaya kelihatan tanpa perlu buka modal deteksi anomali dulu.
+        let salesUnpairedMinusSet = new Set();
+        function recomputeUnpairedMinusSet() {
+            salesUnpairedMinusSet = new Set();
+            if (!salesData.length) return;
+            try {
+                const { toFlagIdx } = cariBarisHantuSales(salesData);
+                salesUnpairedMinusSet = new Set(toFlagIdx);
+            } catch (e) { /* aman diabaikan kalau fungsi belum siap saat pertama load */ }
+        }
+
         function buildSalesRowHtml(r, salesIndexMap) {
             const jumlah = parseNumber(r.Jumlah);
             const harga = parseNumber(r['Harga Jual']);
@@ -9796,13 +9823,18 @@
             const dikonfirmasi = !!r._KesepakatanKhusus;
             let rowClass = '';
             let hargaJualCellExtra = '';
+            const classList = [];
             if (dibawahMinimal && !dikonfirmasi) {
-                rowClass = ' class="row-harga-warning"';
+                classList.push('row-harga-warning');
                 hargaJualCellExtra = ` <button type="button" class="btn-kesepakatan-toggle" data-gidx="${gidx}" title="Harga di bawah minimal (Rp ${fmtRp(hargaMinimal)}). Klik untuk tandai sebagai Kesepakatan Khusus.">⚠️</button>`;
             } else if (dibawahMinimal && dikonfirmasi) {
-                rowClass = ' class="row-harga-confirmed"';
+                classList.push('row-harga-confirmed');
                 hargaJualCellExtra = ` <button type="button" class="btn-kesepakatan-toggle" data-gidx="${gidx}" title="Kesepakatan Khusus — di bawah minimal (Rp ${fmtRp(hargaMinimal)}) tapi sudah dikonfirmasi. Klik untuk batalkan.">✅</button>`;
             }
+            if (jumlah < 0 && salesUnpairedMinusSet.has(gidx)) {
+                classList.push('row-minus-unpaired');
+            }
+            if (classList.length) rowClass = ` class="${classList.join(' ')}"`;
             return `<tr${rowClass}><td><input type="checkbox" class="sales-trash-checkbox" data-gidx="${gidx}" ${cbChecked}></td><td>${fmtTanggal(r.Tanggal)}</td><td>${noFakturSafe ? `<a href="#" class="tab1-faktur-link" data-faktur="${noFakturSafe}" style="${fakturLinkStyle}"${fakturLinkTitle}>${sudahDiedit ? '✏️ ' : ''}${noFakturSafe}</a>` : ''}</td><td>${r.Produk || ''}</td><td class="num">${jumlah}</td><td>${r.Satuan || ''}</td><td class="num">${fmtRp(harga)}${hargaJualCellExtra}</td><td class="num">${hargaBeli !== null ? fmtRp(hargaBeli) : '-'}</td><td class="num">${fmtRp(disc)}</td><td class="num">${fmtRp(total)}</td><td>${r.Sales || ''}</td><td>${r.Customer || ''}</td><td>${r.Alamat || ''}</td><td><span class="badge ${r.Pembayaran === 'Cash' ? 'cash' : 'tempo'}">${r.Pembayaran || 'Tempo'}</span></td></tr>`;
         }
 
@@ -9871,6 +9903,7 @@
         })();
 
         function renderSales() {
+            recomputeUnpairedMinusSet();
             const beforeQuickFilter = getFilteredSales();
             const statusMapForChips = updateTab1Chips(beforeQuickFilter);
             const allFiltered = tab1QuickFilter === 'semua' ? beforeQuickFilter :

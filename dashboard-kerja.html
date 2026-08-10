@@ -10482,6 +10482,163 @@
             }
         }
 
+        // ================================================================
+        // BANDINGKAN BERDAMPINGAN — kelompokkan baris "Kemungkinan Duplikat
+        // Harga Beli/Profit beda" jadi 1 kartu per transaksi (bukan 1 baris
+        // per baris), supaya bisa langsung dibandingkan Harga Beli mana yang
+        // benar sebelum menghapus salah satu baris. Kalau ada acuan dari
+        // Master Produk & Harga (Tab 8) yang cocok dengan salah satu Harga
+        // Beli, itu otomatis ditandai/dipilihkan sebagai saran (tetap bisa
+        // diganti manual sebelum "Terapkan").
+        // ================================================================
+        function buildBedaBeliGroups(bedaBeliIdx, bedaBeliInfo) {
+            const seen = new Set();
+            const groups = [];
+            (bedaBeliIdx || []).forEach(idx => {
+                if (seen.has(idx)) return;
+                const info = bedaBeliInfo && bedaBeliInfo.get(idx);
+                const groupIdxs = [idx, ...((info && info.pasanganIdx) || [])];
+                groupIdxs.forEach(i => seen.add(i));
+                groupIdxs.sort((a, b) => a - b);
+                groups.push(groupIdxs);
+            });
+            return groups;
+        }
+
+        function bukaModalBandingkanHargaBeli(filterPeriods) {
+            if (!salesData.length) { showToast('Tidak ada data di Bank Data Penjualan.', 'warning'); return; }
+            const resultFull = detectSalesAnomali(salesData);
+            const bedaBeliIdx = resultFull.bedaBeliIdx || [];
+            if (!bedaBeliIdx.length) {
+                showToast('✅ Tidak ada kemungkinan duplikat Harga Beli/Profit beda saat ini.', 'success');
+                return;
+            }
+            const groupsAll = buildBedaBeliGroups(bedaBeliIdx, resultFull.bedaBeliInfo);
+
+            const periodSet = new Set();
+            groupsAll.forEach(g => { const r = salesData[g[0]]; if (r && r.Tanggal) periodSet.add(periodKey(r.Tanggal)); });
+            const sortedPeriods = Array.from(periodSet).sort();
+            const activeFilter = (filterPeriods && filterPeriods.size) ? filterPeriods : null;
+            const groups = activeFilter
+                ? groupsAll.filter(g => { const r = salesData[g[0]]; return !!(r && r.Tanggal && activeFilter.has(periodKey(r.Tanggal))); })
+                : groupsAll;
+
+            const filterChipsHtml = sortedPeriods.length ? `
+                <div style="margin-bottom:10px;padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;">
+                    <div style="font-size:11px;font-weight:600;margin-bottom:5px;color:#334155;">📅 Filter Periode:</div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        ${sortedPeriods.map(p => `
+                            <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;background:${activeFilter && activeFilter.has(p) ? '#dbeafe' : '#fff'};border:1px solid #cbd5e1;border-radius:4px;padding:3px 8px;">
+                                <input type="checkbox" class="bandingkan-periode-chip" value="${p}" ${activeFilter && activeFilter.has(p) ? 'checked' : ''}>
+                                ${escapeHtml(periodLabel(p))}
+                            </label>`).join('')}
+                        <button type="button" id="bandingkanFilterResetBtn" style="font-size:11px;padding:3px 10px;border:1px solid #cbd5e1;border-radius:4px;background:#fff;cursor:pointer;color:#64748b;">↺ Semua Periode</button>
+                    </div>
+                </div>` : '';
+
+            const backBtnHtml = `<div style="margin-bottom:10px;"><button type="button" id="bandingkanBackBtn" style="font-size:11px;padding:4px 10px;border:1px solid #cbd5e1;border-radius:4px;background:#fff;cursor:pointer;">← Kembali ke Daftar Anomali</button></div>`;
+
+            if (!groups.length) {
+                document.getElementById('detailModalTitleGlobal').textContent = `🧮 Bandingkan Duplikat Harga Beli (0 grup pada periode terpilih)`;
+                document.getElementById('detailModalBodyGlobal').innerHTML = backBtnHtml + filterChipsHtml +
+                    `<p style="font-size:12px;color:#555;">Tidak ada grup pada periode yang dipilih (total ${groupsAll.length} grup ada di periode lain).</p>`;
+                document.getElementById('detailModalGlobal').classList.add('show');
+                bindBandingkanEvents();
+                return;
+            }
+
+            let matchedCount = 0;
+            const cardsHtml = groups.map((g, gi) => {
+                const rFirst = salesData[g[0]];
+                const master = cariHargaProdukMaster(rFirst.Produk);
+                const masterHarga = (master && master.hargaBeli !== '' && master.hargaBeli !== null) ? master.hargaBeli : null;
+                const matchIdxs = masterHarga !== null
+                    ? g.filter(i => Number(parseNumber(salesData[i]['Harga Beli'])) === Number(masterHarga))
+                    : [];
+                const autoMatch = matchIdxs.length === 1 ? matchIdxs[0] : null;
+                if (autoMatch !== null) matchedCount++;
+                const rowsHtml = g.map(i => {
+                    const r = salesData[i];
+                    const hb = parseNumber(r['Harga Beli']);
+                    const isMatch = autoMatch === i;
+                    const profit = (parseNumber(r['Harga Jual']) - hb) * parseNumber(r.Jumlah) - (parseNumber(r.Disc) || 0);
+                    return `<label style="display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid ${isMatch ? '#16a34a' : '#e2e8f0'};border-radius:6px;margin-bottom:4px;cursor:pointer;background:${isMatch ? '#f0fdf4' : '#fff'};">
+                        <input type="radio" name="bandingkan-grp-${gi}" class="bandingkan-radio" data-group="${gi}" data-idx="${i}" ${isMatch ? 'checked' : ''}>
+                        <span style="flex:1;font-size:12px;">
+                            Harga Beli <b>${fmtRp(hb)}</b> — estimasi Profit ${fmtRp(profit)}
+                            ${isMatch ? ' <span style="color:#16a34a;font-weight:600;">✅ Cocok Master Produk saat ini</span>' : ''}
+                            <span style="color:#94a3b8;"> (baris data ke-${i + 1})</span>
+                        </span>
+                    </label>`;
+                }).join('');
+                return `<div class="bandingkan-group-card" data-group="${gi}" data-idxs="${g.join(',')}" style="border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:10px;background:#fafafa;">
+                    <div style="font-size:12px;font-weight:700;margin-bottom:4px;">
+                        📦 ${escapeHtml(String(rFirst.Produk || ''))} — Faktur ${escapeHtml(String(rFirst['No.Faktur'] || ''))} — ${escapeHtml(fmtTanggal(rFirst.Tanggal))} — Jumlah ${escapeHtml(String(rFirst.Jumlah))} ${escapeHtml(String(rFirst.Satuan || ''))} — Total ${fmtRp(parseNumber(rFirst.Total) || 0)}
+                    </div>
+                    ${masterHarga !== null
+                        ? `<div style="font-size:10.5px;color:#64748b;margin-bottom:6px;">Harga Beli di Master Produk saat ini: <b>${fmtRp(masterHarga)}</b></div>`
+                        : `<div style="font-size:10.5px;color:#b45309;margin-bottom:6px;">⚠️ Produk ini tidak ditemukan di Master Produk & Harga — tidak ada acuan otomatis, pilih manual.</div>`}
+                    ${rowsHtml}
+                </div>`;
+            }).join('');
+
+            document.getElementById('detailModalTitleGlobal').textContent = `🧮 Bandingkan Duplikat Harga Beli (${groups.length} grup${activeFilter ? ' dari total ' + groupsAll.length : ''})`;
+            document.getElementById('detailModalBodyGlobal').innerHTML = backBtnHtml + filterChipsHtml + `
+                <p style="font-size:11.5px;color:#555;margin-bottom:10px;">
+                    Setiap kartu = 1 transaksi yang tersimpan lebih dari 1 kali dengan Harga Beli berbeda. Pilih salah satu (radio) sebagai <b>Harga Beli yang benar untuk disimpan</b> — sisanya otomatis dipindah ke Sampah saat "Terapkan" ditekan.
+                    Kartu dengan tanda <span style="color:#16a34a;font-weight:600;">✅ Cocok Master Produk</span> sudah otomatis dipilihkan (cocok dengan harga di Master Produk &amp; Harga Tab 8) — <b>${matchedCount}</b> dari ${groups.length} grup punya kecocokan otomatis begini. Cek dulu satu-satu sebelum menekan "Terapkan Semua", terutama grup yang belum ada tanda cocok.
+                </p>
+                <div style="max-height:420px;overflow:auto;margin-bottom:12px;">${cardsHtml}</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="btn" id="btnTerapkanBandingkanSemua" style="background:#0d6efd;border-color:#0d6efd;">✅ Terapkan Semua Pilihan Sekarang</button>
+                </div>
+            `;
+            document.getElementById('detailModalGlobal').classList.add('show');
+            bindBandingkanEvents();
+
+            document.getElementById('btnTerapkanBandingkanSemua').addEventListener('click', async function() {
+                const cards = document.querySelectorAll('.bandingkan-group-card');
+                let toTrash = [];
+                let resolvedGroups = 0, skippedGroups = 0;
+                cards.forEach(card => {
+                    const gi = card.dataset.group;
+                    const idxs = card.dataset.idxs.split(',').map(Number);
+                    const checkedRadio = card.querySelector(`input.bandingkan-radio[data-group="${gi}"]:checked`);
+                    if (!checkedRadio) { skippedGroups++; return; }
+                    const keepIdx = parseInt(checkedRadio.dataset.idx, 10);
+                    idxs.forEach(i => { if (i !== keepIdx) toTrash.push(i); });
+                    resolvedGroups++;
+                });
+                if (!toTrash.length) { showToast('⚠️ Belum ada grup yang dipilih Harga Beli-nya (centang radio dulu, atau pakai yang sudah otomatis tercentang).', 'warning'); return; }
+                const konfirmasi = `${resolvedGroups} grup akan diterapkan: total ${toTrash.length} baris (Harga Beli yang TIDAK dipilih) akan dipindah ke Sampah.` +
+                    (skippedGroups ? ` ${skippedGroups} grup dilewati karena belum ada pilihan.` : '') +
+                    `\n\nLanjutkan?`;
+                if (!confirm(konfirmasi)) return;
+                const jumlah = await pindahkanSalesKeSampah(toTrash, 'Duplikat Harga Beli - hasil review bandingkan berdampingan');
+                rebuildSalesFilterOptions();
+                salesCurrentDateIndex = Infinity;
+                renderSales();
+                renderTrashTable();
+                renderRingkasanSaveAll();
+                checkAndShowSalesAnomaliBanner();
+                document.getElementById('detailModalGlobal').classList.remove('show');
+                showToast(`✅ ${jumlah} baris dipindah ke Sampah dari ${resolvedGroups} grup.${skippedGroups ? ` ${skippedGroups} grup belum diterapkan (belum dipilih) — buka lagi "Bandingkan Berdampingan" kalau mau lanjutkan.` : ''}`, 'success');
+            });
+        }
+
+        function bindBandingkanEvents() {
+            const backBtn = document.getElementById('bandingkanBackBtn');
+            if (backBtn) backBtn.addEventListener('click', function() { bukaModalDeteksiAnomaliSales(); });
+            document.querySelectorAll('.bandingkan-periode-chip').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const checked = Array.from(document.querySelectorAll('.bandingkan-periode-chip:checked')).map(el => el.value);
+                    bukaModalBandingkanHargaBeli(checked.length ? new Set(checked) : null);
+                });
+            });
+            const resetBtn = document.getElementById('bandingkanFilterResetBtn');
+            if (resetBtn) resetBtn.addEventListener('click', function() { bukaModalBandingkanHargaBeli(null); });
+        }
+
         function anomaliRowHtml(idx, catLabel, reasonText) {
             const r = salesData[idx];
             if (!r) return '';
@@ -10635,12 +10792,19 @@
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 ${(!activeFilter && result.toDeleteIdx.length) ? `<button class="btn" id="btnBersihkanDariModalAnomali" style="background:#0d6efd;border-color:#0d6efd;">🧹 Bersihkan Baris Hantu Sekarang</button>` : ''}
                 ${(!activeFilter && result.duplicateIdx.length) ? `<button class="btn" id="btnBersihkanDuplikatDariModalAnomali" style="background:#7c3aed;border-color:#7c3aed;">📋 Bersihkan Duplikat Sekarang</button>` : ''}
+                ${(result.bedaBeliIdx && result.bedaBeliIdx.length) ? `<button class="btn" id="btnBandingkanHargaBeli" style="background:#0891b2;border-color:#0891b2;">🧮 Bandingkan Berdampingan (${result.bedaBeliIdx.length})</button>` : ''}
                 <button class="btn" id="btnAbaikanDariModalAnomali" style="background:#64748b;border-color:#64748b;">✅ Tandai Sudah Diperiksa (Terpilih)</button>
                 <button class="btn" id="btnPindahSampahDariModalAnomali" style="background:#b45309;border-color:#b45309;">🗑️ Pindah ke Sampah (Terpilih)</button>
                 </div>
             `;
             document.getElementById('detailModalGlobal').classList.add('show');
             bindAnomaliFilterChipEvents(filterPeriods);
+            const btnBandingkanModal = document.getElementById('btnBandingkanHargaBeli');
+            if (btnBandingkanModal) {
+                btnBandingkanModal.addEventListener('click', function() {
+                    bukaModalBandingkanHargaBeli(activeFilter);
+                });
+            }
             const btnBersihkanModal = document.getElementById('btnBersihkanDariModalAnomali');
             if (btnBersihkanModal) {
                 btnBersihkanModal.addEventListener('click', function() {

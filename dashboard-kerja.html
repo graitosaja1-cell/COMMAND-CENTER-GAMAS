@@ -10641,6 +10641,25 @@
             if (resetBtn) resetBtn.addEventListener('click', function() { bukaModalBandingkanHargaBeli(null); });
         }
 
+        // Baris tambahan (bukan checkbox) untuk menampilkan pasangan PLUS dari sebuah
+        // baris hantu (MINUS) langsung di tabel modal, biar kelihatan visual tanpa perlu
+        // baca teks deskripsi. Ditandai warna beda + label "TIDAK dihapus" biar jelas.
+        function anomaliPairRowHtml(plusIdx) {
+            const r = salesData[plusIdx];
+            if (!r) return '';
+            const totalRaw = (r.Total !== undefined && r.Total !== '') ? parseNumber(r.Total)
+                : ((parseNumber(r.Jumlah) || 0) * (parseNumber(r['Harga Jual']) || 0) - (parseNumber(r.Disc) || 0));
+            return `<tr style="background:#f0fdf4;">
+                <td style="padding:4px 8px;border:1px solid #e2e8f0;text-align:center;color:#94a3b8;">—</td>
+                <td style="padding:4px 8px;border:1px solid #e2e8f0;color:#166534;">${escapeHtml(String(r.Tanggal || ''))}</td>
+                <td style="padding:4px 8px;border:1px solid #e2e8f0;color:#166534;">${escapeHtml(String(r['No.Faktur'] || ''))}</td>
+                <td style="padding:4px 8px;border:1px solid #e2e8f0;color:#166534;">${escapeHtml(String(r.Produk || ''))}</td>
+                <td style="padding:4px 8px;border:1px solid #e2e8f0;text-align:right;color:#166534;">${escapeHtml(String(r.Jumlah))}</td>
+                <td style="padding:4px 8px;border:1px solid #e2e8f0;text-align:right;color:#166534;">${fmtRp(totalRaw)}</td>
+                <td style="padding:4px 8px;border:1px solid #e2e8f0;font-size:9.5px;color:#166534;">↳ Pasangan PLUS (baris data ke-${plusIdx + 1}) — <b>TIDAK ikut dihapus</b>, tetap disimpan.</td>
+            </tr>`;
+        }
+
         function anomaliRowHtml(idx, catLabel, reasonText) {
             const r = salesData[idx];
             if (!r) return '';
@@ -10735,6 +10754,7 @@
                     reason += ' ⚠️ Baris PLUS pasangannya tidak ditemukan detailnya untuk ditampilkan, tapi tetap TIDAK ikut dihapus — cuma baris MINUS ini yang dihapus.';
                 }
                 rowsHtml += anomaliRowHtml(idx, '🧹 Baris Hantu (siap dibersihkan)', reason);
+                if (ginfo && ginfo.plusIdx !== undefined) rowsHtml += anomaliPairRowHtml(ginfo.plusIdx);
             });
             result.toFlagIdx.forEach(idx => rowsHtml += anomaliRowHtml(idx, '⚠️ Minus tanpa pasangan',
                 'Jumlah baris ini minus, tapi tidak ada baris plus dengan No.Faktur+Tanggal+Produk+Jumlah yang cocok sebagai pasangannya — kemungkinan retur/void asli, perlu diperiksa manual apakah sah.'));
